@@ -17,6 +17,9 @@
 
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 ]]></content>
+      <tags>
+        <tag>世界</tag>
+      </tags>
   </entry>
   <entry>
     <title>自定义一个ArrayList</title>
@@ -33,5 +36,16 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]</span><br><span class="line">test</span><br><span class="line">[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]</span><br><span class="line">[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]</span><br><span class="line">38</span><br><span class="line">false</span><br></pre></td></tr></table></figure>
 
 ]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>我的测试博客</title>
+    <url>/2021/11/07/%E6%88%91%E7%9A%84%E6%B5%8B%E8%AF%95%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[]]></content>
+      <tags>
+        <tag>文本</tag>
+      </tags>
   </entry>
 </search>
