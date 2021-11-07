@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-11-07T13:54:09.285Z</updated>
+  <updated>2021-11-07T14:19:45.043Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,49 +17,11 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>我的测试博客</title>
-    <link href="http://example.com/2021/11/07/%E6%88%91%E7%9A%84%E6%B5%8B%E8%AF%95%E5%8D%9A%E5%AE%A2/"/>
-    <id>http://example.com/2021/11/07/%E6%88%91%E7%9A%84%E6%B5%8B%E8%AF%95%E5%8D%9A%E5%AE%A2/</id>
-    <published>2021-11-07T13:52:28.000Z</published>
-    <updated>2021-11-07T13:54:09.285Z</updated>
-    
-    
-    
-    
-    
-    <category term="文本" scheme="http://example.com/tags/%E6%96%87%E6%9C%AC/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://example.com/2021/11/07/hello-world/"/>
-    <id>http://example.com/2021/11/07/hello-world/</id>
-    <published>2021-11-07T12:52:28.000Z</published>
-    <updated>2021-11-07T13:55:01.093Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="世界" scheme="http://example.com/tags/%E4%B8%96%E7%95%8C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>自定义一个ArrayList</title>
+    <title></title>
     <link href="http://example.com/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/"/>
     <id>http://example.com/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/</id>
-    <published>2021-11-07T12:52:28.000Z</published>
-    <updated>2021-11-07T13:54:39.119Z</updated>
+    <published>2021-11-07T14:19:45.043Z</published>
+    <updated>2021-11-07T14:19:45.043Z</updated>
     
     
       
@@ -73,7 +35,47 @@
     
     
     
-    <category term="Java" scheme="http://example.com/tags/Java/"/>
+  </entry>
+  
+  <entry>
+    <title>我的测试博客</title>
+    <link href="http://example.com/2021/11/07/%E6%88%91%E7%9A%84%E6%B5%8B%E8%AF%95%E5%8D%9A%E5%AE%A2/"/>
+    <id>http://example.com/2021/11/07/%E6%88%91%E7%9A%84%E6%B5%8B%E8%AF%95%E5%8D%9A%E5%AE%A2/</id>
+    <published>2021-11-07T13:52:28.000Z</published>
+    <updated>2021-11-07T14:48:48.798Z</updated>
+    
+    
+    
+    
+    <category term="博客" scheme="http://example.com/categories/%E5%8D%9A%E5%AE%A2/"/>
+    
+    
+    <category term="文本" scheme="http://example.com/tags/%E6%96%87%E6%9C%AC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://example.com/2021/11/07/hello-world/"/>
+    <id>http://example.com/2021/11/07/hello-world/</id>
+    <published>2021-11-07T12:52:28.000Z</published>
+    <updated>2021-11-07T14:05:15.298Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt;</summary>
+        
+      
+    
+    
+    
+    <category term="测试" scheme="http://example.com/categories/%E6%B5%8B%E8%AF%95/"/>
+    
+    
+    <category term="世界" scheme="http://example.com/tags/%E4%B8%96%E7%95%8C/"/>
     
   </entry>
   
