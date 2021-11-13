@@ -35,6 +35,11 @@
       />
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
 
+      <!-- Highlight.js -->
+      <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.1/styles/a11y-dark.min.css" rel="stylesheet">
+      <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script>
+
       <!-- mermaid -->
       
       <style>
@@ -193,11 +198,47 @@
 <p>(2) 链表：占用空间不连续。 寻址困难，查询速度慢。但增加和删除效率非常高。</p>
 <p>哈希表的本质就是“数组+链表”，结合了数组和链表的优点(即查询快，增删效率高)。</p>
 <h2 id="HashMap基本结构"><a href="#HashMap基本结构" class="headerlink" title="HashMap基本结构"></a>HashMap基本结构</h2><p>HashMap源码有如下两个核心内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; </span><br><span class="line">   implements Map&lt;K,V&gt;, Cloneable, Serializable &#123;</span><br><span class="line">	/**</span><br><span class="line">     * The default initial capacity - MUST be a power of two.</span><br><span class="line">     * 核心数组默认初始化的大小为16（数组大小必须为2的整数幂）。</span><br><span class="line">     */</span><br><span class="line">    static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16</span><br><span class="line">    </span><br><span class="line">    /**</span><br><span class="line">     * The load factor used when none specified in constructor.、</span><br><span class="line">     * 负载因子（核心数组被占用超过0.75则自动开始扩容）。</span><br><span class="line">     */</span><br><span class="line">    static final float DEFAULT_LOAD_FACTOR = 0.75f;</span><br><span class="line">    </span><br><span class="line">    /**</span><br><span class="line">     * The table, initialized on first use, and resized as</span><br><span class="line">     * necessary. When allocated, length is always a power of two.</span><br><span class="line">     * (We also tolerate length zero in some operations to allow</span><br><span class="line">     * bootstrapping mechanics that are currently not needed.)</span><br><span class="line">     * 核心数组（根据需要可以扩容）。数组长度必须始终为2的整数幂。</span><br><span class="line">     */</span><br><span class="line">    transient Node&lt;K,V&gt;[] table;</span><br><span class="line">    //以下代码省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code>public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; 
+   implements Map&lt;K,V&gt;, Cloneable, Serializable &#123;
+    /**
+     * The default initial capacity - MUST be a power of two.
+     * 核心数组默认初始化的大小为16（数组大小必须为2的整数幂）。
+     */
+    static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16
+    
+    /**
+     * The load factor used when none specified in constructor.、
+     * 负载因子（核心数组被占用超过0.75则自动开始扩容）。
+     */
+    static final float DEFAULT_LOAD_FACTOR = 0.75f;
+    
+    /**
+     * The table, initialized on first use, and resized as
+     * necessary. When allocated, length is always a power of two.
+     * (We also tolerate length zero in some operations to allow
+     * bootstrapping mechanics that are currently not needed.)
+     * 核心数组（根据需要可以扩容）。数组长度必须始终为2的整数幂。
+     */
+    transient Node&lt;K,V&gt;[] table;
+    //以下代码省略
+&#125;
+</code></pre>
 <p>其中的Node&lt;K,V&gt;[] table 就是HashMap的核心数组结构，也称之为“位桶数组”。Node&lt;K,V&gt;源码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;</span><br><span class="line">    final int hash;</span><br><span class="line">    final K key;</span><br><span class="line">    V value;</span><br><span class="line">    Node&lt;K,V&gt; next;</span><br><span class="line"></span><br><span class="line">    Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">        this.hash = hash;</span><br><span class="line">        this.key = key;</span><br><span class="line">        this.value = value;</span><br><span class="line">        this.next = next;</span><br><span class="line">    &#125;</span><br><span class="line">    //以下代码省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
+    final int hash;
+    final K key;
+    V value;
+    Node&lt;K,V&gt; next;
 
+    Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;
+        this.hash = hash;
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    &#125;
+    //以下代码省略
+&#125;
+</code></pre>
 <p>一个Node&lt;K,V&gt;对象存储了：</p>
 <p>(1)key：键对象  value：值对象</p>
 <p>(2)next：下一个节点</p>
@@ -220,8 +261,25 @@
 <p>​      hash值 = hashcode%数组长度</p>
 <p>这种算法可以让hash值均匀地分布在[0,数组长度-1]的区间。 早期的HashTable就是采用这种算法。但是，这种算法由于使用了“除法”，效率低下。JDK后来改进了算法。首先约定数组长度必须为2的整数幂，这样采用位运算即可实现取余的效果：hash值 = hashcode&amp;(数组长度-1)。</p>
 <p>​      iii. 如下为自己测试简单的hash算法：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        int h = 25760399;</span><br><span class="line">        int length = 16;//length为2的整数次幂,则h&amp;(length-1)相当于对length取模</span><br><span class="line">        System.out.println(myHash(h, length));</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * @param h  任意整数</span><br><span class="line">     * @param length 长度必须为2的整数幂</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    public static int myHash(int h,int length)&#123;</span><br><span class="line">        System.out.println(h&amp;(length-1));</span><br><span class="line">        //length为2的整数幂情况下，和取余的值一样</span><br><span class="line">        System.out.println(h%length);//取余数</span><br><span class="line">        return h&amp;(length-1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code>public class Test &#123;
+    public static void main(String[] args) &#123;
+        int h = 25760399;
+        int length = 16;//length为2的整数次幂,则h&amp;(length-1)相当于对length取模
+        System.out.println(myHash(h, length));
+    &#125;
+    /**
+     * @param h  任意整数
+     * @param length 长度必须为2的整数幂
+     * @return
+     */
+    public static int myHash(int h,int length)&#123;
+        System.out.println(h&amp;(length-1));
+        //length为2的整数幂情况下，和取余的值一样
+        System.out.println(h%length);//取余数
+        return h&amp;(length-1);
+    &#125;
+&#125;
+</code></pre>
 <p>运行如上程序，就能发现直接取余(h%length)和位运算(h&amp;(length-1))结果是一致的。事实上，为了获得更好的散列效果，JDK对hashcode进行了两次散列处理(核心目标就是为了分布更散更均匀)。</p>
 <p>(3) 生成Node&lt;K,V&gt;对象</p>
 <p>​     如上所述，一个Node&lt;K,V&gt;对象包含4部分：key对象、value对象、hash值、指向下一个Node&lt;K,V&gt;对象的引用。我们现在算出了hash值。下一个Node&lt;K,V&gt;对象的引用为null。</p>
@@ -294,16 +352,142 @@
 <p>双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。 所以，从双向链表中的任意一个节点开始，都可以很方便地找到所有节点。下图为LinkedList的存储结构图：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A81.png" alt="自定义一个链表1"></p>
 <p>每个节点都应该有3部分内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">class  Node &#123;</span><br><span class="line">        Node  previous;     //前一个节点</span><br><span class="line">        Object  element;    //本节点保存的数据</span><br><span class="line">        Node  next;         //后一个节点</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code>class  Node &#123;
+        Node  previous;     //前一个节点
+        Object  element;    //本节点保存的数据
+        Node  next;         //后一个节点
+&#125;
+</code></pre>
 <p>查看LinkedList的源码，可以看到里面包含了双向链表的相关代码：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A82.png" alt="自定义一个链表2"></p>
 <h2 id="自定义一个LinkedList，体会底层原理"><a href="#自定义一个LinkedList，体会底层原理" class="headerlink" title="自定义一个LinkedList，体会底层原理"></a>自定义一个LinkedList，体会底层原理</h2><p>代码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></td><td class="code"><pre><span class="line">package com.msl.mycollection;</span><br><span class="line">/**</span><br><span class="line"> * 自定义实现一个链表</span><br><span class="line"> * @author Senley</span><br><span class="line"> */</span><br><span class="line">public class MslLinkedList&lt;E&gt; &#123;</span><br><span class="line">	</span><br><span class="line">	private Node first;</span><br><span class="line">	private Node last;</span><br><span class="line">	private int size;</span><br><span class="line">	</span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		MslLinkedList&lt;String&gt; list = new MslLinkedList();</span><br><span class="line">		list.add(&quot;a&quot;);</span><br><span class="line">		list.add(&quot;b&quot;);</span><br><span class="line">		list.add(&quot;c&quot;);</span><br><span class="line">		System.out.println(list);</span><br><span class="line">		System.out.println(list.get(2));</span><br><span class="line">		list.remove(0);</span><br><span class="line">		System.out.println(list);</span><br><span class="line">		list.add(1, &quot;插入&quot;);</span><br><span class="line">		System.out.println(list);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void add(int index,E element) &#123;</span><br><span class="line">		checkRange(index);</span><br><span class="line">		Node newNode = new Node(element);</span><br><span class="line">		Node temp = getNode(index);</span><br><span class="line">		if(temp!=null) &#123;</span><br><span class="line">			Node up = temp.previous;</span><br><span class="line">			up.next = newNode;</span><br><span class="line">			newNode.previous = up;</span><br><span class="line">			newNode.next = temp;</span><br><span class="line">			temp.previous = newNode;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void remove(int index) &#123;</span><br><span class="line">		checkRange(index);</span><br><span class="line">		Node temp = getNode(index);</span><br><span class="line">		if(temp!=null) &#123;</span><br><span class="line">			Node up = temp.previous;</span><br><span class="line">			Node down = temp.next;</span><br><span class="line">			if(up!=null) &#123;</span><br><span class="line">				up.next = down;</span><br><span class="line">			&#125;</span><br><span class="line">			if(down!=null) &#123;</span><br><span class="line">				down.previous = up;</span><br><span class="line">			&#125;</span><br><span class="line">			//被删除的元素是第一个元素时</span><br><span class="line">			if(index==0) &#123;</span><br><span class="line">				first = down;</span><br><span class="line">			&#125;</span><br><span class="line">			//被删除的元素是最后一个元素时</span><br><span class="line">			if(index==size-1) &#123;</span><br><span class="line">				last = up;</span><br><span class="line">			&#125;</span><br><span class="line">			size--;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void add(E element) &#123;</span><br><span class="line">		Node node = new Node(element);</span><br><span class="line">		if(first==null) &#123;</span><br><span class="line">//			node.previous = null;</span><br><span class="line">//			node.next = null;</span><br><span class="line">			first = node;</span><br><span class="line">			last = node;</span><br><span class="line">		&#125;else &#123;</span><br><span class="line">			node.previous = last;</span><br><span class="line">			node.next = null;</span><br><span class="line">			last.next = node;</span><br><span class="line">			last = node;</span><br><span class="line">		&#125;</span><br><span class="line">		size++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public E get(int index) &#123;</span><br><span class="line">		checkRange(index);</span><br><span class="line">		Node temp = getNode(index);</span><br><span class="line">		return temp!=null?(E)temp.element:null;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	private void checkRange(int index) &#123;</span><br><span class="line">		if(index&lt;0 || index&gt;size-1) &#123;</span><br><span class="line">			throw new RuntimeException(&quot;索引数字不合法:&quot;+index);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	private Node getNode(int index) &#123;</span><br><span class="line">		checkRange(index);</span><br><span class="line">		Node temp = null;</span><br><span class="line">		if(index&lt;=(size&gt;&gt;1)) &#123;//size&gt;&gt;1相当于除以2</span><br><span class="line">			temp = first;</span><br><span class="line">			for(int i=0;i&lt;index;i++) &#123;</span><br><span class="line">				temp = temp.next;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;else &#123;</span><br><span class="line">			temp = last;</span><br><span class="line">			for(int i=size-1;i&gt;index;i--) &#123;</span><br><span class="line">				temp = temp.previous;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; </span><br><span class="line">		return temp;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	@Override</span><br><span class="line">	public String toString() &#123;</span><br><span class="line">		//[a b c] first = a, last = c</span><br><span class="line">		StringBuilder sb = new StringBuilder(&quot;[&quot;);</span><br><span class="line">		Node temp = first;</span><br><span class="line">		while(temp!=null) &#123;</span><br><span class="line">			sb.append(temp.element+&quot;,&quot;);</span><br><span class="line">			temp = temp.next;</span><br><span class="line">		&#125;</span><br><span class="line">		sb.setCharAt(sb.length()-1, &#x27;]&#x27;);</span><br><span class="line">		return sb.toString();</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<pre><code>package com.msl.mycollection;
+/**
+ * 自定义实现一个链表
+ * @author Senley
+ */
+public class MslLinkedList&lt;E&gt; &#123;
+    
+    private Node first;
+    private Node last;
+    private int size;
+    
+    public static void main(String[] args) &#123;
+        MslLinkedList&lt;String&gt; list = new MslLinkedList();
+        list.add(&quot;a&quot;);
+        list.add(&quot;b&quot;);
+        list.add(&quot;c&quot;);
+        System.out.println(list);
+        System.out.println(list.get(2));
+        list.remove(0);
+        System.out.println(list);
+        list.add(1, &quot;插入&quot;);
+        System.out.println(list);
+    &#125;
+    
+    public void add(int index,E element) &#123;
+        checkRange(index);
+        Node newNode = new Node(element);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            up.next = newNode;
+            newNode.previous = up;
+            newNode.next = temp;
+            temp.previous = newNode;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            Node down = temp.next;
+            if(up!=null) &#123;
+                up.next = down;
+            &#125;
+            if(down!=null) &#123;
+                down.previous = up;
+            &#125;
+            //被删除的元素是第一个元素时
+            if(index==0) &#123;
+                first = down;
+            &#125;
+            //被删除的元素是最后一个元素时
+            if(index==size-1) &#123;
+                last = up;
+            &#125;
+            size--;
+        &#125;
+    &#125;
+    
+    public void add(E element) &#123;
+        Node node = new Node(element);
+        if(first==null) &#123;
+//            node.previous = null;
+//            node.next = null;
+            first = node;
+            last = node;
+        &#125;else &#123;
+            node.previous = last;
+            node.next = null;
+            last.next = node;
+            last = node;
+        &#125;
+        size++;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        return temp!=null?(E)temp.element:null;
+    &#125;
+    
+    private void checkRange(int index) &#123;
+        if(index&lt;0 || index&gt;size-1) &#123;
+            throw new RuntimeException(&quot;索引数字不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    private Node getNode(int index) &#123;
+        checkRange(index);
+        Node temp = null;
+        if(index&lt;=(size&gt;&gt;1)) &#123;//size&gt;&gt;1相当于除以2
+            temp = first;
+            for(int i=0;i&lt;index;i++) &#123;
+                temp = temp.next;
+            &#125;
+        &#125;else &#123;
+            temp = last;
+            for(int i=size-1;i&gt;index;i--) &#123;
+                temp = temp.previous;
+            &#125;
+        &#125; 
+        return temp;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //[a b c] first = a, last = c
+        StringBuilder sb = new StringBuilder(&quot;[&quot;);
+        Node temp = first;
+        while(temp!=null) &#123;
+            sb.append(temp.element+&quot;,&quot;);
+            temp = temp.next;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+&#125;
+</code></pre>
 <p>结果如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[a,b,c]</span><br><span class="line">c</span><br><span class="line">[b,c]</span><br><span class="line">[b,插入,c]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<pre><code>[a,b,c]
+c
+[b,c]
+[b,插入,c]
+</code></pre>
  
       <!-- reward -->
       
@@ -363,11 +547,126 @@
 <p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
 <h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line">package com.msl.mycollection;</span><br><span class="line"></span><br><span class="line">import javax.management.RuntimeErrorException;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 自定义实现一个ArrayList,体会底层原理</span><br><span class="line"> * @author Senley</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">public class MslArrayList&lt;E&gt; &#123;</span><br><span class="line">	</span><br><span class="line">	private Object[] elementData;</span><br><span class="line">	private int size;</span><br><span class="line">	private static final int DEFALT_CAPACITY = 10;</span><br><span class="line">	</span><br><span class="line">	public MslArrayList() &#123;</span><br><span class="line">		elementData = new Object[DEFALT_CAPACITY];</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public MslArrayList(int capacity) &#123;</span><br><span class="line">		if(capacity&lt;0) &#123;</span><br><span class="line">			throw new RuntimeException(&quot;容器的容量不能为负数&quot;);</span><br><span class="line">		&#125;else if(capacity==0) &#123;</span><br><span class="line">			elementData = new Object[DEFALT_CAPACITY];</span><br><span class="line">		&#125;else &#123;</span><br><span class="line">			elementData = new Object[capacity];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public int size() &#123;</span><br><span class="line">		return size;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public boolean isEmpty() &#123;</span><br><span class="line">		return size==0?true:false;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void add(E element) &#123;</span><br><span class="line">		//什么时候扩容</span><br><span class="line">		if(size == elementData.length) &#123;</span><br><span class="line">			//扩容操作</span><br><span class="line">			Object[] newArray = new Object[elementData.length + (elementData.length&gt;&gt;1)];//10--&gt;10+10/2</span><br><span class="line">			System.arraycopy(elementData, 0, newArray, 0, elementData.length);</span><br><span class="line">			elementData = newArray;		</span><br><span class="line">		&#125;</span><br><span class="line">		elementData[size++] = element;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public E get(int index) &#123;</span><br><span class="line">		checkRange(index);</span><br><span class="line">		return (E) elementData[index];</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void set(E element,int index) &#123;</span><br><span class="line">		checkRange(index);</span><br><span class="line">		elementData[index] = element;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void checkRange(int index) &#123;</span><br><span class="line">		//索引合法判断[0,size)</span><br><span class="line">		if(index&lt;0 || index&gt;size-1) &#123;</span><br><span class="line">			//不合法</span><br><span class="line">			throw new RuntimeException(&quot;索引不合法:&quot;+index);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void remove(E element) &#123;</span><br><span class="line">		//将element和所有元素挨个比较,获得第一个比较为true的,返回.</span><br><span class="line">		for(int i=0;i&lt;size;i++) &#123;</span><br><span class="line">			if(element.equals(get(i))) &#123;//容器中所有的比较操作都是用的equals而不是==</span><br><span class="line">				//将该元素从此处移除</span><br><span class="line">				remove(i);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public void remove(int index) &#123;</span><br><span class="line">		int numMoved = elementData.length-index-1;</span><br><span class="line">		if(numMoved&gt;0) &#123;</span><br><span class="line">			System.arraycopy(elementData, index+1, elementData, index, elementData.length-index-1);</span><br><span class="line">		&#125;</span><br><span class="line">		elementData[--size] = null;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	@Override</span><br><span class="line">	public String toString() &#123;</span><br><span class="line">		StringBuilder sb = new StringBuilder();</span><br><span class="line">		sb.append(&quot;[&quot;);</span><br><span class="line">		for(int i=0;i&lt;size;i++) &#123;</span><br><span class="line">			sb.append(elementData[i]+&quot;,&quot;);</span><br><span class="line">		&#125;</span><br><span class="line">		sb.setCharAt(sb.length()-1, &#x27;]&#x27;);</span><br><span class="line">		return sb.toString();</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		MslArrayList m = new MslArrayList(20);</span><br><span class="line">		for(int i=0;i&lt;40;i++) &#123;</span><br><span class="line">			m.add(&quot;senley&quot;+i);</span><br><span class="line">		&#125;</span><br><span class="line">		System.out.println(m);</span><br><span class="line">		m.set(&quot;test&quot;, 10);</span><br><span class="line">		System.out.println(m.get(10));</span><br><span class="line">		m.remove(3);</span><br><span class="line">		System.out.println(m);</span><br><span class="line">		m.remove(&quot;test&quot;);</span><br><span class="line">		System.out.println(m);</span><br><span class="line">		System.out.println(m.size);</span><br><span class="line">		System.out.println(m.isEmpty());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre><code>package com.msl.mycollection;
 
+import javax.management.RuntimeErrorException;
+
+/**
+ * 自定义实现一个ArrayList,体会底层原理
+ * @author Senley
+ *
+ */
+public class MslArrayList&lt;E&gt; &#123;
+    
+    private Object[] elementData;
+    private int size;
+    private static final int DEFALT_CAPACITY = 10;
+    
+    public MslArrayList() &#123;
+        elementData = new Object[DEFALT_CAPACITY];
+    &#125;
+    
+    public MslArrayList(int capacity) &#123;
+        if(capacity&lt;0) &#123;
+            throw new RuntimeException(&quot;容器的容量不能为负数&quot;);
+        &#125;else if(capacity==0) &#123;
+            elementData = new Object[DEFALT_CAPACITY];
+        &#125;else &#123;
+            elementData = new Object[capacity];
+        &#125;
+    &#125;
+    
+    public int size() &#123;
+        return size;
+    &#125;
+    
+    public boolean isEmpty() &#123;
+        return size==0?true:false;
+    &#125;
+    
+    public void add(E element) &#123;
+        //什么时候扩容
+        if(size == elementData.length) &#123;
+            //扩容操作
+            Object[] newArray = new Object[elementData.length + (elementData.length&gt;&gt;1)];//10--&gt;10+10/2
+            System.arraycopy(elementData, 0, newArray, 0, elementData.length);
+            elementData = newArray;        
+        &#125;
+        elementData[size++] = element;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        return (E) elementData[index];
+    &#125;
+    
+    public void set(E element,int index) &#123;
+        checkRange(index);
+        elementData[index] = element;
+    &#125;
+    
+    public void checkRange(int index) &#123;
+        //索引合法判断[0,size)
+        if(index&lt;0 || index&gt;size-1) &#123;
+            //不合法
+            throw new RuntimeException(&quot;索引不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    public void remove(E element) &#123;
+        //将element和所有元素挨个比较,获得第一个比较为true的,返回.
+        for(int i=0;i&lt;size;i++) &#123;
+            if(element.equals(get(i))) &#123;//容器中所有的比较操作都是用的equals而不是==
+                //将该元素从此处移除
+                remove(i);
+            &#125;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        int numMoved = elementData.length-index-1;
+        if(numMoved&gt;0) &#123;
+            System.arraycopy(elementData, index+1, elementData, index, elementData.length-index-1);
+        &#125;
+        elementData[--size] = null;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(int i=0;i&lt;size;i++) &#123;
+            sb.append(elementData[i]+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+    public static void main(String[] args) &#123;
+        MslArrayList m = new MslArrayList(20);
+        for(int i=0;i&lt;40;i++) &#123;
+            m.add(&quot;senley&quot;+i);
+        &#125;
+        System.out.println(m);
+        m.set(&quot;test&quot;, 10);
+        System.out.println(m.get(10));
+        m.remove(3);
+        System.out.println(m);
+        m.remove(&quot;test&quot;);
+        System.out.println(m);
+        System.out.println(m.size);
+        System.out.println(m.isEmpty());
+    &#125;
+&#125;
+</code></pre>
 <p>结果如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]</span><br><span class="line">test</span><br><span class="line">[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]</span><br><span class="line">[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]</span><br><span class="line">38</span><br><span class="line">false</span><br></pre></td></tr></table></figure>
-
+<pre><code>[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+test
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+38
+false
+</code></pre>
  
       <!-- reward -->
       

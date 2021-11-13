@@ -35,6 +35,11 @@
       />
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
 
+      <!-- Highlight.js -->
+      <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.1/styles/a11y-dark.min.css" rel="stylesheet">
+      <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script>
+
       <!-- mermaid -->
       
       <style>
@@ -116,11 +121,47 @@
 <p>(2) 链表：占用空间不连续。 寻址困难，查询速度慢。但增加和删除效率非常高。</p>
 <p>哈希表的本质就是“数组+链表”，结合了数组和链表的优点(即查询快，增删效率高)。</p>
 <h2 id="HashMap基本结构"><a href="#HashMap基本结构" class="headerlink" title="HashMap基本结构"></a>HashMap基本结构</h2><p>HashMap源码有如下两个核心内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; </span><br><span class="line">   implements Map&lt;K,V&gt;, Cloneable, Serializable &#123;</span><br><span class="line">	/**</span><br><span class="line">     * The default initial capacity - MUST be a power of two.</span><br><span class="line">     * 核心数组默认初始化的大小为16（数组大小必须为2的整数幂）。</span><br><span class="line">     */</span><br><span class="line">    static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16</span><br><span class="line">    </span><br><span class="line">    /**</span><br><span class="line">     * The load factor used when none specified in constructor.、</span><br><span class="line">     * 负载因子（核心数组被占用超过0.75则自动开始扩容）。</span><br><span class="line">     */</span><br><span class="line">    static final float DEFAULT_LOAD_FACTOR = 0.75f;</span><br><span class="line">    </span><br><span class="line">    /**</span><br><span class="line">     * The table, initialized on first use, and resized as</span><br><span class="line">     * necessary. When allocated, length is always a power of two.</span><br><span class="line">     * (We also tolerate length zero in some operations to allow</span><br><span class="line">     * bootstrapping mechanics that are currently not needed.)</span><br><span class="line">     * 核心数组（根据需要可以扩容）。数组长度必须始终为2的整数幂。</span><br><span class="line">     */</span><br><span class="line">    transient Node&lt;K,V&gt;[] table;</span><br><span class="line">    //以下代码省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code>public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; 
+   implements Map&lt;K,V&gt;, Cloneable, Serializable &#123;
+    /**
+     * The default initial capacity - MUST be a power of two.
+     * 核心数组默认初始化的大小为16（数组大小必须为2的整数幂）。
+     */
+    static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16
+    
+    /**
+     * The load factor used when none specified in constructor.、
+     * 负载因子（核心数组被占用超过0.75则自动开始扩容）。
+     */
+    static final float DEFAULT_LOAD_FACTOR = 0.75f;
+    
+    /**
+     * The table, initialized on first use, and resized as
+     * necessary. When allocated, length is always a power of two.
+     * (We also tolerate length zero in some operations to allow
+     * bootstrapping mechanics that are currently not needed.)
+     * 核心数组（根据需要可以扩容）。数组长度必须始终为2的整数幂。
+     */
+    transient Node&lt;K,V&gt;[] table;
+    //以下代码省略
+&#125;
+</code></pre>
 <p>其中的Node&lt;K,V&gt;[] table 就是HashMap的核心数组结构，也称之为“位桶数组”。Node&lt;K,V&gt;源码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;</span><br><span class="line">    final int hash;</span><br><span class="line">    final K key;</span><br><span class="line">    V value;</span><br><span class="line">    Node&lt;K,V&gt; next;</span><br><span class="line"></span><br><span class="line">    Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">        this.hash = hash;</span><br><span class="line">        this.key = key;</span><br><span class="line">        this.value = value;</span><br><span class="line">        this.next = next;</span><br><span class="line">    &#125;</span><br><span class="line">    //以下代码省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
+    final int hash;
+    final K key;
+    V value;
+    Node&lt;K,V&gt; next;
 
+    Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;
+        this.hash = hash;
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    &#125;
+    //以下代码省略
+&#125;
+</code></pre>
 <p>一个Node&lt;K,V&gt;对象存储了：</p>
 <p>(1)key：键对象  value：值对象</p>
 <p>(2)next：下一个节点</p>
@@ -143,8 +184,25 @@
 <p>​      hash值 = hashcode%数组长度</p>
 <p>这种算法可以让hash值均匀地分布在[0,数组长度-1]的区间。 早期的HashTable就是采用这种算法。但是，这种算法由于使用了“除法”，效率低下。JDK后来改进了算法。首先约定数组长度必须为2的整数幂，这样采用位运算即可实现取余的效果：hash值 = hashcode&amp;(数组长度-1)。</p>
 <p>​      iii. 如下为自己测试简单的hash算法：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        int h = 25760399;</span><br><span class="line">        int length = 16;//length为2的整数次幂,则h&amp;(length-1)相当于对length取模</span><br><span class="line">        System.out.println(myHash(h, length));</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * @param h  任意整数</span><br><span class="line">     * @param length 长度必须为2的整数幂</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    public static int myHash(int h,int length)&#123;</span><br><span class="line">        System.out.println(h&amp;(length-1));</span><br><span class="line">        //length为2的整数幂情况下，和取余的值一样</span><br><span class="line">        System.out.println(h%length);//取余数</span><br><span class="line">        return h&amp;(length-1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code>public class Test &#123;
+    public static void main(String[] args) &#123;
+        int h = 25760399;
+        int length = 16;//length为2的整数次幂,则h&amp;(length-1)相当于对length取模
+        System.out.println(myHash(h, length));
+    &#125;
+    /**
+     * @param h  任意整数
+     * @param length 长度必须为2的整数幂
+     * @return
+     */
+    public static int myHash(int h,int length)&#123;
+        System.out.println(h&amp;(length-1));
+        //length为2的整数幂情况下，和取余的值一样
+        System.out.println(h%length);//取余数
+        return h&amp;(length-1);
+    &#125;
+&#125;
+</code></pre>
 <p>运行如上程序，就能发现直接取余(h%length)和位运算(h&amp;(length-1))结果是一致的。事实上，为了获得更好的散列效果，JDK对hashcode进行了两次散列处理(核心目标就是为了分布更散更均匀)。</p>
 <p>(3) 生成Node&lt;K,V&gt;对象</p>
 <p>​     如上所述，一个Node&lt;K,V&gt;对象包含4部分：key对象、value对象、hash值、指向下一个Node&lt;K,V&gt;对象的引用。我们现在算出了hash值。下一个Node&lt;K,V&gt;对象的引用为null。</p>
