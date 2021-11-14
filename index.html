@@ -161,6 +161,202 @@
     
     
     <article
+  id="post-自定义一个HashMap"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/"
+    >自定义一个HashMap</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/" class="article-date">
+  <time datetime="2021-11-14T12:00:08.000Z" itemprop="datePublished">2021-11-14</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="自定义一个HashMap"><a href="#自定义一个HashMap" class="headerlink" title="自定义一个HashMap"></a>自定义一个HashMap</h1><h2 id="HashMap的结构"><a href="#HashMap的结构" class="headerlink" title="HashMap的结构"></a>HashMap的结构</h2><p>在HashMap底层实现原理中，聊过Node&lt;K,V&gt;[]数组的结构，也是HashMap的结构。如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E6%95%B0%E7%BB%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node数组存储结构"></p>
+<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code>package com.msl.mycollection;
+/**
+ * 用于MslHashMap中
+ * @author Senley
+ *
+ */
+public class Node&lt;K,V&gt; &#123;
+    int hash;
+    K key;
+    V value;
+    Node next;
+&#125;
+</code></pre>
+<h2 id="自定义一个HashMap，体会底层原理"><a href="#自定义一个HashMap，体会底层原理" class="headerlink" title="自定义一个HashMap，体会底层原理"></a>自定义一个HashMap，体会底层原理</h2><p>在上述基础上自定义实现一个HashMap，实现如下简单功能：</p>
+<ol>
+<li>实现put方法增加键值对；</li>
+<li>解决键重复问题和链表生成问题；</li>
+<li>实现toString方法，方便查看Map中的键值对信息；</li>
+<li>实现get方法，根据键对象获得对应的值对象；</li>
+<li>增加泛型。</li>
+</ol>
+<p>代码如下：</p>
+<pre><code>package com.msl.mycollection;
+/**
+ * 自定义一个HashMap
+ * @author Senley
+ *
+ */
+public class MslHashMap&lt;K,V&gt; &#123;
+    Node[] table;  //位桶数组。bucket array
+    int size;      //存放的键值对的个数
+    
+    public static void main(String[] args) &#123;
+        MslHashMap&lt;Integer,String&gt; m = new MslHashMap&lt;&gt;();
+        m.put(10, &quot;aa&quot;);
+        m.put(20, &quot;bb&quot;);
+        m.put(30, &quot;cc&quot;);
+        m.put(20, &quot;ss&quot;);
+        
+        m.put(53, &quot;ee&quot;);
+        m.put(69, &quot;ff&quot;);
+        m.put(85, &quot;gg&quot;);
+        
+        System.out.println(m);
+        
+//        for(int i=10;i&lt;100;i++) &#123;
+//            System.out.println(i+&quot;---&quot;+myHash(i,16)); //53,69,85
+//        &#125;
+        
+        System.out.println(m.get(53));
+    &#125;
+    
+    public MslHashMap() &#123;
+        table = new Node[16]; //长度一般定义成2的整数幂
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //&#123;10:aa,20:bb&#125;
+        StringBuilder sb = new StringBuilder(&quot;&#123;&quot;);
+        //遍历bucket数组
+        for(int i=0;i&lt;table.length;i++) &#123;
+            Node temp = table[i];
+            //遍历链表
+            while(temp!=null) &#123;
+                sb.append(temp.key+&quot;:&quot;+temp.value+&quot;,&quot;);
+                temp = temp.next;
+            &#125;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;&#125;&#39;);
+        return sb.toString();
+    &#125;
+    
+    public void put(K key,V value) &#123;
+        //还需要考虑数组扩容问题！
+        
+        //定义了新的结点对象
+        Node newNode = new Node();
+        newNode.hash = myHash(key.hashCode(),table.length);
+        newNode.key = key;
+        newNode.value = value;
+        newNode.next = null;
+        
+        Node temp = table[newNode.hash];
+        Node iterLast = null; //正在遍历的最后一个元素
+        boolean keyRepeat = false; 
+        if(temp == null) &#123;
+            //此处数组元素为空，则直接将新结点放进去
+            table[newNode.hash] = newNode;
+            size++;
+        &#125;else &#123;
+            //此处数组元素不为空，则遍历对应链表
+            while(temp!=null) &#123;
+                //判断key如果重复，则覆盖
+                if(temp.key.equals(key)) &#123;
+                    keyRepeat = true;
+                    System.out.println(&quot;key重复了&quot;);
+                    temp.value = value; //只是覆盖value即可，其他的值（hash,key,next）保持不变
+                    break;
+                &#125;else &#123;
+                    //key不重复，则遍历下一个
+                    iterLast = temp;
+                    temp = temp.next;
+                &#125;
+            &#125;
+            if(!keyRepeat) &#123; //如果没有发生key重复的情况，则添加到链表最后
+                iterLast.next = newNode;
+                size++;
+            &#125;
+        &#125;
+    &#125;
+    
+    public V get(K key) &#123;
+        int hash = myHash(key.hashCode(),table.length);
+        V value = null;
+        if(table[hash]!=null) &#123;
+            Node temp = table[hash];
+            while(temp!=null) &#123;
+                if(temp.key.equals(key)) &#123; //如果相等则说明找对了键值对，返回相应的value
+                    value = (V) temp.value;
+                    break;
+                &#125;else &#123;
+                    temp = temp.next;
+                &#125;
+            &#125;
+        &#125;
+        return value;
+    &#125;
+    
+    public static int myHash(int v,int length) &#123;
+//        System.out.println(&quot;hash in myHash:&quot;+(v&amp;(length-1))); //直接位运算，效率高
+//        System.out.println(&quot;hash in myHash:&quot;+(v%(length-1))); //取模运算，效率低
+        return v&amp;(length-1);
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code>key重复了
+&#123;20:ss,53:ee,69:ff,85:gg,10:aa,30:cc&#125;
+ee
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HashMap/" rel="tag">HashMap</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-HashMap底层实现原理"
   class="article article-type-post"
   itemscope

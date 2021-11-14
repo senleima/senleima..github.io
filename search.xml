@@ -115,143 +115,6 @@
       </tags>
   </entry>
   <entry>
-    <title>自定义一个ArrayList</title>
-    <url>/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/</url>
-    <content><![CDATA[<h1 id="自定义一个ArrayList"><a href="#自定义一个ArrayList" class="headerlink" title="自定义一个ArrayList"></a>自定义一个ArrayList</h1><h2 id="ArrayList特点和底层实现"><a href="#ArrayList特点和底层实现" class="headerlink" title="ArrayList特点和底层实现"></a>ArrayList特点和底层实现</h2><p>ArrayList底层是用数组实现的存储。 特点：查询效率高，增删效率低，线程不安全。查看源码：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071028176.png" alt="自定义一个ArrayList1"></p>
-<p>可以看出ArrayList底层使用Object数组来存储元素数据。所有的方法，都围绕这个核心的Object数组来开展。</p>
-<p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
-<h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
-<pre><code>package com.msl.mycollection;
-
-import javax.management.RuntimeErrorException;
-
-/**
- * 自定义实现一个ArrayList,体会底层原理
- * @author Senley
- *
- */
-public class MslArrayList&lt;E&gt; &#123;
-    
-    private Object[] elementData;
-    private int size;
-    private static final int DEFALT_CAPACITY = 10;
-    
-    public MslArrayList() &#123;
-        elementData = new Object[DEFALT_CAPACITY];
-    &#125;
-    
-    public MslArrayList(int capacity) &#123;
-        if(capacity&lt;0) &#123;
-            throw new RuntimeException(&quot;容器的容量不能为负数&quot;);
-        &#125;else if(capacity==0) &#123;
-            elementData = new Object[DEFALT_CAPACITY];
-        &#125;else &#123;
-            elementData = new Object[capacity];
-        &#125;
-    &#125;
-    
-    public int size() &#123;
-        return size;
-    &#125;
-    
-    public boolean isEmpty() &#123;
-        return size==0?true:false;
-    &#125;
-    
-    public void add(E element) &#123;
-        //什么时候扩容
-        if(size == elementData.length) &#123;
-            //扩容操作
-            Object[] newArray = new Object[elementData.length + (elementData.length&gt;&gt;1)];//10--&gt;10+10/2
-            System.arraycopy(elementData, 0, newArray, 0, elementData.length);
-            elementData = newArray;        
-        &#125;
-        elementData[size++] = element;
-    &#125;
-    
-    public E get(int index) &#123;
-        checkRange(index);
-        return (E) elementData[index];
-    &#125;
-    
-    public void set(E element,int index) &#123;
-        checkRange(index);
-        elementData[index] = element;
-    &#125;
-    
-    public void checkRange(int index) &#123;
-        //索引合法判断[0,size)
-        if(index&lt;0 || index&gt;size-1) &#123;
-            //不合法
-            throw new RuntimeException(&quot;索引不合法:&quot;+index);
-        &#125;
-    &#125;
-    
-    public void remove(E element) &#123;
-        //将element和所有元素挨个比较,获得第一个比较为true的,返回.
-        for(int i=0;i&lt;size;i++) &#123;
-            if(element.equals(get(i))) &#123;//容器中所有的比较操作都是用的equals而不是==
-                //将该元素从此处移除
-                remove(i);
-            &#125;
-        &#125;
-    &#125;
-    
-    public void remove(int index) &#123;
-        int numMoved = elementData.length-index-1;
-        if(numMoved&gt;0) &#123;
-            System.arraycopy(elementData, index+1, elementData, index, elementData.length-index-1);
-        &#125;
-        elementData[--size] = null;
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        StringBuilder sb = new StringBuilder();
-        sb.append(&quot;[&quot;);
-        for(int i=0;i&lt;size;i++) &#123;
-            sb.append(elementData[i]+&quot;,&quot;);
-        &#125;
-        sb.setCharAt(sb.length()-1, &#39;]&#39;);
-        return sb.toString();
-    &#125;
-    
-    public static void main(String[] args) &#123;
-        MslArrayList m = new MslArrayList(20);
-        for(int i=0;i&lt;40;i++) &#123;
-            m.add(&quot;senley&quot;+i);
-        &#125;
-        System.out.println(m);
-        m.set(&quot;test&quot;, 10);
-        System.out.println(m.get(10));
-        m.remove(3);
-        System.out.println(m);
-        m.remove(&quot;test&quot;);
-        System.out.println(m);
-        System.out.println(m.size);
-        System.out.println(m.isEmpty());
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code>[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
-test
-[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
-[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
-38
-false
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>ArrayList</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>自定义一个LinkedList</title>
     <url>/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/</url>
     <content><![CDATA[<h1 id="自定义一个LinkedList"><a href="#自定义一个LinkedList" class="headerlink" title="自定义一个LinkedList"></a>自定义一个LinkedList</h1><h2 id="LinkedList特点和底层实现"><a href="#LinkedList特点和底层实现" class="headerlink" title="LinkedList特点和底层实现"></a>LinkedList特点和底层实现</h2><p>LinkedList底层用双向链表实现的存储。特点：查询效率低，增删效率高，线程不安全。</p>
@@ -400,6 +263,297 @@ c
       </categories>
       <tags>
         <tag>LinkedList</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义一个ArrayList</title>
+    <url>/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/</url>
+    <content><![CDATA[<h1 id="自定义一个ArrayList"><a href="#自定义一个ArrayList" class="headerlink" title="自定义一个ArrayList"></a>自定义一个ArrayList</h1><h2 id="ArrayList特点和底层实现"><a href="#ArrayList特点和底层实现" class="headerlink" title="ArrayList特点和底层实现"></a>ArrayList特点和底层实现</h2><p>ArrayList底层是用数组实现的存储。 特点：查询效率高，增删效率低，线程不安全。查看源码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071028176.png" alt="自定义一个ArrayList1"></p>
+<p>可以看出ArrayList底层使用Object数组来存储元素数据。所有的方法，都围绕这个核心的Object数组来开展。</p>
+<p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
+<h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
+<pre><code>package com.msl.mycollection;
+
+import javax.management.RuntimeErrorException;
+
+/**
+ * 自定义实现一个ArrayList,体会底层原理
+ * @author Senley
+ *
+ */
+public class MslArrayList&lt;E&gt; &#123;
+    
+    private Object[] elementData;
+    private int size;
+    private static final int DEFALT_CAPACITY = 10;
+    
+    public MslArrayList() &#123;
+        elementData = new Object[DEFALT_CAPACITY];
+    &#125;
+    
+    public MslArrayList(int capacity) &#123;
+        if(capacity&lt;0) &#123;
+            throw new RuntimeException(&quot;容器的容量不能为负数&quot;);
+        &#125;else if(capacity==0) &#123;
+            elementData = new Object[DEFALT_CAPACITY];
+        &#125;else &#123;
+            elementData = new Object[capacity];
+        &#125;
+    &#125;
+    
+    public int size() &#123;
+        return size;
+    &#125;
+    
+    public boolean isEmpty() &#123;
+        return size==0?true:false;
+    &#125;
+    
+    public void add(E element) &#123;
+        //什么时候扩容
+        if(size == elementData.length) &#123;
+            //扩容操作
+            Object[] newArray = new Object[elementData.length + (elementData.length&gt;&gt;1)];//10--&gt;10+10/2
+            System.arraycopy(elementData, 0, newArray, 0, elementData.length);
+            elementData = newArray;        
+        &#125;
+        elementData[size++] = element;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        return (E) elementData[index];
+    &#125;
+    
+    public void set(E element,int index) &#123;
+        checkRange(index);
+        elementData[index] = element;
+    &#125;
+    
+    public void checkRange(int index) &#123;
+        //索引合法判断[0,size)
+        if(index&lt;0 || index&gt;size-1) &#123;
+            //不合法
+            throw new RuntimeException(&quot;索引不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    public void remove(E element) &#123;
+        //将element和所有元素挨个比较,获得第一个比较为true的,返回.
+        for(int i=0;i&lt;size;i++) &#123;
+            if(element.equals(get(i))) &#123;//容器中所有的比较操作都是用的equals而不是==
+                //将该元素从此处移除
+                remove(i);
+            &#125;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        int numMoved = elementData.length-index-1;
+        if(numMoved&gt;0) &#123;
+            System.arraycopy(elementData, index+1, elementData, index, elementData.length-index-1);
+        &#125;
+        elementData[--size] = null;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(int i=0;i&lt;size;i++) &#123;
+            sb.append(elementData[i]+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+    public static void main(String[] args) &#123;
+        MslArrayList m = new MslArrayList(20);
+        for(int i=0;i&lt;40;i++) &#123;
+            m.add(&quot;senley&quot;+i);
+        &#125;
+        System.out.println(m);
+        m.set(&quot;test&quot;, 10);
+        System.out.println(m.get(10));
+        m.remove(3);
+        System.out.println(m);
+        m.remove(&quot;test&quot;);
+        System.out.println(m);
+        System.out.println(m.size);
+        System.out.println(m.isEmpty());
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code>[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+test
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+38
+false
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>ArrayList</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义一个HashMap</title>
+    <url>/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/</url>
+    <content><![CDATA[<h1 id="自定义一个HashMap"><a href="#自定义一个HashMap" class="headerlink" title="自定义一个HashMap"></a>自定义一个HashMap</h1><h2 id="HashMap的结构"><a href="#HashMap的结构" class="headerlink" title="HashMap的结构"></a>HashMap的结构</h2><p>在HashMap底层实现原理中，聊过Node&lt;K,V&gt;[]数组的结构，也是HashMap的结构。如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E6%95%B0%E7%BB%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node数组存储结构"></p>
+<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code>package com.msl.mycollection;
+/**
+ * 用于MslHashMap中
+ * @author Senley
+ *
+ */
+public class Node&lt;K,V&gt; &#123;
+    int hash;
+    K key;
+    V value;
+    Node next;
+&#125;
+</code></pre>
+<h2 id="自定义一个HashMap，体会底层原理"><a href="#自定义一个HashMap，体会底层原理" class="headerlink" title="自定义一个HashMap，体会底层原理"></a>自定义一个HashMap，体会底层原理</h2><p>在上述基础上自定义实现一个HashMap，实现如下简单功能：</p>
+<ol>
+<li>实现put方法增加键值对；</li>
+<li>解决键重复问题和链表生成问题；</li>
+<li>实现toString方法，方便查看Map中的键值对信息；</li>
+<li>实现get方法，根据键对象获得对应的值对象；</li>
+<li>增加泛型。</li>
+</ol>
+<p>代码如下：</p>
+<pre><code>package com.msl.mycollection;
+/**
+ * 自定义一个HashMap
+ * @author Senley
+ *
+ */
+public class MslHashMap&lt;K,V&gt; &#123;
+    Node[] table;  //位桶数组。bucket array
+    int size;      //存放的键值对的个数
+    
+    public static void main(String[] args) &#123;
+        MslHashMap&lt;Integer,String&gt; m = new MslHashMap&lt;&gt;();
+        m.put(10, &quot;aa&quot;);
+        m.put(20, &quot;bb&quot;);
+        m.put(30, &quot;cc&quot;);
+        m.put(20, &quot;ss&quot;);
+        
+        m.put(53, &quot;ee&quot;);
+        m.put(69, &quot;ff&quot;);
+        m.put(85, &quot;gg&quot;);
+        
+        System.out.println(m);
+        
+//        for(int i=10;i&lt;100;i++) &#123;
+//            System.out.println(i+&quot;---&quot;+myHash(i,16)); //53,69,85
+//        &#125;
+        
+        System.out.println(m.get(53));
+    &#125;
+    
+    public MslHashMap() &#123;
+        table = new Node[16]; //长度一般定义成2的整数幂
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //&#123;10:aa,20:bb&#125;
+        StringBuilder sb = new StringBuilder(&quot;&#123;&quot;);
+        //遍历bucket数组
+        for(int i=0;i&lt;table.length;i++) &#123;
+            Node temp = table[i];
+            //遍历链表
+            while(temp!=null) &#123;
+                sb.append(temp.key+&quot;:&quot;+temp.value+&quot;,&quot;);
+                temp = temp.next;
+            &#125;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;&#125;&#39;);
+        return sb.toString();
+    &#125;
+    
+    public void put(K key,V value) &#123;
+        //还需要考虑数组扩容问题！
+        
+        //定义了新的结点对象
+        Node newNode = new Node();
+        newNode.hash = myHash(key.hashCode(),table.length);
+        newNode.key = key;
+        newNode.value = value;
+        newNode.next = null;
+        
+        Node temp = table[newNode.hash];
+        Node iterLast = null; //正在遍历的最后一个元素
+        boolean keyRepeat = false; 
+        if(temp == null) &#123;
+            //此处数组元素为空，则直接将新结点放进去
+            table[newNode.hash] = newNode;
+            size++;
+        &#125;else &#123;
+            //此处数组元素不为空，则遍历对应链表
+            while(temp!=null) &#123;
+                //判断key如果重复，则覆盖
+                if(temp.key.equals(key)) &#123;
+                    keyRepeat = true;
+                    System.out.println(&quot;key重复了&quot;);
+                    temp.value = value; //只是覆盖value即可，其他的值（hash,key,next）保持不变
+                    break;
+                &#125;else &#123;
+                    //key不重复，则遍历下一个
+                    iterLast = temp;
+                    temp = temp.next;
+                &#125;
+            &#125;
+            if(!keyRepeat) &#123; //如果没有发生key重复的情况，则添加到链表最后
+                iterLast.next = newNode;
+                size++;
+            &#125;
+        &#125;
+    &#125;
+    
+    public V get(K key) &#123;
+        int hash = myHash(key.hashCode(),table.length);
+        V value = null;
+        if(table[hash]!=null) &#123;
+            Node temp = table[hash];
+            while(temp!=null) &#123;
+                if(temp.key.equals(key)) &#123; //如果相等则说明找对了键值对，返回相应的value
+                    value = (V) temp.value;
+                    break;
+                &#125;else &#123;
+                    temp = temp.next;
+                &#125;
+            &#125;
+        &#125;
+        return value;
+    &#125;
+    
+    public static int myHash(int v,int length) &#123;
+//        System.out.println(&quot;hash in myHash:&quot;+(v&amp;(length-1))); //直接位运算，效率高
+//        System.out.println(&quot;hash in myHash:&quot;+(v%(length-1))); //取模运算，效率低
+        return v&amp;(length-1);
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code>key重复了
+&#123;20:ss,53:ee,69:ff,85:gg,10:aa,30:cc&#125;
+ee
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>HashMap</tag>
       </tags>
   </entry>
 </search>

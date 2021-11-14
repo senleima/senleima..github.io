@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>HashMap底层实现原理 |  senleima</title>
+      <title>自定义一个HashMap |  senleima</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -60,7 +60,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-HashMap底层实现原理"
+  id="post-自定义一个HashMap"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -71,7 +71,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  HashMap底层实现原理
+  自定义一个HashMap
 </h1>
  
 
@@ -79,8 +79,8 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" class="article-date">
-  <time datetime="2021-11-10T14:38:12.000Z" itemprop="datePublished">2021-11-10</time>
+      <a href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/" class="article-date">
+  <time datetime="2021-11-14T12:00:08.000Z" itemprop="datePublished">2021-11-14</time>
 </a> 
   <div class="article-category">
     <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
@@ -91,7 +91,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">1.8k</span>
+            <span class="post-count">761</span>
         </span>
     </span>
 
@@ -100,7 +100,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">7 min</span>
+            <span class="post-count">3 min</span>
         </span>
     </span>
 </div>
@@ -115,109 +115,149 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="HashMap底层实现原理"><a href="#HashMap底层实现原理" class="headerlink" title="HashMap底层实现原理"></a>HashMap底层实现原理</h1><p>HashMap底层实现采用了哈希表，这是一种非常重要的数据结构，对于理解很多技术都非常有帮助(比如：redis数据库的核心技术和HashMap一样)。</p>
-<p>数据结构中由数组和链表来实现对数据的存储，他们各有不同的特点。</p>
-<p>(1) 数组：占用空间连续。 寻址容易，查询速度快。但增加和删除效率非常低。</p>
-<p>(2) 链表：占用空间不连续。 寻址困难，查询速度慢。但增加和删除效率非常高。</p>
-<p>哈希表的本质就是“数组+链表”，结合了数组和链表的优点(即查询快，增删效率高)。</p>
-<h2 id="HashMap基本结构"><a href="#HashMap基本结构" class="headerlink" title="HashMap基本结构"></a>HashMap基本结构</h2><p>HashMap源码有如下两个核心内容：</p>
-<pre><code>public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; 
-   implements Map&lt;K,V&gt;, Cloneable, Serializable &#123;
-    /**
-     * The default initial capacity - MUST be a power of two.
-     * 核心数组默认初始化的大小为16（数组大小必须为2的整数幂）。
-     */
-    static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16
-    
-    /**
-     * The load factor used when none specified in constructor.、
-     * 负载因子（核心数组被占用超过0.75则自动开始扩容）。
-     */
-    static final float DEFAULT_LOAD_FACTOR = 0.75f;
-    
-    /**
-     * The table, initialized on first use, and resized as
-     * necessary. When allocated, length is always a power of two.
-     * (We also tolerate length zero in some operations to allow
-     * bootstrapping mechanics that are currently not needed.)
-     * 核心数组（根据需要可以扩容）。数组长度必须始终为2的整数幂。
-     */
-    transient Node&lt;K,V&gt;[] table;
-    //以下代码省略
-&#125;
-</code></pre>
-<p>其中的Node&lt;K,V&gt;[] table 就是HashMap的核心数组结构，也称之为“位桶数组”。Node&lt;K,V&gt;源码如下：</p>
-<pre><code>static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
-    final int hash;
-    final K key;
-    V value;
-    Node&lt;K,V&gt; next;
-
-    Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;
-        this.hash = hash;
-        this.key = key;
-        this.value = value;
-        this.next = next;
-    &#125;
-    //以下代码省略
-&#125;
-</code></pre>
-<p>一个Node&lt;K,V&gt;对象存储了：</p>
-<p>(1)key：键对象  value：值对象</p>
-<p>(2)next：下一个节点</p>
-<p>(3)hash：键对象的hash值</p>
-<p>每一个Node&lt;K,V&gt;对象都是一个单向链表结构，如下表示一个Node&lt;K,V&gt;对象的典型示意：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node对象存储结构"></p>
-<p>如下为Node&lt;K,V&gt;[]数组的结构(也是HashMap的结构)：</p>
+  <h1 id="自定义一个HashMap"><a href="#自定义一个HashMap" class="headerlink" title="自定义一个HashMap"></a>自定义一个HashMap</h1><h2 id="HashMap的结构"><a href="#HashMap的结构" class="headerlink" title="HashMap的结构"></a>HashMap的结构</h2><p>在HashMap底层实现原理中，聊过Node&lt;K,V&gt;[]数组的结构，也是HashMap的结构。如下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E6%95%B0%E7%BB%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node数组存储结构"></p>
-<h2 id="存储数据过程put-key-value"><a href="#存储数据过程put-key-value" class="headerlink" title="存储数据过程put(key,value)"></a><strong>存储数据过程put(key,value)</strong></h2><p>HashMap存储数据的核心是如何产生hash值，该值用来对应数组的存储位置。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/HashMap%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE%E8%BF%87%E7%A8%8B.png" alt="HashMap存储数据过程"></p>
-<p>我们的目的是将”key-value两个对象”成对存放到HashMap的Node&lt;K,V&gt;[]数组中。步骤如下：</p>
-<p>(1) 获得key对象的hashcode</p>
-<p>​      首先调用key对象的hashcode()方法，获得hashcode。</p>
-<p>(2) 根据hashcode计算出hash值(要求在[0, 数组长度-1]区间)</p>
-<p>​      hashcode是一个整数，需要将它转化成[0, 数组长度-1]的范围。我们要求转化后的hash值尽量均匀地分布在[0,数组长度-1]这个区间，减少“hash冲突”。</p>
-<p>​      i. 一种极端简单和低下的算法是：</p>
-<p>​      hash值 = hashcode/hashcode;</p>
-<p>​      也就是说hash值总是1。意味着键值对对象都会存储到数组索引1位置，这样就形成一个非常长的链表。相当于每存储一个对象都会发生“hash冲突”，HashMap也退化成了一个“链表”。</p>
-<p>​      ii. 一种简单和常用的算法是(相除取余算法)：</p>
-<p>​      hash值 = hashcode%数组长度</p>
-<p>这种算法可以让hash值均匀地分布在[0,数组长度-1]的区间。 早期的HashTable就是采用这种算法。但是，这种算法由于使用了“除法”，效率低下。JDK后来改进了算法。首先约定数组长度必须为2的整数幂，这样采用位运算即可实现取余的效果：hash值 = hashcode&amp;(数组长度-1)。</p>
-<p>​      iii. 如下为自己测试简单的hash算法：</p>
-<pre><code>public class Test &#123;
+<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code>package com.msl.mycollection;
+/**
+ * 用于MslHashMap中
+ * @author Senley
+ *
+ */
+public class Node&lt;K,V&gt; &#123;
+    int hash;
+    K key;
+    V value;
+    Node next;
+&#125;
+</code></pre>
+<h2 id="自定义一个HashMap，体会底层原理"><a href="#自定义一个HashMap，体会底层原理" class="headerlink" title="自定义一个HashMap，体会底层原理"></a>自定义一个HashMap，体会底层原理</h2><p>在上述基础上自定义实现一个HashMap，实现如下简单功能：</p>
+<ol>
+<li>实现put方法增加键值对；</li>
+<li>解决键重复问题和链表生成问题；</li>
+<li>实现toString方法，方便查看Map中的键值对信息；</li>
+<li>实现get方法，根据键对象获得对应的值对象；</li>
+<li>增加泛型。</li>
+</ol>
+<p>代码如下：</p>
+<pre><code>package com.msl.mycollection;
+/**
+ * 自定义一个HashMap
+ * @author Senley
+ *
+ */
+public class MslHashMap&lt;K,V&gt; &#123;
+    Node[] table;  //位桶数组。bucket array
+    int size;      //存放的键值对的个数
+    
     public static void main(String[] args) &#123;
-        int h = 25760399;
-        int length = 16;//length为2的整数次幂,则h&amp;(length-1)相当于对length取模
-        System.out.println(myHash(h, length));
+        MslHashMap&lt;Integer,String&gt; m = new MslHashMap&lt;&gt;();
+        m.put(10, &quot;aa&quot;);
+        m.put(20, &quot;bb&quot;);
+        m.put(30, &quot;cc&quot;);
+        m.put(20, &quot;ss&quot;);
+        
+        m.put(53, &quot;ee&quot;);
+        m.put(69, &quot;ff&quot;);
+        m.put(85, &quot;gg&quot;);
+        
+        System.out.println(m);
+        
+//        for(int i=10;i&lt;100;i++) &#123;
+//            System.out.println(i+&quot;---&quot;+myHash(i,16)); //53,69,85
+//        &#125;
+        
+        System.out.println(m.get(53));
     &#125;
-    /**
-     * @param h  任意整数
-     * @param length 长度必须为2的整数幂
-     * @return
-     */
-    public static int myHash(int h,int length)&#123;
-        System.out.println(h&amp;(length-1));
-        //length为2的整数幂情况下，和取余的值一样
-        System.out.println(h%length);//取余数
-        return h&amp;(length-1);
+    
+    public MslHashMap() &#123;
+        table = new Node[16]; //长度一般定义成2的整数幂
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //&#123;10:aa,20:bb&#125;
+        StringBuilder sb = new StringBuilder(&quot;&#123;&quot;);
+        //遍历bucket数组
+        for(int i=0;i&lt;table.length;i++) &#123;
+            Node temp = table[i];
+            //遍历链表
+            while(temp!=null) &#123;
+                sb.append(temp.key+&quot;:&quot;+temp.value+&quot;,&quot;);
+                temp = temp.next;
+            &#125;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;&#125;&#39;);
+        return sb.toString();
+    &#125;
+    
+    public void put(K key,V value) &#123;
+        //还需要考虑数组扩容问题！
+        
+        //定义了新的结点对象
+        Node newNode = new Node();
+        newNode.hash = myHash(key.hashCode(),table.length);
+        newNode.key = key;
+        newNode.value = value;
+        newNode.next = null;
+        
+        Node temp = table[newNode.hash];
+        Node iterLast = null; //正在遍历的最后一个元素
+        boolean keyRepeat = false; 
+        if(temp == null) &#123;
+            //此处数组元素为空，则直接将新结点放进去
+            table[newNode.hash] = newNode;
+            size++;
+        &#125;else &#123;
+            //此处数组元素不为空，则遍历对应链表
+            while(temp!=null) &#123;
+                //判断key如果重复，则覆盖
+                if(temp.key.equals(key)) &#123;
+                    keyRepeat = true;
+                    System.out.println(&quot;key重复了&quot;);
+                    temp.value = value; //只是覆盖value即可，其他的值（hash,key,next）保持不变
+                    break;
+                &#125;else &#123;
+                    //key不重复，则遍历下一个
+                    iterLast = temp;
+                    temp = temp.next;
+                &#125;
+            &#125;
+            if(!keyRepeat) &#123; //如果没有发生key重复的情况，则添加到链表最后
+                iterLast.next = newNode;
+                size++;
+            &#125;
+        &#125;
+    &#125;
+    
+    public V get(K key) &#123;
+        int hash = myHash(key.hashCode(),table.length);
+        V value = null;
+        if(table[hash]!=null) &#123;
+            Node temp = table[hash];
+            while(temp!=null) &#123;
+                if(temp.key.equals(key)) &#123; //如果相等则说明找对了键值对，返回相应的value
+                    value = (V) temp.value;
+                    break;
+                &#125;else &#123;
+                    temp = temp.next;
+                &#125;
+            &#125;
+        &#125;
+        return value;
+    &#125;
+    
+    public static int myHash(int v,int length) &#123;
+//        System.out.println(&quot;hash in myHash:&quot;+(v&amp;(length-1))); //直接位运算，效率高
+//        System.out.println(&quot;hash in myHash:&quot;+(v%(length-1))); //取模运算，效率低
+        return v&amp;(length-1);
     &#125;
 &#125;
 </code></pre>
-<p>运行如上程序，就能发现直接取余(h%length)和位运算(h&amp;(length-1))结果是一致的。事实上，为了获得更好的散列效果，JDK对hashcode进行了两次散列处理(核心目标就是为了分布更散更均匀)。</p>
-<p>(3) 生成Node&lt;K,V&gt;对象</p>
-<p>​     如上所述，一个Node&lt;K,V&gt;对象包含4部分：key对象、value对象、hash值、指向下一个Node&lt;K,V&gt;对象的引用。我们现在算出了hash值。下一个Node&lt;K,V&gt;对象的引用为null。</p>
-<p>(4) 将Node&lt;K,V&gt;对象放到table数组中</p>
-<p>​     如果本Node&lt;K,V&gt;对象对应的数组索引位置还没有放Node&lt;K,V&gt;对象，则直接将Node&lt;K,V&gt;对象存储进数组;如果对应索引位置已经有Node&lt;K,V&gt;对象，则将已有Node&lt;K,V&gt;对象的next指向本Node&lt;K,V&gt;对象，形成链表。</p>
-<h3 id="总结如上过程"><a href="#总结如上过程" class="headerlink" title="总结如上过程"></a><strong>总结如上过程</strong></h3><p>   当添加一个元素(key-value)时，首先计算key的hash值，以此确定插入数组中的位置，但可能存在同一hash值的元素已经被放在数组同一位置了，这时就添加到同一hash值的元素的后面，他们在数组的同一位置，就形成了链表，同一个链表上的hash值是相同的，所以说数组存放的是链表。 JDK8中，当链表长度大于8时，链表就转换为红黑树，大大提高了查找的效率。</p>
-<h2 id="取数据过程get-key"><a href="#取数据过程get-key" class="headerlink" title="取数据过程get(key)"></a>取数据过程get(key)</h2><p>   我们需要通过key对象获得“键值对”对象，进而返回value对象。步骤如下：</p>
-<p>   (1) 获得key的hashcode，通过hash()散列算法得到hash值，进而定位到数组的位置。</p>
-<p>   (2) 在链表上挨个比较key对象。 调用equals()方法，将key对象和链表上所有节点的key对象进行比较，直到碰到返回true的节点对象为止。</p>
-<p>   (3) 返回equals()为true的节点对象的value对象。</p>
-<p>   明白了存取数据的过程，下面再看下hashcode()和equals方法的关系：</p>
-<p>   Java中规定，两个内容相同(equals()为true)的对象必须具有相等的hashcode。因为如果equals()为true而两个对象的hashcode不同，那在整个存储过程中就发生了悖论。</p>
-<h2 id="扩容问题"><a href="#扩容问题" class="headerlink" title="扩容问题"></a><strong>扩容问题</strong></h2><p>   HashMap的位桶数组，初始大小为16。实际使用时大小是可变的。如果位桶数组中的元素达到(0.75*数组 length)， 则重新调整数组大小变为原来2倍大小。</p>
-<p>   扩容很耗时，扩容的本质是定义新的更大的数组，并将旧数组内容挨个拷贝到新数组中。</p>
-<h2 id="JDK8将链表在大于8情况下变为红黑二叉树"><a href="#JDK8将链表在大于8情况下变为红黑二叉树" class="headerlink" title="JDK8将链表在大于8情况下变为红黑二叉树"></a><strong>JDK8将链表在大于8情况下变为红黑二叉树</strong></h2><p>   JDK8中，HashMap在存储一个元素时，当对应链表长度大于8时，链表就转换为红黑树，这样又大大提高了查找的效率。</p>
+<p>结果如下：</p>
+<pre><code>key重复了
+&#123;20:ss,53:ee,69:ff,85:gg,10:aa,30:cc&#125;
+ee
+</code></pre>
  
       <!-- reward -->
       
@@ -288,7 +328,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -301,19 +341,10 @@
    
   <nav class="article-nav">
     
-      <a href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            自定义一个HashMap
-          
-        </div>
-      </a>
     
-    
-      <a href="/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/" class="article-nav-link">
+      <a href="/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">自定义一个LinkedList</div>
+        <div class="article-nav-title">HashMap底层实现原理</div>
       </a>
     
   </nav>
