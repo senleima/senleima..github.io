@@ -121,7 +121,7 @@
 <p>(2) 链表：占用空间不连续。 寻址困难，查询速度慢。但增加和删除效率非常高。</p>
 <p>哈希表的本质就是“数组+链表”，结合了数组和链表的优点(即查询快，增删效率高)。</p>
 <h2 id="HashMap基本结构"><a href="#HashMap基本结构" class="headerlink" title="HashMap基本结构"></a>HashMap基本结构</h2><p>HashMap源码有如下两个核心内容：</p>
-<pre><code>public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; 
+<pre><code class="java">public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; 
    implements Map&lt;K,V&gt;, Cloneable, Serializable &#123;
     /**
      * The default initial capacity - MUST be a power of two.
@@ -147,7 +147,7 @@
 &#125;
 </code></pre>
 <p>其中的Node&lt;K,V&gt;[] table 就是HashMap的核心数组结构，也称之为“位桶数组”。Node&lt;K,V&gt;源码如下：</p>
-<pre><code>static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
+<pre><code class="java">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
     final int hash;
     final K key;
     V value;
@@ -184,7 +184,7 @@
 <p>​      hash值 = hashcode%数组长度</p>
 <p>这种算法可以让hash值均匀地分布在[0,数组长度-1]的区间。 早期的HashTable就是采用这种算法。但是，这种算法由于使用了“除法”，效率低下。JDK后来改进了算法。首先约定数组长度必须为2的整数幂，这样采用位运算即可实现取余的效果：hash值 = hashcode&amp;(数组长度-1)。</p>
 <p>​      iii. 如下为自己测试简单的hash算法：</p>
-<pre><code>public class Test &#123;
+<pre><code class="java">public class Test &#123;
     public static void main(String[] args) &#123;
         int h = 25760399;
         int length = 16;//length为2的整数次幂,则h&amp;(length-1)相当于对length取模

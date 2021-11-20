@@ -161,6 +161,153 @@
     
     
     <article
+  id="post-自定义一个HashSet"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/"
+    >自定义一个HashSet</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/" class="article-date">
+  <time datetime="2021-11-18T14:05:03.000Z" itemprop="datePublished">2021-11-18</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="自定义一个HashSet"><a href="#自定义一个HashSet" class="headerlink" title="自定义一个HashSet"></a>自定义一个HashSet</h1><h2 id="HashSet特点和底层实现"><a href="#HashSet特点和底层实现" class="headerlink" title="HashSet特点和底层实现"></a>HashSet特点和底层实现</h2><ul>
+<li><p>HashSet底层是HashMap；</p>
+</li>
+<li><p>向Hashset中添加元素, 实际上是把这个元素作为键添加到底层的HashMap中；</p>
+</li>
+<li><p>HashSet实际上就是底层HashMap的键的集合。</p>
+</li>
+</ul>
+<p> HashSet是采用哈希算法实现，底层实际是用HashMap实现的(HashSet本质就是一个简化版的HashMap)，因此，查询效率和增删效率都比较高。查看HashSet的源码：</p>
+<pre><code class="java">public class HashSet&lt;E&gt; extends AbstractSet&lt;E&gt; implements Set&lt;E&gt;, Cloneable, java.io.Serializable&#123;
+    static final long serialVersionUID = -5024744406713321676L;
+
+    private transient HashMap&lt;E,Object&gt; map;
+
+    // Dummy value to associate with an Object in the backing Map
+    private static final Object PRESENT = new Object();
+
+    /**
+     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
+     * default initial capacity (16) and load factor (0.75).
+     */
+    public HashSet() &#123;
+        map = new HashMap&lt;&gt;();
+    &#125;
+    
+     /**
+     * Adds the specified element to this set if it is not already present.
+     * More formally, adds the specified element &lt;tt&gt;e&lt;/tt&gt; to this set if
+     * this set contains no element &lt;tt&gt;e2&lt;/tt&gt; such that
+     * &lt;tt&gt;(e==null&amp;nbsp;?&amp;nbsp;e2==null&amp;nbsp;:&amp;nbsp;e.equals(e2))&lt;/tt&gt;.
+     * If this set already contains the element, the call leaves the set
+     * unchanged and returns &lt;tt&gt;false&lt;/tt&gt;.
+     *
+     * @param e element to be added to this set
+     * @return &lt;tt&gt;true&lt;/tt&gt; if this set did not already contain the specified
+     * element
+     */
+    public boolean add(E e) &#123;
+        return map.put(e, PRESENT)==null;
+    &#125;
+    //以下代码省略
+&#125;
+</code></pre>
+<p>可以发现里面有个map属性，这就是HashSet的核心秘密。再看add()方法，可以发现增加一个元素，说白了就是在map中增加一个键值对，键对象就是这个元素，值对象是名为PRESENT的Object对象。说白了就是“往set中加入元素，本质就是把这个元素作为key加入到了内部的map中”。</p>
+<p>由于map中key都是不可重复的，因此，Set天然具有“不可重复”的特性。</p>
+<h2 id="自定义一个HashSet，体会底层原理"><a href="#自定义一个HashSet，体会底层原理" class="headerlink" title="自定义一个HashSet，体会底层原理"></a>自定义一个HashSet，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+
+import java.util.HashMap;
+
+/**
+ * 手动实现一个HashSet，深刻理解HashSet底层原理
+ * @author Senley
+ *
+ */
+public class MslHashSet &#123;
+    HashMap map;
+    private static final Object PRESENT = new Object();
+    
+    public static void main(String[] args) &#123;
+        MslHashSet set = new MslHashSet();
+        set.add(&quot;aaa&quot;);
+        set.add(&quot;bbb&quot;);
+        set.add(&quot;ccc&quot;);
+        System.out.println(set);
+    &#125;
+    
+    public MslHashSet()&#123;
+        map = new HashMap();
+    &#125;
+    
+    public int size() &#123;
+        return map.size();
+    &#125;
+    
+    public void add(Object o) &#123;
+        map.put(o, PRESENT);
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(Object key:map.keySet()) &#123;
+            sb.append(key+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[aaa,ccc,bbb]
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HashSet/" rel="tag">HashSet</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-自定义一个HashMap"
   class="article article-type-post"
   itemscope
@@ -194,7 +341,7 @@
        
   <h1 id="自定义一个HashMap"><a href="#自定义一个HashMap" class="headerlink" title="自定义一个HashMap"></a>自定义一个HashMap</h1><h2 id="HashMap的结构"><a href="#HashMap的结构" class="headerlink" title="HashMap的结构"></a>HashMap的结构</h2><p>在HashMap底层实现原理中，聊过Node&lt;K,V&gt;[]数组的结构，也是HashMap的结构。如下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E6%95%B0%E7%BB%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node数组存储结构"></p>
-<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code>package com.msl.mycollection;
+<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code class="java">package com.msl.mycollection;
 /**
  * 用于MslHashMap中
  * @author Senley
@@ -216,7 +363,7 @@ public class Node&lt;K,V&gt; &#123;
 <li>增加泛型。</li>
 </ol>
 <p>代码如下：</p>
-<pre><code>package com.msl.mycollection;
+<pre><code class="java">package com.msl.mycollection;
 /**
  * 自定义一个HashMap
  * @author Senley
@@ -331,7 +478,7 @@ public class MslHashMap&lt;K,V&gt; &#123;
 &#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code>key重复了
+<pre><code class="java">key重复了
 &#123;20:ss,53:ee,69:ff,85:gg,10:aa,30:cc&#125;
 ee
 </code></pre>
@@ -394,7 +541,7 @@ ee
 <p>(2) 链表：占用空间不连续。 寻址困难，查询速度慢。但增加和删除效率非常高。</p>
 <p>哈希表的本质就是“数组+链表”，结合了数组和链表的优点(即查询快，增删效率高)。</p>
 <h2 id="HashMap基本结构"><a href="#HashMap基本结构" class="headerlink" title="HashMap基本结构"></a>HashMap基本结构</h2><p>HashMap源码有如下两个核心内容：</p>
-<pre><code>public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; 
+<pre><code class="java">public class HashMap&lt;K,V&gt; extends AbstractMap&lt;K,V&gt; 
    implements Map&lt;K,V&gt;, Cloneable, Serializable &#123;
     /**
      * The default initial capacity - MUST be a power of two.
@@ -420,7 +567,7 @@ ee
 &#125;
 </code></pre>
 <p>其中的Node&lt;K,V&gt;[] table 就是HashMap的核心数组结构，也称之为“位桶数组”。Node&lt;K,V&gt;源码如下：</p>
-<pre><code>static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
+<pre><code class="java">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
     final int hash;
     final K key;
     V value;
@@ -457,7 +604,7 @@ ee
 <p>​      hash值 = hashcode%数组长度</p>
 <p>这种算法可以让hash值均匀地分布在[0,数组长度-1]的区间。 早期的HashTable就是采用这种算法。但是，这种算法由于使用了“除法”，效率低下。JDK后来改进了算法。首先约定数组长度必须为2的整数幂，这样采用位运算即可实现取余的效果：hash值 = hashcode&amp;(数组长度-1)。</p>
 <p>​      iii. 如下为自己测试简单的hash算法：</p>
-<pre><code>public class Test &#123;
+<pre><code class="java">public class Test &#123;
     public static void main(String[] args) &#123;
         int h = 25760399;
         int length = 16;//length为2的整数次幂,则h&amp;(length-1)相当于对length取模
@@ -548,7 +695,7 @@ ee
 <p>双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。 所以，从双向链表中的任意一个节点开始，都可以很方便地找到所有节点。下图为LinkedList的存储结构图：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A81.png" alt="自定义一个链表1"></p>
 <p>每个节点都应该有3部分内容：</p>
-<pre><code>class  Node &#123;
+<pre><code class="java">class  Node &#123;
         Node  previous;     //前一个节点
         Object  element;    //本节点保存的数据
         Node  next;         //后一个节点
@@ -557,7 +704,7 @@ ee
 <p>查看LinkedList的源码，可以看到里面包含了双向链表的相关代码：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A82.png" alt="自定义一个链表2"></p>
 <h2 id="自定义一个LinkedList，体会底层原理"><a href="#自定义一个LinkedList，体会底层原理" class="headerlink" title="自定义一个LinkedList，体会底层原理"></a>自定义一个LinkedList，体会底层原理</h2><p>代码如下：</p>
-<pre><code>package com.msl.mycollection;
+<pre><code class="java">package com.msl.mycollection;
 /**
  * 自定义实现一个链表
  * @author Senley
@@ -679,7 +826,7 @@ public class MslLinkedList&lt;E&gt; &#123;
 &#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code>[a,b,c]
+<pre><code class="java">[a,b,c]
 c
 [b,c]
 [b,插入,c]
@@ -743,7 +890,7 @@ c
 <p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
 <h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
-<pre><code>package com.msl.mycollection;
+<pre><code class="java">package com.msl.mycollection;
 
 import javax.management.RuntimeErrorException;
 
@@ -856,7 +1003,7 @@ public class MslArrayList&lt;E&gt; &#123;
 &#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code>[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+<pre><code class="java">[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
 test
 [senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
 [senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]

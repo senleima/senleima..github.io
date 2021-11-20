@@ -121,7 +121,7 @@
 <p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
 <h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
-<pre><code>package com.msl.mycollection;
+<pre><code class="java">package com.msl.mycollection;
 
 import javax.management.RuntimeErrorException;
 
@@ -234,7 +234,7 @@ public class MslArrayList&lt;E&gt; &#123;
 &#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code>[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+<pre><code class="java">[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
 test
 [senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
 [senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]

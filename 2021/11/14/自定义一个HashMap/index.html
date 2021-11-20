@@ -117,7 +117,7 @@
        
   <h1 id="自定义一个HashMap"><a href="#自定义一个HashMap" class="headerlink" title="自定义一个HashMap"></a>自定义一个HashMap</h1><h2 id="HashMap的结构"><a href="#HashMap的结构" class="headerlink" title="HashMap的结构"></a>HashMap的结构</h2><p>在HashMap底层实现原理中，聊过Node&lt;K,V&gt;[]数组的结构，也是HashMap的结构。如下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E6%95%B0%E7%BB%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node数组存储结构"></p>
-<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code>package com.msl.mycollection;
+<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code class="java">package com.msl.mycollection;
 /**
  * 用于MslHashMap中
  * @author Senley
@@ -139,7 +139,7 @@ public class Node&lt;K,V&gt; &#123;
 <li>增加泛型。</li>
 </ol>
 <p>代码如下：</p>
-<pre><code>package com.msl.mycollection;
+<pre><code class="java">package com.msl.mycollection;
 /**
  * 自定义一个HashMap
  * @author Senley
@@ -254,7 +254,7 @@ public class MslHashMap&lt;K,V&gt; &#123;
 &#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code>key重复了
+<pre><code class="java">key重复了
 &#123;20:ss,53:ee,69:ff,85:gg,10:aa,30:cc&#125;
 ee
 </code></pre>
@@ -340,6 +340,15 @@ ee
 
    
   <nav class="article-nav">
+    
+      <a href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            自定义一个HashSet
+          
+        </div>
+      </a>
     
     
       <a href="/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" class="article-nav-link">
