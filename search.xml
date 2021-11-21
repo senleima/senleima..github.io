@@ -115,6 +115,111 @@
       </tags>
   </entry>
   <entry>
+    <title>自定义一个HashSet</title>
+    <url>/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/</url>
+    <content><![CDATA[<h1 id="自定义一个HashSet"><a href="#自定义一个HashSet" class="headerlink" title="自定义一个HashSet"></a>自定义一个HashSet</h1><h2 id="HashSet特点和底层实现"><a href="#HashSet特点和底层实现" class="headerlink" title="HashSet特点和底层实现"></a>HashSet特点和底层实现</h2><ul>
+<li><p>HashSet底层是HashMap；</p>
+</li>
+<li><p>向Hashset中添加元素, 实际上是把这个元素作为键添加到底层的HashMap中；</p>
+</li>
+<li><p>HashSet实际上就是底层HashMap的键的集合。</p>
+</li>
+</ul>
+<p> HashSet是采用哈希算法实现，底层实际是用HashMap实现的(HashSet本质就是一个简化版的HashMap)，因此，查询效率和增删效率都比较高。查看HashSet的源码：</p>
+<pre><code class="java">public class HashSet&lt;E&gt; extends AbstractSet&lt;E&gt; implements Set&lt;E&gt;, Cloneable, java.io.Serializable&#123;
+    static final long serialVersionUID = -5024744406713321676L;
+
+    private transient HashMap&lt;E,Object&gt; map;
+
+    // Dummy value to associate with an Object in the backing Map
+    private static final Object PRESENT = new Object();
+
+    /**
+     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
+     * default initial capacity (16) and load factor (0.75).
+     */
+    public HashSet() &#123;
+        map = new HashMap&lt;&gt;();
+    &#125;
+    
+     /**
+     * Adds the specified element to this set if it is not already present.
+     * More formally, adds the specified element &lt;tt&gt;e&lt;/tt&gt; to this set if
+     * this set contains no element &lt;tt&gt;e2&lt;/tt&gt; such that
+     * &lt;tt&gt;(e==null&amp;nbsp;?&amp;nbsp;e2==null&amp;nbsp;:&amp;nbsp;e.equals(e2))&lt;/tt&gt;.
+     * If this set already contains the element, the call leaves the set
+     * unchanged and returns &lt;tt&gt;false&lt;/tt&gt;.
+     *
+     * @param e element to be added to this set
+     * @return &lt;tt&gt;true&lt;/tt&gt; if this set did not already contain the specified
+     * element
+     */
+    public boolean add(E e) &#123;
+        return map.put(e, PRESENT)==null;
+    &#125;
+    //以下代码省略
+&#125;
+</code></pre>
+<p>可以发现里面有个map属性，这就是HashSet的核心秘密。再看add()方法，可以发现增加一个元素，说白了就是在map中增加一个键值对，键对象就是这个元素，值对象是名为PRESENT的Object对象。说白了就是“往set中加入元素，本质就是把这个元素作为key加入到了内部的map中”。</p>
+<p>由于map中key都是不可重复的，因此，Set天然具有“不可重复”的特性。</p>
+<h2 id="自定义一个HashSet，体会底层原理"><a href="#自定义一个HashSet，体会底层原理" class="headerlink" title="自定义一个HashSet，体会底层原理"></a>自定义一个HashSet，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+
+import java.util.HashMap;
+
+/**
+ * 手动实现一个HashSet，深刻理解HashSet底层原理
+ * @author Senley
+ *
+ */
+public class MslHashSet &#123;
+    HashMap map;
+    private static final Object PRESENT = new Object();
+    
+    public static void main(String[] args) &#123;
+        MslHashSet set = new MslHashSet();
+        set.add(&quot;aaa&quot;);
+        set.add(&quot;bbb&quot;);
+        set.add(&quot;ccc&quot;);
+        System.out.println(set);
+    &#125;
+    
+    public MslHashSet()&#123;
+        map = new HashMap();
+    &#125;
+    
+    public int size() &#123;
+        return map.size();
+    &#125;
+    
+    public void add(Object o) &#123;
+        map.put(o, PRESENT);
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(Object key:map.keySet()) &#123;
+            sb.append(key+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[aaa,ccc,bbb]
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>HashSet</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>自定义一个ArrayList</title>
     <url>/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/</url>
     <content><![CDATA[<h1 id="自定义一个ArrayList"><a href="#自定义一个ArrayList" class="headerlink" title="自定义一个ArrayList"></a>自定义一个ArrayList</h1><h2 id="ArrayList特点和底层实现"><a href="#ArrayList特点和底层实现" class="headerlink" title="ArrayList特点和底层实现"></a>ArrayList特点和底层实现</h2><p>ArrayList底层是用数组实现的存储。 特点：查询效率高，增删效率低，线程不安全。查看源码：</p>
@@ -249,6 +354,157 @@ false
       </categories>
       <tags>
         <tag>ArrayList</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义一个LinkedList</title>
+    <url>/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/</url>
+    <content><![CDATA[<h1 id="自定义一个LinkedList"><a href="#自定义一个LinkedList" class="headerlink" title="自定义一个LinkedList"></a>自定义一个LinkedList</h1><h2 id="LinkedList特点和底层实现"><a href="#LinkedList特点和底层实现" class="headerlink" title="LinkedList特点和底层实现"></a>LinkedList特点和底层实现</h2><p>LinkedList底层用双向链表实现的存储。特点：查询效率低，增删效率高，线程不安全。</p>
+<p>双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。 所以，从双向链表中的任意一个节点开始，都可以很方便地找到所有节点。下图为LinkedList的存储结构图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A81.png" alt="自定义一个链表1"></p>
+<p>每个节点都应该有3部分内容：</p>
+<pre><code class="java">class  Node &#123;
+        Node  previous;     //前一个节点
+        Object  element;    //本节点保存的数据
+        Node  next;         //后一个节点
+&#125;
+</code></pre>
+<p>查看LinkedList的源码，可以看到里面包含了双向链表的相关代码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A82.png" alt="自定义一个链表2"></p>
+<h2 id="自定义一个LinkedList，体会底层原理"><a href="#自定义一个LinkedList，体会底层原理" class="headerlink" title="自定义一个LinkedList，体会底层原理"></a>自定义一个LinkedList，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+/**
+ * 自定义实现一个链表
+ * @author Senley
+ */
+public class MslLinkedList&lt;E&gt; &#123;
+    
+    private Node first;
+    private Node last;
+    private int size;
+    
+    public static void main(String[] args) &#123;
+        MslLinkedList&lt;String&gt; list = new MslLinkedList();
+        list.add(&quot;a&quot;);
+        list.add(&quot;b&quot;);
+        list.add(&quot;c&quot;);
+        System.out.println(list);
+        System.out.println(list.get(2));
+        list.remove(0);
+        System.out.println(list);
+        list.add(1, &quot;插入&quot;);
+        System.out.println(list);
+    &#125;
+    
+    public void add(int index,E element) &#123;
+        checkRange(index);
+        Node newNode = new Node(element);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            up.next = newNode;
+            newNode.previous = up;
+            newNode.next = temp;
+            temp.previous = newNode;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            Node down = temp.next;
+            if(up!=null) &#123;
+                up.next = down;
+            &#125;
+            if(down!=null) &#123;
+                down.previous = up;
+            &#125;
+            //被删除的元素是第一个元素时
+            if(index==0) &#123;
+                first = down;
+            &#125;
+            //被删除的元素是最后一个元素时
+            if(index==size-1) &#123;
+                last = up;
+            &#125;
+            size--;
+        &#125;
+    &#125;
+    
+    public void add(E element) &#123;
+        Node node = new Node(element);
+        if(first==null) &#123;
+//            node.previous = null;
+//            node.next = null;
+            first = node;
+            last = node;
+        &#125;else &#123;
+            node.previous = last;
+            node.next = null;
+            last.next = node;
+            last = node;
+        &#125;
+        size++;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        return temp!=null?(E)temp.element:null;
+    &#125;
+    
+    private void checkRange(int index) &#123;
+        if(index&lt;0 || index&gt;size-1) &#123;
+            throw new RuntimeException(&quot;索引数字不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    private Node getNode(int index) &#123;
+        checkRange(index);
+        Node temp = null;
+        if(index&lt;=(size&gt;&gt;1)) &#123;//size&gt;&gt;1相当于除以2
+            temp = first;
+            for(int i=0;i&lt;index;i++) &#123;
+                temp = temp.next;
+            &#125;
+        &#125;else &#123;
+            temp = last;
+            for(int i=size-1;i&gt;index;i--) &#123;
+                temp = temp.previous;
+            &#125;
+        &#125; 
+        return temp;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //[a b c] first = a, last = c
+        StringBuilder sb = new StringBuilder(&quot;[&quot;);
+        Node temp = first;
+        while(temp!=null) &#123;
+            sb.append(temp.element+&quot;,&quot;);
+            temp = temp.next;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[a,b,c]
+c
+[b,c]
+[b,插入,c]
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>LinkedList</tag>
       </tags>
   </entry>
   <entry>
@@ -406,259 +662,145 @@ ee
       </tags>
   </entry>
   <entry>
-    <title>自定义一个HashSet</title>
-    <url>/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/</url>
-    <content><![CDATA[<h1 id="自定义一个HashSet"><a href="#自定义一个HashSet" class="headerlink" title="自定义一个HashSet"></a>自定义一个HashSet</h1><h2 id="HashSet特点和底层实现"><a href="#HashSet特点和底层实现" class="headerlink" title="HashSet特点和底层实现"></a>HashSet特点和底层实现</h2><ul>
-<li><p>HashSet底层是HashMap；</p>
-</li>
-<li><p>向Hashset中添加元素, 实际上是把这个元素作为键添加到底层的HashMap中；</p>
-</li>
-<li><p>HashSet实际上就是底层HashMap的键的集合。</p>
-</li>
-</ul>
-<p> HashSet是采用哈希算法实现，底层实际是用HashMap实现的(HashSet本质就是一个简化版的HashMap)，因此，查询效率和增删效率都比较高。查看HashSet的源码：</p>
-<pre><code class="java">public class HashSet&lt;E&gt; extends AbstractSet&lt;E&gt; implements Set&lt;E&gt;, Cloneable, java.io.Serializable&#123;
-    static final long serialVersionUID = -5024744406713321676L;
+    <title>遍历集合的方法总结</title>
+    <url>/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h1 id="遍历集合-容器-的方法总结"><a href="#遍历集合-容器-的方法总结" class="headerlink" title="遍历集合(容器)的方法总结"></a><strong>遍历集合(容器)的方法总结</strong></h1><h2 id="使用Iterator迭代器遍历容器元素"><a href="#使用Iterator迭代器遍历容器元素" class="headerlink" title="使用Iterator迭代器遍历容器元素"></a>使用Iterator迭代器遍历容器元素</h2><h2 id="Iterator迭代器"><a href="#Iterator迭代器" class="headerlink" title="Iterator迭代器"></a>Iterator迭代器</h2><p>Java集合框架的集合类，我们有时候称之为容器。容器的种类有很多种，如ArrayList、LinkedList、HashSet…，每种容器都有自己的特点，ArrayList底层维护的是一个数组；LinkedList是链表结构；HashSet依赖的是哈希表，每种容器都有自己特有的数据结构。</p>
+<p>因为容器的内部结构不同，很多时候可能不知道该怎样去遍历一个容器中的元素。所以为了使对容器内元素的操作更为简单，Java引入了迭代器模式。</p>
+<p><strong>把访问逻辑从不同类型的集合类中抽取出来，从而避免向外部暴露集合的内部结构。</strong></p>
+<p>使用Iterator遍历List、Set、Map，代码如下：</p>
+<pre><code class="java">package com.msl.collection;
 
-    private transient HashMap&lt;E,Object&gt; map;
-
-    // Dummy value to associate with an Object in the backing Map
-    private static final Object PRESENT = new Object();
-
-    /**
-     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
-     * default initial capacity (16) and load factor (0.75).
-     */
-    public HashSet() &#123;
-        map = new HashMap&lt;&gt;();
-    &#125;
-    
-     /**
-     * Adds the specified element to this set if it is not already present.
-     * More formally, adds the specified element &lt;tt&gt;e&lt;/tt&gt; to this set if
-     * this set contains no element &lt;tt&gt;e2&lt;/tt&gt; such that
-     * &lt;tt&gt;(e==null&amp;nbsp;?&amp;nbsp;e2==null&amp;nbsp;:&amp;nbsp;e.equals(e2))&lt;/tt&gt;.
-     * If this set already contains the element, the call leaves the set
-     * unchanged and returns &lt;tt&gt;false&lt;/tt&gt;.
-     *
-     * @param e element to be added to this set
-     * @return &lt;tt&gt;true&lt;/tt&gt; if this set did not already contain the specified
-     * element
-     */
-    public boolean add(E e) &#123;
-        return map.put(e, PRESENT)==null;
-    &#125;
-    //以下代码省略
-&#125;
-</code></pre>
-<p>可以发现里面有个map属性，这就是HashSet的核心秘密。再看add()方法，可以发现增加一个元素，说白了就是在map中增加一个键值对，键对象就是这个元素，值对象是名为PRESENT的Object对象。说白了就是“往set中加入元素，本质就是把这个元素作为key加入到了内部的map中”。</p>
-<p>由于map中key都是不可重复的，因此，Set天然具有“不可重复”的特性。</p>
-<h2 id="自定义一个HashSet，体会底层原理"><a href="#自定义一个HashSet，体会底层原理" class="headerlink" title="自定义一个HashSet，体会底层原理"></a>自定义一个HashSet，体会底层原理</h2><p>代码如下：</p>
-<pre><code class="java">package com.msl.mycollection;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
- * 手动实现一个HashSet，深刻理解HashSet底层原理
+ * 测试迭代器遍历集合
  * @author Senley
  *
  */
-public class MslHashSet &#123;
-    HashMap map;
-    private static final Object PRESENT = new Object();
-    
+public class TestIterator &#123;
     public static void main(String[] args) &#123;
-        MslHashSet set = new MslHashSet();
-        set.add(&quot;aaa&quot;);
-        set.add(&quot;bbb&quot;);
-        set.add(&quot;ccc&quot;);
-        System.out.println(set);
+        testIteratorList();
+        testIteratorSet();
+        testIteratorMap();
     &#125;
     
-    public MslHashSet()&#123;
-        map = new HashMap();
-    &#125;
-    
-    public int size() &#123;
-        return map.size();
-    &#125;
-    
-    public void add(Object o) &#123;
-        map.put(o, PRESENT);
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        StringBuilder sb = new StringBuilder();
-        sb.append(&quot;[&quot;);
-        for(Object key:map.keySet()) &#123;
-            sb.append(key+&quot;,&quot;);
+    public static void testIteratorList() &#123;
+        List&lt;String&gt; list = new ArrayList&lt;&gt;();
+        list.add(&quot;aa&quot;);
+        list.add(&quot;bb&quot;);
+        list.add(&quot;cc&quot;);
+        
+        //使用Iterator遍历List
+        for(Iterator&lt;String&gt; iter=list.iterator();iter.hasNext();) &#123;
+            String temp = iter.next();
+            System.out.println(temp);
         &#125;
-        sb.setCharAt(sb.length()-1, &#39;]&#39;);
-        return sb.toString();
+    &#125;
+    
+    public static void testIteratorSet() &#123;
+        Set&lt;String&gt; set = new HashSet&lt;&gt;();
+        set.add(&quot;aa&quot;);
+        set.add(&quot;bb&quot;);
+        set.add(&quot;cc&quot;);
+        
+        //使用Iterator遍历Set
+        for(Iterator&lt;String&gt; iter=set.iterator();iter.hasNext();) &#123;
+            String temp = iter.next();
+            System.out.println(temp);
+        &#125;
+    &#125;
+    
+    public static void testIteratorMap() &#123;
+        Map&lt;Integer,String&gt; map = new HashMap&lt;&gt;();
+        map.put(100,&quot;aa&quot;);
+        map.put(200,&quot;bb&quot;);
+        map.put(300,&quot;cc&quot;);
+        
+        //使用Iterator遍历Map，第一种方式
+        Set&lt;Entry&lt;Integer,String&gt;&gt; ss = map.entrySet();
+        for(Iterator&lt;Entry&lt;Integer,String&gt;&gt; iter=ss.iterator();iter.hasNext();) &#123;
+            Entry&lt;Integer,String&gt; temp = iter.next();
+            System.out.println(temp.getKey()+&quot;---&quot;+temp.getValue());
+        &#125;
+        
+        //使用Iterator遍历Map，第二种方式
+        Set&lt;Integer&gt; keySet = map.keySet();
+        for(Iterator&lt;Integer&gt; iter=keySet.iterator();iter.hasNext();) &#123;
+            Integer key = iter.next();
+            System.out.println(key+&quot;---&quot;+map.get(key));
+        &#125;
     &#125;
 &#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code class="java">[aaa,ccc,bbb]
+<pre><code class="java">aa
+bb
+cc
+aa
+bb
+cc
+100---aa
+200---bb
+300---cc
+100---aa
+200---bb
+300---cc
+</code></pre>
+<h2 id="遍历集合-容器-的方法"><a href="#遍历集合-容器-的方法" class="headerlink" title="遍历集合(容器)的方法"></a>遍历集合(容器)的方法</h2><h3 id="遍历List方法一：普通for循环"><a href="#遍历List方法一：普通for循环" class="headerlink" title="遍历List方法一：普通for循环"></a>遍历List方法一：普通for循环</h3><pre><code class="java">for(int i=0;i&lt;list.size();i++)&#123;//list为集合的对象名
+    String temp = (String)list.get(i);
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法二：增强for循环"><a href="#遍历List方法二：增强for循环" class="headerlink" title="遍历List方法二：增强for循环"></a>遍历List方法二：增强for循环</h3><pre><code class="java">for (String temp : list) &#123;
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法三：使用Iterator迭代器-1"><a href="#遍历List方法三：使用Iterator迭代器-1" class="headerlink" title="遍历List方法三：使用Iterator迭代器(1)"></a>遍历List方法三：使用Iterator迭代器(1)</h3><pre><code class="java">for(Iterator iter = list.iterator();iter.hasNext();)&#123;
+    String temp = (String)iter.next();
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法四：使用Iterator迭代器-2"><a href="#遍历List方法四：使用Iterator迭代器-2" class="headerlink" title="遍历List方法四：使用Iterator迭代器(2)"></a>遍历List方法四：使用Iterator迭代器(2)</h3><pre><code class="java">Iterator iter = list.iterator();
+while(iter.hasNext())&#123;
+    Object  obj = iter.next();
+    iter.remove();//如果要遍历时，删除集合中的元素，建议使用这种方式
+    System.out.println(obj);
+&#125;
+</code></pre>
+<h3 id="遍历Set方法一：增强for循环"><a href="#遍历Set方法一：增强for循环" class="headerlink" title="遍历Set方法一：增强for循环"></a>遍历Set方法一：增强for循环</h3><pre><code class="java">for(String temp:set)&#123;
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历Set方法二：使用Iterator迭代器"><a href="#遍历Set方法二：使用Iterator迭代器" class="headerlink" title="遍历Set方法二：使用Iterator迭代器"></a>遍历Set方法二：使用Iterator迭代器</h3><pre><code class="java">for(Iterator iter = set.iterator();iter.hasNext();)&#123;
+    String temp = (String)iter.next();
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历Map方法一：根据key获取value"><a href="#遍历Map方法一：根据key获取value" class="headerlink" title="遍历Map方法一：根据key获取value"></a>遍历Map方法一：根据key获取value</h3><pre><code class="java">Map&lt;Integer, Man&gt; maps = new HashMap&lt;Integer, Man&gt;();
+Set&lt;Integer&gt; keySet = maps.keySet();
+for(Integer id : keySet)&#123;
+    System.out.println(maps.get(id).name);
+&#125;
+</code></pre>
+<h3 id="遍历Map方法二：使用entrySet"><a href="#遍历Map方法二：使用entrySet" class="headerlink" title="遍历Map方法二：使用entrySet"></a>遍历Map方法二：使用entrySet</h3><pre><code class="java">Set&lt;Entry&lt;Integer, Man&gt;&gt; ss = maps.entrySet();
+for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
+    Entry e = (Entry) iterator.next(); 
+    System.out.println(e.getKey()+&quot;--&quot;+e.getValue());
+&#125;
 </code></pre>
 ]]></content>
       <categories>
         <category>Java基础</category>
       </categories>
       <tags>
-        <tag>HashSet</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自定义一个LinkedList</title>
-    <url>/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/</url>
-    <content><![CDATA[<h1 id="自定义一个LinkedList"><a href="#自定义一个LinkedList" class="headerlink" title="自定义一个LinkedList"></a>自定义一个LinkedList</h1><h2 id="LinkedList特点和底层实现"><a href="#LinkedList特点和底层实现" class="headerlink" title="LinkedList特点和底层实现"></a>LinkedList特点和底层实现</h2><p>LinkedList底层用双向链表实现的存储。特点：查询效率低，增删效率高，线程不安全。</p>
-<p>双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。 所以，从双向链表中的任意一个节点开始，都可以很方便地找到所有节点。下图为LinkedList的存储结构图：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A81.png" alt="自定义一个链表1"></p>
-<p>每个节点都应该有3部分内容：</p>
-<pre><code class="java">class  Node &#123;
-        Node  previous;     //前一个节点
-        Object  element;    //本节点保存的数据
-        Node  next;         //后一个节点
-&#125;
-</code></pre>
-<p>查看LinkedList的源码，可以看到里面包含了双向链表的相关代码：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A82.png" alt="自定义一个链表2"></p>
-<h2 id="自定义一个LinkedList，体会底层原理"><a href="#自定义一个LinkedList，体会底层原理" class="headerlink" title="自定义一个LinkedList，体会底层原理"></a>自定义一个LinkedList，体会底层原理</h2><p>代码如下：</p>
-<pre><code class="java">package com.msl.mycollection;
-/**
- * 自定义实现一个链表
- * @author Senley
- */
-public class MslLinkedList&lt;E&gt; &#123;
-    
-    private Node first;
-    private Node last;
-    private int size;
-    
-    public static void main(String[] args) &#123;
-        MslLinkedList&lt;String&gt; list = new MslLinkedList();
-        list.add(&quot;a&quot;);
-        list.add(&quot;b&quot;);
-        list.add(&quot;c&quot;);
-        System.out.println(list);
-        System.out.println(list.get(2));
-        list.remove(0);
-        System.out.println(list);
-        list.add(1, &quot;插入&quot;);
-        System.out.println(list);
-    &#125;
-    
-    public void add(int index,E element) &#123;
-        checkRange(index);
-        Node newNode = new Node(element);
-        Node temp = getNode(index);
-        if(temp!=null) &#123;
-            Node up = temp.previous;
-            up.next = newNode;
-            newNode.previous = up;
-            newNode.next = temp;
-            temp.previous = newNode;
-        &#125;
-    &#125;
-    
-    public void remove(int index) &#123;
-        checkRange(index);
-        Node temp = getNode(index);
-        if(temp!=null) &#123;
-            Node up = temp.previous;
-            Node down = temp.next;
-            if(up!=null) &#123;
-                up.next = down;
-            &#125;
-            if(down!=null) &#123;
-                down.previous = up;
-            &#125;
-            //被删除的元素是第一个元素时
-            if(index==0) &#123;
-                first = down;
-            &#125;
-            //被删除的元素是最后一个元素时
-            if(index==size-1) &#123;
-                last = up;
-            &#125;
-            size--;
-        &#125;
-    &#125;
-    
-    public void add(E element) &#123;
-        Node node = new Node(element);
-        if(first==null) &#123;
-//            node.previous = null;
-//            node.next = null;
-            first = node;
-            last = node;
-        &#125;else &#123;
-            node.previous = last;
-            node.next = null;
-            last.next = node;
-            last = node;
-        &#125;
-        size++;
-    &#125;
-    
-    public E get(int index) &#123;
-        checkRange(index);
-        Node temp = getNode(index);
-        return temp!=null?(E)temp.element:null;
-    &#125;
-    
-    private void checkRange(int index) &#123;
-        if(index&lt;0 || index&gt;size-1) &#123;
-            throw new RuntimeException(&quot;索引数字不合法:&quot;+index);
-        &#125;
-    &#125;
-    
-    private Node getNode(int index) &#123;
-        checkRange(index);
-        Node temp = null;
-        if(index&lt;=(size&gt;&gt;1)) &#123;//size&gt;&gt;1相当于除以2
-            temp = first;
-            for(int i=0;i&lt;index;i++) &#123;
-                temp = temp.next;
-            &#125;
-        &#125;else &#123;
-            temp = last;
-            for(int i=size-1;i&gt;index;i--) &#123;
-                temp = temp.previous;
-            &#125;
-        &#125; 
-        return temp;
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        //[a b c] first = a, last = c
-        StringBuilder sb = new StringBuilder(&quot;[&quot;);
-        Node temp = first;
-        while(temp!=null) &#123;
-            sb.append(temp.element+&quot;,&quot;);
-            temp = temp.next;
-        &#125;
-        sb.setCharAt(sb.length()-1, &#39;]&#39;);
-        return sb.toString();
-    &#125;
-    
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">[a,b,c]
-c
-[b,c]
-[b,插入,c]
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>LinkedList</tag>
+        <tag>Collection</tag>
       </tags>
   </entry>
 </search>
