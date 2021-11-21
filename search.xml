@@ -803,4 +803,367 @@ for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
         <tag>Collection</tag>
       </tags>
   </entry>
+  <entry>
+    <title>表格数据存储的方法总结</title>
+    <url>/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/</url>
+    <content><![CDATA[<h1 id="表格数据存储的方法总结"><a href="#表格数据存储的方法总结" class="headerlink" title="表格数据存储的方法总结"></a><strong>表格数据存储的方法总结</strong></h1><h2 id="使用Iterator迭代器遍历容器元素"><a href="#使用Iterator迭代器遍历容器元素" class="headerlink" title="使用Iterator迭代器遍历容器元素"></a>使用Iterator迭代器遍历容器元素</h2><table>
+<thead>
+<tr>
+<th align="center">ID</th>
+<th align="center">姓名</th>
+<th align="center">薪水</th>
+<th align="center">入职日期</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1001</td>
+<td align="center">张三</td>
+<td align="center">20000</td>
+<td align="center">2018.5.5</td>
+</tr>
+<tr>
+<td align="center">1002</td>
+<td align="center">李四</td>
+<td align="center">30000</td>
+<td align="center">2005.5.4</td>
+</tr>
+<tr>
+<td align="center">1003</td>
+<td align="center">王五</td>
+<td align="center">3000</td>
+<td align="center">2020.5.4</td>
+</tr>
+</tbody></table>
+<h2 id="Iterator迭代器"><a href="#Iterator迭代器" class="headerlink" title="Iterator迭代器"></a>Iterator迭代器</h2><p>Java集合框架的集合类，我们有时候称之为容器。容器的种类有很多种，如ArrayList、LinkedList、HashSet…，每种容器都有自己的特点，ArrayList底层维护的是一个数组；LinkedList是链表结构；HashSet依赖的是哈希表，每种容器都有自己特有的数据结构。</p>
+<p>因为容器的内部结构不同，很多时候可能不知道该怎样去遍历一个容器中的元素。所以为了使对容器内元素的操作更为简单，Java引入了迭代器模式。</p>
+<p><strong>把访问逻辑从不同类型的集合类中抽取出来，从而避免向外部暴露集合的内部结构。</strong></p>
+<p>使用Iterator遍历List、Set、Map，代码如下：</p>
+<pre><code class="java">package com.msl.collection;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+/**
+ * 测试迭代器遍历集合
+ * @author Senley
+ *
+ */
+public class TestIterator &#123;
+    public static void main(String[] args) &#123;
+        testIteratorList();
+        testIteratorSet();
+        testIteratorMap();
+    &#125;
+    
+    public static void testIteratorList() &#123;
+        List&lt;String&gt; list = new ArrayList&lt;&gt;();
+        list.add(&quot;aa&quot;);
+        list.add(&quot;bb&quot;);
+        list.add(&quot;cc&quot;);
+        
+        //使用Iterator遍历List
+        for(Iterator&lt;String&gt; iter=list.iterator();iter.hasNext();) &#123;
+            String temp = iter.next();
+            System.out.println(temp);
+        &#125;
+    &#125;
+    
+    public static void testIteratorSet() &#123;
+        Set&lt;String&gt; set = new HashSet&lt;&gt;();
+        set.add(&quot;aa&quot;);
+        set.add(&quot;bb&quot;);
+        set.add(&quot;cc&quot;);
+        
+        //使用Iterator遍历Set
+        for(Iterator&lt;String&gt; iter=set.iterator();iter.hasNext();) &#123;
+            String temp = iter.next();
+            System.out.println(temp);
+        &#125;
+    &#125;
+    
+    public static void testIteratorMap() &#123;
+        Map&lt;Integer,String&gt; map = new HashMap&lt;&gt;();
+        map.put(100,&quot;aa&quot;);
+        map.put(200,&quot;bb&quot;);
+        map.put(300,&quot;cc&quot;);
+        
+        //使用Iterator遍历Map，第一种方式
+        Set&lt;Entry&lt;Integer,String&gt;&gt; ss = map.entrySet();
+        for(Iterator&lt;Entry&lt;Integer,String&gt;&gt; iter=ss.iterator();iter.hasNext();) &#123;
+            Entry&lt;Integer,String&gt; temp = iter.next();
+            System.out.println(temp.getKey()+&quot;---&quot;+temp.getValue());
+        &#125;
+        
+        //使用Iterator遍历Map，第二种方式
+        Set&lt;Integer&gt; keySet = map.keySet();
+        for(Iterator&lt;Integer&gt; iter=keySet.iterator();iter.hasNext();) &#123;
+            Integer key = iter.next();
+            System.out.println(key+&quot;---&quot;+map.get(key));
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">aa
+bb
+cc
+aa
+bb
+cc
+100---aa
+200---bb
+300---cc
+100---aa
+200---bb
+300---cc
+</code></pre>
+<h2 id="遍历集合-容器-的方法"><a href="#遍历集合-容器-的方法" class="headerlink" title="遍历集合(容器)的方法"></a>遍历集合(容器)的方法</h2><h3 id="遍历List方法一：普通for循环"><a href="#遍历List方法一：普通for循环" class="headerlink" title="遍历List方法一：普通for循环"></a>遍历List方法一：普通for循环</h3><pre><code class="java">for(int i=0;i&lt;list.size();i++)&#123;//list为集合的对象名
+    String temp = (String)list.get(i);
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法二：增强for循环"><a href="#遍历List方法二：增强for循环" class="headerlink" title="遍历List方法二：增强for循环"></a>遍历List方法二：增强for循环</h3><pre><code class="java">for (String temp : list) &#123;
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法三：使用Iterator迭代器-1"><a href="#遍历List方法三：使用Iterator迭代器-1" class="headerlink" title="遍历List方法三：使用Iterator迭代器(1)"></a>遍历List方法三：使用Iterator迭代器(1)</h3><pre><code class="java">for(Iterator iter = list.iterator();iter.hasNext();)&#123;
+    String temp = (String)iter.next();
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法四：使用Iterator迭代器-2"><a href="#遍历List方法四：使用Iterator迭代器-2" class="headerlink" title="遍历List方法四：使用Iterator迭代器(2)"></a>遍历List方法四：使用Iterator迭代器(2)</h3><pre><code class="java">Iterator iter = list.iterator();
+while(iter.hasNext())&#123;
+    Object  obj = iter.next();
+    iter.remove();//如果要遍历时，删除集合中的元素，建议使用这种方式
+    System.out.println(obj);
+&#125;
+</code></pre>
+<h3 id="遍历Set方法一：增强for循环"><a href="#遍历Set方法一：增强for循环" class="headerlink" title="遍历Set方法一：增强for循环"></a>遍历Set方法一：增强for循环</h3><pre><code class="java">for(String temp:set)&#123;
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历Set方法二：使用Iterator迭代器"><a href="#遍历Set方法二：使用Iterator迭代器" class="headerlink" title="遍历Set方法二：使用Iterator迭代器"></a>遍历Set方法二：使用Iterator迭代器</h3><pre><code class="java">for(Iterator iter = set.iterator();iter.hasNext();)&#123;
+    String temp = (String)iter.next();
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历Map方法一：根据key获取value"><a href="#遍历Map方法一：根据key获取value" class="headerlink" title="遍历Map方法一：根据key获取value"></a>遍历Map方法一：根据key获取value</h3><pre><code class="java">Map&lt;Integer, Man&gt; maps = new HashMap&lt;Integer, Man&gt;();
+Set&lt;Integer&gt; keySet = maps.keySet();
+for(Integer id : keySet)&#123;
+    System.out.println(maps.get(id).name);
+&#125;
+</code></pre>
+<h3 id="遍历Map方法二：使用entrySet"><a href="#遍历Map方法二：使用entrySet" class="headerlink" title="遍历Map方法二：使用entrySet"></a>遍历Map方法二：使用entrySet</h3><pre><code class="java">Set&lt;Entry&lt;Integer, Man&gt;&gt; ss = maps.entrySet();
+for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
+    Entry e = (Entry) iterator.next(); 
+    System.out.println(e.getKey()+&quot;--&quot;+e.getValue());
+&#125;
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>StoreData</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用容器存储表格数据</title>
+    <url>/2021/11/22/%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h1 id="使用容器存储表格数据"><a href="#使用容器存储表格数据" class="headerlink" title="使用容器存储表格数据"></a><strong>使用容器存储表格数据</strong></h1><p>使用容器存储以下表格数据。</p>
+<table>
+<thead>
+<tr>
+<th align="center">ID</th>
+<th align="center">姓名</th>
+<th align="center">薪水</th>
+<th align="center">入职日期</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1001</td>
+<td align="center">张三</td>
+<td align="center">20000</td>
+<td align="center">2018.5.5</td>
+</tr>
+<tr>
+<td align="center">1002</td>
+<td align="center">李四</td>
+<td align="center">30000</td>
+<td align="center">2005.5.4</td>
+</tr>
+<tr>
+<td align="center">1003</td>
+<td align="center">王五</td>
+<td align="center">3000</td>
+<td align="center">2020.5.4</td>
+</tr>
+</tbody></table>
+<h2 id="Map和List结合存储"><a href="#Map和List结合存储" class="headerlink" title="Map和List结合存储"></a>Map和List结合存储</h2><p>Map表示一行数据，多行数据是多个Map，将多个Map放到List中。代码如下：</p>
+<pre><code class="java">package com.msl.collection;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * 测试表格数据的存储
+ * ORM思想的简单实验：map表示一行数据，多行数据是多个map；将多个map放到list中
+ * @author Senley
+ *
+ */
+public class TestStoreData &#123;
+    public static void main(String[] args) &#123;
+        Map&lt;String,Object&gt; row1 = new HashMap&lt;&gt;();
+        row1.put(&quot;id&quot;, 1001);
+        row1.put(&quot;姓名&quot;, &quot;张三&quot;);
+        row1.put(&quot;薪水&quot;, 20000);
+        row1.put(&quot;入职日期&quot;, &quot;2018.5.5&quot;);
+        
+        Map&lt;String,Object&gt; row2 = new HashMap&lt;&gt;();
+        row2.put(&quot;id&quot;, 1002);
+        row2.put(&quot;姓名&quot;, &quot;李四&quot;);
+        row2.put(&quot;薪水&quot;, 30000);
+        row2.put(&quot;入职日期&quot;, &quot;2005.4.4&quot;);
+        
+        Map&lt;String,Object&gt; row3 = new HashMap&lt;&gt;();
+        row3.put(&quot;id&quot;, 1003);
+        row3.put(&quot;姓名&quot;, &quot;王五&quot;);
+        row3.put(&quot;薪水&quot;, 3000);
+        row3.put(&quot;入职日期&quot;, &quot;2020.5.4&quot;);
+        
+        List&lt;Map&lt;String,Object&gt;&gt; table1 = new ArrayList&lt;&gt;();
+        table1.add(row1);
+        table1.add(row2);
+        table1.add(row3);
+        
+        for(Map&lt;String,Object&gt; row:table1) &#123;
+            Set&lt;String&gt; keyset = row.keySet();
+            for(String key:keyset) &#123;
+                System.out.print(key+&quot;:&quot;+row.get(key)+&quot;\t&quot;);
+            &#125;
+            System.out.println();
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">姓名:张三    薪水:20000    id:1001    入职日期:2018.5.5    
+姓名:李四    薪水:30000    id:1002    入职日期:2005.4.4    
+姓名:王五    薪水:3000    id:1003    入职日期:2020.5.4    
+</code></pre>
+<h2 id="JavaBean和List结合存储"><a href="#JavaBean和List结合存储" class="headerlink" title="JavaBean和List结合存储"></a>JavaBean和List结合存储</h2><p>每一行数据使用JavaBean对象存储，多行使用放到Map或List中。代码如下：</p>
+<pre><code class="java">package com.msl.collection;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * 测试表格数据的存储
+ * 体会ORM思想
+ * 每一行数据使用javabean对象存储，多行使用放到map或list中
+ * @author Senley
+ *
+ */
+public class TestStoreData2 &#123;
+    public static void main(String[] args) &#123;
+        User user1 = new User(1001,&quot;张三&quot;,20000,&quot;2018.5.5&quot;);
+        User user2 = new User(1002,&quot;李四&quot;,30000,&quot;2005.5.4&quot;);
+        User user3 = new User(1003,&quot;王五&quot;,3000,&quot;2020.5.4&quot;);
+        
+        List&lt;User&gt; list = new ArrayList&lt;&gt;();
+        list.add(user1);
+        list.add(user2);
+        list.add(user3);
+        for(User u:list) &#123;
+            System.out.println(u);
+        &#125;
+        
+        Map&lt;Integer,User&gt; map = new HashMap&lt;&gt;();
+        map.put(1001, user1);
+        map.put(1002, user2);
+        map.put(1003, user3);
+        Set&lt;Integer&gt; keyset = map.keySet();
+        for(Integer key:keyset) &#123;
+            System.out.println(key+&quot;====&quot;+map.get(key));
+        &#125;
+    &#125;
+&#125;
+
+class User&#123;
+    private int id;
+    private String name;
+    private double salary;
+    private String hiredate;
+    
+    //一个完整的javabean要有set和get方法以及一个无参构造器
+    public User() &#123;
+    &#125;
+    
+    public User(int id, String name, double salary, String hiredate) &#123;
+        super();
+        this.id = id;
+        this.name = name;
+        this.salary = salary;
+        this.hiredate = hiredate;
+    &#125;
+    
+    public int getId() &#123;
+        return id;
+    &#125;
+    public void setId(int id) &#123;
+        this.id = id;
+    &#125;
+    public String getName() &#123;
+        return name;
+    &#125;
+    public void setName(String name) &#123;
+        this.name = name;
+    &#125;
+    public double getSalary() &#123;
+        return salary;
+    &#125;
+    public void setSalary(double salary) &#123;
+        this.salary = salary;
+    &#125;
+    public String getHiredate() &#123;
+        return hiredate;
+    &#125;
+    public void setHiredate(String hiredate) &#123;
+        this.hiredate = hiredate;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        return &quot;id:&quot;+id+&quot;,name:&quot;+name+&quot;,salary:&quot;+salary+&quot;,hiredate:&quot;+hiredate;
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">id:1001,name:张三,salary:20000.0,hiredate:2018.5.5
+id:1002,name:李四,salary:30000.0,hiredate:2005.5.4
+id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
+1001====id:1001,name:张三,salary:20000.0,hiredate:2018.5.5
+1002====id:1002,name:李四,salary:30000.0,hiredate:2005.5.4
+1003====id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>StoreData</tag>
+      </tags>
+  </entry>
 </search>
