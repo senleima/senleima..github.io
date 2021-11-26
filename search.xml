@@ -996,4 +996,243 @@ for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
         <tag>Collection</tag>
       </tags>
   </entry>
+  <entry>
+    <title>使用递归及面向对象思想统计文件夹大小</title>
+    <url>/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/</url>
+    <content><![CDATA[<h1 id="使用递归及面向对象思想统计文件夹大小"><a href="#使用递归及面向对象思想统计文件夹大小" class="headerlink" title="使用递归及面向对象思想统计文件夹大小"></a><strong>使用递归及面向对象思想统计文件夹大小</strong></h1><h2 id="IO介绍"><a href="#IO介绍" class="headerlink" title="IO介绍"></a>IO介绍</h2><p>对于任何程序设计语言而言，输入输出(Input/Output)系统都是非常核心的功能。程序运行需要数据，数据的获取往往需要跟外部系统进行通信，外部系统可能是文件、数据库、其他程序、网络、IO设备等等。外部系统比较复杂多变，那么就有必要通过某种手段进行抽象、屏蔽外部的差异，从而实现更加便捷的编程。</p>
+<p>输入(Input)指的是：可以让程序从外部系统获得数据(核心含义是“读”，读取外部数据)。常见的应用：</p>
+<ul>
+<li>读取硬盘上的文件内容到程序。例如：播放器打开一个视频文件、word打开一个doc文件。</li>
+<li>读取网络上某个位置内容到程序。例如：浏览器中输入网址后，打开该网址对应的网页内容；下载网络上某个网址的文件。</li>
+<li>读取数据库系统的数据到程序。</li>
+<li>读取某些硬件系统数据到程序。例如：车载电脑读取雷达扫描信息到程序；温控系统等。</li>
+</ul>
+<p>输出(Output)指的是：程序输出数据给外部系统从而可以操作外部系统(核心含义是“写”，将数据写出到外部系统)。常见的应用有：</p>
+<ul>
+<li>将数据写到硬盘中。例如：我们编辑完一个word文档后，将内容写到硬盘上进行保存。</li>
+<li>将数据写到数据库系统中。例如：我们注册一个网站会员，实际就是后台程序向数据库中写入一条记录。</li>
+<li>将数据写到某些硬件系统中。例如：导弹系统导航程序将新的路径输出到飞控子系统，飞控子系统根据数据修正飞行路径。</li>
+</ul>
+<h2 id="File类介绍"><a href="#File类介绍" class="headerlink" title="File类介绍"></a>File类介绍</h2><p>Java文件类以抽象的方式代表文件名和目录路径名。该类主要用于文件和目录的创建、文件的查找和文件的删除等。</p>
+<p>File对象代表磁盘中实际存在的文件和目录。通过以下构造方法创建一个File对象。</p>
+<p>通过给定的父抽象路径名和子路径名字符串创建一个新的File实例。</p>
+<pre><code class="java">File(File parent, String child);
+</code></pre>
+<p>通过将给定路径名字符串转换成抽象路径名来创建一个新 File 实例。</p>
+<pre><code class="java">File(String pathname) 
+</code></pre>
+<p>根据 parent 路径名字符串和 child 路径名字符串创建一个新 File 实例。</p>
+<pre><code class="java">File(String parent, String child) 
+</code></pre>
+<p>通过将给定的 file: URI 转换成一个抽象路径名来创建一个新的 File 实例。</p>
+<pre><code class="java">File(URI uri) 
+</code></pre>
+<p>创建File对象成功后，可以使用以下列表中的方法操作文件。</p>
+<table>
+<thead>
+<tr>
+<th align="center">序号</th>
+<th align="left">方法描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="left"><strong>public String getName()</strong> 返回由此抽象路径名表示的文件或目录的名称。</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="left">**public String getParent()**<strong>、</strong>  返回此抽象路径名的父路径名的路径名字符串，如果此路径名没有指定父目录，则返回 <code>null</code>。</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="left"><strong>public File getParentFile()</strong> 返回此抽象路径名的父路径名的抽象路径名，如果此路径名没有指定父目录，则返回 <code>null</code>。</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="left"><strong>public String getPath()</strong> 将此抽象路径名转换为一个路径名字符串。</td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="left"><strong>public boolean isAbsolute()</strong> 测试此抽象路径名是否为绝对路径名。</td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="left"><strong>public String getAbsolutePath()</strong> 返回抽象路径名的绝对路径名字符串。</td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="left"><strong>public boolean canRead()</strong> 测试应用程序是否可以读取此抽象路径名表示的文件。</td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td align="left"><strong>public boolean canWrite()</strong> 测试应用程序是否可以修改此抽象路径名表示的文件。</td>
+</tr>
+<tr>
+<td align="center">9</td>
+<td align="left"><strong>public boolean exists()</strong> 测试此抽象路径名表示的文件或目录是否存在。</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="left"><strong>public boolean isDirectory()</strong> 测试此抽象路径名表示的文件是否是一个目录。</td>
+</tr>
+<tr>
+<td align="center">11</td>
+<td align="left"><strong>public boolean isFile()</strong> 测试此抽象路径名表示的文件是否是一个标准文件。</td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td align="left"><strong>public long lastModified()</strong> 返回此抽象路径名表示的文件最后一次被修改的时间。</td>
+</tr>
+<tr>
+<td align="center">13</td>
+<td align="left"><strong>public long length()</strong> 返回由此抽象路径名表示的文件的长度。</td>
+</tr>
+<tr>
+<td align="center">14</td>
+<td align="left"><strong>public boolean createNewFile() throws IOException</strong> 当且仅当不存在具有此抽象路径名指定的名称的文件时，原子地创建由此抽象路径名指定的一个新的空文件。</td>
+</tr>
+<tr>
+<td align="center">15</td>
+<td align="left"><strong>public boolean delete()</strong>  删除此抽象路径名表示的文件或目录。</td>
+</tr>
+<tr>
+<td align="center">16</td>
+<td align="left"><strong>public void deleteOnExit()</strong> 在虚拟机终止时，请求删除此抽象路径名表示的文件或目录。</td>
+</tr>
+<tr>
+<td align="center">17</td>
+<td align="left"><strong>public String[] list()</strong> 返回由此抽象路径名所表示的目录中的文件和目录的名称所组成字符串数组。</td>
+</tr>
+<tr>
+<td align="center">18</td>
+<td align="left"><strong>public String[] list(FilenameFilter filter)</strong> 返回由包含在目录中的文件和目录的名称所组成的字符串数组，这一目录是通过满足指定过滤器的抽象路径名来表示的。</td>
+</tr>
+<tr>
+<td align="center">19</td>
+<td align="left"><strong>public File[] listFiles()</strong>  返回一个抽象路径名数组，这些路径名表示此抽象路径名所表示目录中的文件。</td>
+</tr>
+<tr>
+<td align="center">20</td>
+<td align="left"><strong>public File[] listFiles(FileFilter filter)</strong> 返回表示此抽象路径名所表示目录中的文件和目录的抽象路径名数组，这些路径名满足特定过滤器。</td>
+</tr>
+<tr>
+<td align="center">21</td>
+<td align="left"><strong>public boolean mkdir()</strong> 创建此抽象路径名指定的目录。</td>
+</tr>
+<tr>
+<td align="center">22</td>
+<td align="left"><strong>public boolean mkdirs()</strong> 创建此抽象路径名指定的目录，包括创建必需但不存在的父目录。</td>
+</tr>
+<tr>
+<td align="center">23</td>
+<td align="left"><strong>public boolean renameTo(File dest)</strong>  重新命名此抽象路径名表示的文件。</td>
+</tr>
+<tr>
+<td align="center">24</td>
+<td align="left"><strong>public boolean setLastModified(long time)</strong> 设置由此抽象路径名所指定的文件或目录的最后一次修改时间。</td>
+</tr>
+<tr>
+<td align="center">25</td>
+<td align="left"><strong>public boolean setReadOnly()</strong> 标记此抽象路径名指定的文件或目录，以便只可对其进行读操作。</td>
+</tr>
+<tr>
+<td align="center">26</td>
+<td align="left"><strong>public static File createTempFile(String prefix, String suffix, File directory) throws IOException</strong> 在指定目录中创建一个新的空文件，使用给定的前缀和后缀字符串生成其名称。</td>
+</tr>
+<tr>
+<td align="center">27</td>
+<td align="left"><strong>public static File createTempFile(String prefix, String suffix) throws IOException</strong> 在默认临时文件目录中创建一个空文件，使用给定前缀和后缀生成其名称。</td>
+</tr>
+<tr>
+<td align="center">28</td>
+<td align="left"><strong>public int compareTo(File pathname)</strong> 按字母顺序比较两个抽象路径名。</td>
+</tr>
+<tr>
+<td align="center">29</td>
+<td align="left"><strong>public int compareTo(Object o)</strong> 按字母顺序比较抽象路径名与给定对象。</td>
+</tr>
+<tr>
+<td align="center">30</td>
+<td align="left"><strong>public boolean equals(Object obj)</strong> 测试此抽象路径名与给定对象是否相等。</td>
+</tr>
+<tr>
+<td align="center">31</td>
+<td align="left"><strong>public String toString()</strong>  返回此抽象路径名的路径名字符串。</td>
+</tr>
+</tbody></table>
+<h2 id="使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数"><a href="#使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数" class="headerlink" title="使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数"></a>使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+
+import java.io.File;
+
+/**
+ * 使用递归及面向对象: 统计文件夹大小、文件个数、文件夹个数
+ * @author Senley
+ * 
+ */
+public class DirSize &#123;
+    //大小
+    private long len;
+    //文件夹路径
+    private String path;
+    //文件个数
+    private int fileCount;
+    //文件夹个数
+    private int dirCount;
+    //源
+    private File src;
+    
+    public long getLen() &#123;
+        return len;
+    &#125;
+    
+    public int getFileCount() &#123;
+        return fileCount;
+    &#125;
+
+    public int getDirCount() &#123;
+        return dirCount;
+    &#125;
+    
+    public DirSize(String path) &#123;
+        this.path = path;
+        this.src = new File(path);
+        count(src);
+    &#125;
+
+    public static void main(String[] args) &#123;
+        DirSize dir = new DirSize(&quot;E:/Workspace/IO&quot;);
+        System.out.println(&quot;文件夹大小：&quot;+dir.getLen()+&quot;字节&quot;+ &quot;--&quot;+&quot;文件个数：&quot;+dir.getFileCount()+&quot; --&quot;+&quot;文件夹个数：&quot;+dir.getDirCount());
+    &#125;
+    
+    //统计大小
+    private void count(File src)&#123;
+        //获取大小
+        if(null!=src &amp;&amp; src.exists()) &#123;
+            if(src.isFile()) &#123;//大小
+                fileCount++;
+                len+=src.length();
+            &#125;else&#123;//子孙级
+                dirCount++;
+                for(File s:src.listFiles()) &#123;
+                    count(s);
+                &#125;
+            &#125;
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">文件夹大小：60850字节 --文件个数：29 --文件夹个数：13
+</code></pre>
+<p>需注意的是，文件夹个数为子孙级文件夹个数+本身，如需仅显示子孙级文件夹，可定义dirCount = -1。</p>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>File</tag>
+      </tags>
+  </entry>
 </search>

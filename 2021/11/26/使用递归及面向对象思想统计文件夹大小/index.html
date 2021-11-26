@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>使用容器存储表格数据 |  senleima</title>
+      <title>使用递归及面向对象思想统计文件夹大小 |  senleima</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -60,7 +60,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-使用容器存储表格数据"
+  id="post-使用递归及面向对象思想统计文件夹大小"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -71,7 +71,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  使用容器存储表格数据
+  使用递归及面向对象思想统计文件夹大小
 </h1>
  
 
@@ -79,8 +79,8 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/" class="article-date">
-  <time datetime="2021-11-21T17:52:12.000Z" itemprop="datePublished">2021-11-22</time>
+      <a href="/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/" class="article-date">
+  <time datetime="2021-11-26T15:40:12.000Z" itemprop="datePublished">2021-11-26</time>
 </a> 
   <div class="article-category">
     <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
@@ -91,7 +91,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">867</span>
+            <span class="post-count">2k</span>
         </span>
     </span>
 
@@ -100,7 +100,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">4 min</span>
+            <span class="post-count">7 min</span>
         </span>
     </span>
 </div>
@@ -115,188 +115,234 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="使用容器存储表格数据"><a href="#使用容器存储表格数据" class="headerlink" title="使用容器存储表格数据"></a><strong>使用容器存储表格数据</strong></h1><p>使用容器存储以下表格数据。</p>
+  <h1 id="使用递归及面向对象思想统计文件夹大小"><a href="#使用递归及面向对象思想统计文件夹大小" class="headerlink" title="使用递归及面向对象思想统计文件夹大小"></a><strong>使用递归及面向对象思想统计文件夹大小</strong></h1><h2 id="IO介绍"><a href="#IO介绍" class="headerlink" title="IO介绍"></a>IO介绍</h2><p>对于任何程序设计语言而言，输入输出(Input/Output)系统都是非常核心的功能。程序运行需要数据，数据的获取往往需要跟外部系统进行通信，外部系统可能是文件、数据库、其他程序、网络、IO设备等等。外部系统比较复杂多变，那么就有必要通过某种手段进行抽象、屏蔽外部的差异，从而实现更加便捷的编程。</p>
+<p>输入(Input)指的是：可以让程序从外部系统获得数据(核心含义是“读”，读取外部数据)。常见的应用：</p>
+<ul>
+<li>读取硬盘上的文件内容到程序。例如：播放器打开一个视频文件、word打开一个doc文件。</li>
+<li>读取网络上某个位置内容到程序。例如：浏览器中输入网址后，打开该网址对应的网页内容；下载网络上某个网址的文件。</li>
+<li>读取数据库系统的数据到程序。</li>
+<li>读取某些硬件系统数据到程序。例如：车载电脑读取雷达扫描信息到程序；温控系统等。</li>
+</ul>
+<p>输出(Output)指的是：程序输出数据给外部系统从而可以操作外部系统(核心含义是“写”，将数据写出到外部系统)。常见的应用有：</p>
+<ul>
+<li>将数据写到硬盘中。例如：我们编辑完一个word文档后，将内容写到硬盘上进行保存。</li>
+<li>将数据写到数据库系统中。例如：我们注册一个网站会员，实际就是后台程序向数据库中写入一条记录。</li>
+<li>将数据写到某些硬件系统中。例如：导弹系统导航程序将新的路径输出到飞控子系统，飞控子系统根据数据修正飞行路径。</li>
+</ul>
+<h2 id="File类介绍"><a href="#File类介绍" class="headerlink" title="File类介绍"></a>File类介绍</h2><p>Java文件类以抽象的方式代表文件名和目录路径名。该类主要用于文件和目录的创建、文件的查找和文件的删除等。</p>
+<p>File对象代表磁盘中实际存在的文件和目录。通过以下构造方法创建一个File对象。</p>
+<p>通过给定的父抽象路径名和子路径名字符串创建一个新的File实例。</p>
+<pre><code class="java">File(File parent, String child);
+</code></pre>
+<p>通过将给定路径名字符串转换成抽象路径名来创建一个新 File 实例。</p>
+<pre><code class="java">File(String pathname) 
+</code></pre>
+<p>根据 parent 路径名字符串和 child 路径名字符串创建一个新 File 实例。</p>
+<pre><code class="java">File(String parent, String child) 
+</code></pre>
+<p>通过将给定的 file: URI 转换成一个抽象路径名来创建一个新的 File 实例。</p>
+<pre><code class="java">File(URI uri) 
+</code></pre>
+<p>创建File对象成功后，可以使用以下列表中的方法操作文件。</p>
 <table>
 <thead>
 <tr>
-<th align="center">ID</th>
-<th align="center">姓名</th>
-<th align="center">薪水</th>
-<th align="center">入职日期</th>
+<th align="center">序号</th>
+<th align="left">方法描述</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="center">1001</td>
-<td align="center">张三</td>
-<td align="center">20000</td>
-<td align="center">2018.5.5</td>
+<td align="center">1</td>
+<td align="left"><strong>public String getName()</strong> 返回由此抽象路径名表示的文件或目录的名称。</td>
 </tr>
 <tr>
-<td align="center">1002</td>
-<td align="center">李四</td>
-<td align="center">30000</td>
-<td align="center">2005.5.4</td>
+<td align="center">2</td>
+<td align="left">**public String getParent()**<strong>、</strong>  返回此抽象路径名的父路径名的路径名字符串，如果此路径名没有指定父目录，则返回 <code>null</code>。</td>
 </tr>
 <tr>
-<td align="center">1003</td>
-<td align="center">王五</td>
-<td align="center">3000</td>
-<td align="center">2020.5.4</td>
+<td align="center">3</td>
+<td align="left"><strong>public File getParentFile()</strong> 返回此抽象路径名的父路径名的抽象路径名，如果此路径名没有指定父目录，则返回 <code>null</code>。</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="left"><strong>public String getPath()</strong> 将此抽象路径名转换为一个路径名字符串。</td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="left"><strong>public boolean isAbsolute()</strong> 测试此抽象路径名是否为绝对路径名。</td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="left"><strong>public String getAbsolutePath()</strong> 返回抽象路径名的绝对路径名字符串。</td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="left"><strong>public boolean canRead()</strong> 测试应用程序是否可以读取此抽象路径名表示的文件。</td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td align="left"><strong>public boolean canWrite()</strong> 测试应用程序是否可以修改此抽象路径名表示的文件。</td>
+</tr>
+<tr>
+<td align="center">9</td>
+<td align="left"><strong>public boolean exists()</strong> 测试此抽象路径名表示的文件或目录是否存在。</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="left"><strong>public boolean isDirectory()</strong> 测试此抽象路径名表示的文件是否是一个目录。</td>
+</tr>
+<tr>
+<td align="center">11</td>
+<td align="left"><strong>public boolean isFile()</strong> 测试此抽象路径名表示的文件是否是一个标准文件。</td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td align="left"><strong>public long lastModified()</strong> 返回此抽象路径名表示的文件最后一次被修改的时间。</td>
+</tr>
+<tr>
+<td align="center">13</td>
+<td align="left"><strong>public long length()</strong> 返回由此抽象路径名表示的文件的长度。</td>
+</tr>
+<tr>
+<td align="center">14</td>
+<td align="left"><strong>public boolean createNewFile() throws IOException</strong> 当且仅当不存在具有此抽象路径名指定的名称的文件时，原子地创建由此抽象路径名指定的一个新的空文件。</td>
+</tr>
+<tr>
+<td align="center">15</td>
+<td align="left"><strong>public boolean delete()</strong>  删除此抽象路径名表示的文件或目录。</td>
+</tr>
+<tr>
+<td align="center">16</td>
+<td align="left"><strong>public void deleteOnExit()</strong> 在虚拟机终止时，请求删除此抽象路径名表示的文件或目录。</td>
+</tr>
+<tr>
+<td align="center">17</td>
+<td align="left"><strong>public String[] list()</strong> 返回由此抽象路径名所表示的目录中的文件和目录的名称所组成字符串数组。</td>
+</tr>
+<tr>
+<td align="center">18</td>
+<td align="left"><strong>public String[] list(FilenameFilter filter)</strong> 返回由包含在目录中的文件和目录的名称所组成的字符串数组，这一目录是通过满足指定过滤器的抽象路径名来表示的。</td>
+</tr>
+<tr>
+<td align="center">19</td>
+<td align="left"><strong>public File[] listFiles()</strong>  返回一个抽象路径名数组，这些路径名表示此抽象路径名所表示目录中的文件。</td>
+</tr>
+<tr>
+<td align="center">20</td>
+<td align="left"><strong>public File[] listFiles(FileFilter filter)</strong> 返回表示此抽象路径名所表示目录中的文件和目录的抽象路径名数组，这些路径名满足特定过滤器。</td>
+</tr>
+<tr>
+<td align="center">21</td>
+<td align="left"><strong>public boolean mkdir()</strong> 创建此抽象路径名指定的目录。</td>
+</tr>
+<tr>
+<td align="center">22</td>
+<td align="left"><strong>public boolean mkdirs()</strong> 创建此抽象路径名指定的目录，包括创建必需但不存在的父目录。</td>
+</tr>
+<tr>
+<td align="center">23</td>
+<td align="left"><strong>public boolean renameTo(File dest)</strong>  重新命名此抽象路径名表示的文件。</td>
+</tr>
+<tr>
+<td align="center">24</td>
+<td align="left"><strong>public boolean setLastModified(long time)</strong> 设置由此抽象路径名所指定的文件或目录的最后一次修改时间。</td>
+</tr>
+<tr>
+<td align="center">25</td>
+<td align="left"><strong>public boolean setReadOnly()</strong> 标记此抽象路径名指定的文件或目录，以便只可对其进行读操作。</td>
+</tr>
+<tr>
+<td align="center">26</td>
+<td align="left"><strong>public static File createTempFile(String prefix, String suffix, File directory) throws IOException</strong> 在指定目录中创建一个新的空文件，使用给定的前缀和后缀字符串生成其名称。</td>
+</tr>
+<tr>
+<td align="center">27</td>
+<td align="left"><strong>public static File createTempFile(String prefix, String suffix) throws IOException</strong> 在默认临时文件目录中创建一个空文件，使用给定前缀和后缀生成其名称。</td>
+</tr>
+<tr>
+<td align="center">28</td>
+<td align="left"><strong>public int compareTo(File pathname)</strong> 按字母顺序比较两个抽象路径名。</td>
+</tr>
+<tr>
+<td align="center">29</td>
+<td align="left"><strong>public int compareTo(Object o)</strong> 按字母顺序比较抽象路径名与给定对象。</td>
+</tr>
+<tr>
+<td align="center">30</td>
+<td align="left"><strong>public boolean equals(Object obj)</strong> 测试此抽象路径名与给定对象是否相等。</td>
+</tr>
+<tr>
+<td align="center">31</td>
+<td align="left"><strong>public String toString()</strong>  返回此抽象路径名的路径名字符串。</td>
 </tr>
 </tbody></table>
-<h2 id="Map和List结合存储"><a href="#Map和List结合存储" class="headerlink" title="Map和List结合存储"></a>Map和List结合存储</h2><p>Map表示一行数据，多行数据是多个Map，将多个Map放到List中。代码如下：</p>
-<pre><code class="java">package com.msl.collection;
+<h2 id="使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数"><a href="#使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数" class="headerlink" title="使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数"></a>使用递归及面向对象思想统计文件夹大小、文件个数、文件夹个数</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.File;
 
 /**
- * 测试表格数据的存储
- * ORM思想的简单实验：map表示一行数据，多行数据是多个map；将多个map放到list中
+ * 使用递归及面向对象: 统计文件夹大小、文件个数、文件夹个数
  * @author Senley
- *
+ * 
  */
-public class TestStoreData &#123;
+public class DirSize &#123;
+    //大小
+    private long len;
+    //文件夹路径
+    private String path;
+    //文件个数
+    private int fileCount;
+    //文件夹个数
+    private int dirCount;
+    //源
+    private File src;
+    
+    public long getLen() &#123;
+        return len;
+    &#125;
+    
+    public int getFileCount() &#123;
+        return fileCount;
+    &#125;
+
+    public int getDirCount() &#123;
+        return dirCount;
+    &#125;
+    
+    public DirSize(String path) &#123;
+        this.path = path;
+        this.src = new File(path);
+        count(src);
+    &#125;
+
     public static void main(String[] args) &#123;
-        Map&lt;String,Object&gt; row1 = new HashMap&lt;&gt;();
-        row1.put(&quot;id&quot;, 1001);
-        row1.put(&quot;姓名&quot;, &quot;张三&quot;);
-        row1.put(&quot;薪水&quot;, 20000);
-        row1.put(&quot;入职日期&quot;, &quot;2018.5.5&quot;);
-        
-        Map&lt;String,Object&gt; row2 = new HashMap&lt;&gt;();
-        row2.put(&quot;id&quot;, 1002);
-        row2.put(&quot;姓名&quot;, &quot;李四&quot;);
-        row2.put(&quot;薪水&quot;, 30000);
-        row2.put(&quot;入职日期&quot;, &quot;2005.4.4&quot;);
-        
-        Map&lt;String,Object&gt; row3 = new HashMap&lt;&gt;();
-        row3.put(&quot;id&quot;, 1003);
-        row3.put(&quot;姓名&quot;, &quot;王五&quot;);
-        row3.put(&quot;薪水&quot;, 3000);
-        row3.put(&quot;入职日期&quot;, &quot;2020.5.4&quot;);
-        
-        List&lt;Map&lt;String,Object&gt;&gt; table1 = new ArrayList&lt;&gt;();
-        table1.add(row1);
-        table1.add(row2);
-        table1.add(row3);
-        
-        for(Map&lt;String,Object&gt; row:table1) &#123;
-            Set&lt;String&gt; keyset = row.keySet();
-            for(String key:keyset) &#123;
-                System.out.print(key+&quot;:&quot;+row.get(key)+&quot;\t&quot;);
+        DirSize dir = new DirSize(&quot;E:/Workspace/IO&quot;);
+        System.out.println(&quot;文件夹大小：&quot;+dir.getLen()+&quot;字节&quot;+ &quot;--&quot;+&quot;文件个数：&quot;+dir.getFileCount()+&quot; --&quot;+&quot;文件夹个数：&quot;+dir.getDirCount());
+    &#125;
+    
+    //统计大小
+    private void count(File src)&#123;
+        //获取大小
+        if(null!=src &amp;&amp; src.exists()) &#123;
+            if(src.isFile()) &#123;//大小
+                fileCount++;
+                len+=src.length();
+            &#125;else&#123;//子孙级
+                dirCount++;
+                for(File s:src.listFiles()) &#123;
+                    count(s);
+                &#125;
             &#125;
-            System.out.println();
         &#125;
     &#125;
+
 &#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code class="java">姓名:张三    薪水:20000    id:1001    入职日期:2018.5.5    
-姓名:李四    薪水:30000    id:1002    入职日期:2005.4.4    
-姓名:王五    薪水:3000    id:1003    入职日期:2020.5.4    
+<pre><code class="java">文件夹大小：60850字节 --文件个数：29 --文件夹个数：13
 </code></pre>
-<h2 id="JavaBean和List结合存储"><a href="#JavaBean和List结合存储" class="headerlink" title="JavaBean和List结合存储"></a>JavaBean和List结合存储</h2><p>每一行数据使用JavaBean对象存储，多行使用放到Map或List中。代码如下：</p>
-<pre><code class="java">package com.msl.collection;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-/**
- * 测试表格数据的存储
- * 体会ORM思想
- * 每一行数据使用javabean对象存储，多行使用放到map或list中
- * @author Senley
- *
- */
-public class TestStoreData2 &#123;
-    public static void main(String[] args) &#123;
-        User user1 = new User(1001,&quot;张三&quot;,20000,&quot;2018.5.5&quot;);
-        User user2 = new User(1002,&quot;李四&quot;,30000,&quot;2005.5.4&quot;);
-        User user3 = new User(1003,&quot;王五&quot;,3000,&quot;2020.5.4&quot;);
-        
-        List&lt;User&gt; list = new ArrayList&lt;&gt;();
-        list.add(user1);
-        list.add(user2);
-        list.add(user3);
-        for(User u:list) &#123;
-            System.out.println(u);
-        &#125;
-        
-        Map&lt;Integer,User&gt; map = new HashMap&lt;&gt;();
-        map.put(1001, user1);
-        map.put(1002, user2);
-        map.put(1003, user3);
-        Set&lt;Integer&gt; keyset = map.keySet();
-        for(Integer key:keyset) &#123;
-            System.out.println(key+&quot;====&quot;+map.get(key));
-        &#125;
-    &#125;
-&#125;
-
-class User&#123;
-    private int id;
-    private String name;
-    private double salary;
-    private String hiredate;
-    
-    //一个完整的javabean要有set和get方法以及一个无参构造器
-    public User() &#123;
-    &#125;
-    
-    public User(int id, String name, double salary, String hiredate) &#123;
-        super();
-        this.id = id;
-        this.name = name;
-        this.salary = salary;
-        this.hiredate = hiredate;
-    &#125;
-    
-    public int getId() &#123;
-        return id;
-    &#125;
-    public void setId(int id) &#123;
-        this.id = id;
-    &#125;
-    public String getName() &#123;
-        return name;
-    &#125;
-    public void setName(String name) &#123;
-        this.name = name;
-    &#125;
-    public double getSalary() &#123;
-        return salary;
-    &#125;
-    public void setSalary(double salary) &#123;
-        this.salary = salary;
-    &#125;
-    public String getHiredate() &#123;
-        return hiredate;
-    &#125;
-    public void setHiredate(String hiredate) &#123;
-        this.hiredate = hiredate;
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        return &quot;id:&quot;+id+&quot;,name:&quot;+name+&quot;,salary:&quot;+salary+&quot;,hiredate:&quot;+hiredate;
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">id:1001,name:张三,salary:20000.0,hiredate:2018.5.5
-id:1002,name:李四,salary:30000.0,hiredate:2005.5.4
-id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
-1001====id:1001,name:张三,salary:20000.0,hiredate:2018.5.5
-1002====id:1002,name:李四,salary:30000.0,hiredate:2005.5.4
-1003====id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
-</code></pre>
+<p>需注意的是，文件夹个数为子孙级文件夹个数+本身，如需仅显示子孙级文件夹，可定义dirCount = -1。</p>
  
       <!-- reward -->
       
@@ -367,12 +413,12 @@ id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/StoreData/" rel="tag">StoreData</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/File/" rel="tag">File</a></li></ul>
 
     </footer>
   </div>
@@ -380,19 +426,10 @@ id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
    
   <nav class="article-nav">
     
-      <a href="/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            使用递归及面向对象思想统计文件夹大小
-          
-        </div>
-      </a>
     
-    
-      <a href="/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" class="article-nav-link">
+      <a href="/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">遍历集合的方法总结</div>
+        <div class="article-nav-title">使用容器存储表格数据</div>
       </a>
     
   </nav>
