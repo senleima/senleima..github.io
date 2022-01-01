@@ -161,6 +161,250 @@
     
     
     <article
+  id="post-IO文件拷贝与对接流"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/"
+    >IO文件拷贝与对接流</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/" class="article-date">
+  <time datetime="2022-01-01T08:01:06.000Z" itemprop="datePublished">2022-01-01</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="IO文件拷贝与对接流"><a href="#IO文件拷贝与对接流" class="headerlink" title="IO文件拷贝与对接流"></a>IO文件拷贝与对接流</h1><h2 id="IO文件拷贝"><a href="#IO文件拷贝" class="headerlink" title="IO文件拷贝"></a>IO文件拷贝</h2><p>IO文件拷贝：文件字节输入输出流。</p>
+<ol>
+<li>创建源</li>
+<li>选择流</li>
+<li>操作</li>
+<li>释放资源</li>
+</ol>
+<p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * 文件拷贝：文件字节输入、输出流
+ * 1、创建源
+ * 2、选择流
+ * 3、操作（写出内容）
+ * 4、释放资源
+ * @author Senley
+ *
+ */
+public class Copy &#123;
+
+    public static void main(String[] args) &#123;
+        copy(&quot;src/com/msl/io/Copy.java&quot;,&quot;copy.txt&quot;);
+    &#125;
+    /**
+     * 文件的拷贝
+     * @param srcPath
+     * @param destPath
+     */
+    public static void copy(String srcPath,String destPath) &#123;
+        //1、创建源
+        File src = new File(srcPath);//源头
+        File dest = new File(destPath);//目的地
+        //2、选择流
+        InputStream is = null;
+        OutputStream os = null;
+        try &#123;
+            is = new FileInputStream(src);
+            os = new FileOutputStream(dest);
+            //3、操作
+            byte[] flush = new byte[1024];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                os.write(flush,0,len);
+            &#125;
+        &#125;catch(FileNotFoundException e)&#123;
+            e.printStackTrace();
+        &#125;catch(IOException e)&#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //释放资源 分别关闭 先打开的后关闭
+            try &#123;
+                if (null != os) &#123;
+                    os.close();
+                &#125; 
+            &#125; catch (Exception e) &#123;
+                e.printStackTrace();
+            &#125;
+            
+            try &#123;
+                if(null!=is) &#123;
+                    is.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
+<h2 id="IO对接流"><a href="#IO对接流" class="headerlink" title="IO对接流"></a>IO对接流</h2><ol>
+<li><p>图片读取到字节数组</p>
+<p>1)图片到程序</p>
+<p>2)程序到字节数组</p>
+</li>
+<li><p>字节数组写出到文件</p>
+<p>1)字节数组到程序</p>
+<p>2)程序到文件</p>
+</li>
+</ol>
+<p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * 1、图片读取到字节数组
+ * 2、字节数组写出到文件
+ * @author Senley
+ *
+ */
+public class IOTest &#123;
+
+    public static void main(String[] args) &#123;
+        //图片转成字节数组
+        byte[] datas = fileToByteArray(&quot;p.png&quot;);
+        System.out.println(datas.length);
+        byteArrayToFile(datas, &quot;p-byte.png&quot;);
+    &#125;
+    
+    /**
+     * 1、图片读取到字节数组
+     * 1)、图片到程序 FileInputStream
+     * 2)、程序到字节数组 ByteArrayOutputStream
+     */
+    public static byte[] fileToByteArray(String filePath) &#123;
+        //1、创建源与目的地
+        File src = new File(filePath);
+        byte[] dest = null;
+        //2、选择流
+        InputStream is = null;
+        ByteArrayOutputStream baos = null;
+        try &#123;
+            is = new FileInputStream(src);
+            baos = new ByteArrayOutputStream();
+            //3、操作（分段读取）
+            byte[] flush = new byte[1024*10];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                baos.write(flush,0,len); //写出到字节数组中
+            &#125;
+            baos.flush();
+            return baos.toByteArray();
+        &#125; catch (FileNotFoundException e) &#123;
+            e.printStackTrace();
+        &#125; catch (IOException e) &#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //4、释放资源
+            try &#123;
+                if(null!=is) &#123;
+                    is.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        return null;
+    &#125;
+    /**
+     * 2、字节数组写出到文件
+     * 1)、字节数组到程序 ByteArrayInputStream
+     * 2)、程序到文件 FileOutputStream
+     */
+    public static void byteArrayToFile(byte[] src,String filePath) &#123;
+        //1、创建源
+        File dest = new File(filePath);
+        //2、选择流
+        InputStream is = null;
+        OutputStream os = null;
+        try &#123;
+            is = new ByteArrayInputStream(src);
+            os = new FileOutputStream(dest);
+            //3、操作（分段读取）
+            byte[] flush = new byte[5];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                os.write(flush,0,len);//写出到文件
+            &#125;
+            os.flush();
+        &#125;catch (IOException e) &#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //4、释放资源
+            try &#123;
+                if (null != os) &#123;
+                    os.close();
+                &#125; 
+            &#125; catch (Exception e) &#123;
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IO/" rel="tag">IO</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-使用递归及面向对象思想统计文件夹大小"
   class="article article-type-post"
   itemscope
@@ -1743,7 +1987,7 @@ false
     <ul>
       <li>
         Copyrights &copy;
-        2021
+        2021-2022
         <i class="ri-heart-fill heart_icon"></i> Senley
       </li>
     </ul>

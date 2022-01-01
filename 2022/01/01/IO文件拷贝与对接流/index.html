@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>Java基础 |  senleima</title>
+      <title>IO文件拷贝与对接流 |  senleima</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -59,285 +59,397 @@
       
     <main class="content on">
       <section class="outer">
-  
-  
-  <article class="articles">
+  <article
+  id="post-IO文件拷贝与对接流"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
     
-    
-    <h1 class="page-type-title">Java基础</h1>
-    
-    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  IO文件拷贝与对接流
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/" class="article-date">
+  <time datetime="2022-01-01T08:01:06.000Z" itemprop="datePublished">2022-01-01</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
   
-  
-  
-  
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2022" class="archive-year">2022</a>
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">748</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">3 min</span>
+        </span>
+    </span>
+</div>
+ 
     </div>
-    <div class="archives">
       
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/" class="archive-article-date">
-  <time datetime="2022-01-01T08:01:06.000Z" itemprop="datePublished">01/01</time>
-</a>
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
        
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/"
-    >IO文件拷贝与对接流</a> 
-</h2>
+  <h1 id="IO文件拷贝与对接流"><a href="#IO文件拷贝与对接流" class="headerlink" title="IO文件拷贝与对接流"></a>IO文件拷贝与对接流</h1><h2 id="IO文件拷贝"><a href="#IO文件拷贝" class="headerlink" title="IO文件拷贝"></a>IO文件拷贝</h2><p>IO文件拷贝：文件字节输入输出流。</p>
+<ol>
+<li>创建源</li>
+<li>选择流</li>
+<li>操作</li>
+<li>释放资源</li>
+</ol>
+<p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * 文件拷贝：文件字节输入、输出流
+ * 1、创建源
+ * 2、选择流
+ * 3、操作（写出内容）
+ * 4、释放资源
+ * @author Senley
+ *
+ */
+public class Copy &#123;
+
+    public static void main(String[] args) &#123;
+        copy(&quot;src/com/msl/io/Copy.java&quot;,&quot;copy.txt&quot;);
+    &#125;
+    /**
+     * 文件的拷贝
+     * @param srcPath
+     * @param destPath
+     */
+    public static void copy(String srcPath,String destPath) &#123;
+        //1、创建源
+        File src = new File(srcPath);//源头
+        File dest = new File(destPath);//目的地
+        //2、选择流
+        InputStream is = null;
+        OutputStream os = null;
+        try &#123;
+            is = new FileInputStream(src);
+            os = new FileOutputStream(dest);
+            //3、操作
+            byte[] flush = new byte[1024];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                os.write(flush,0,len);
+            &#125;
+        &#125;catch(FileNotFoundException e)&#123;
+            e.printStackTrace();
+        &#125;catch(IOException e)&#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //释放资源 分别关闭 先打开的后关闭
+            try &#123;
+                if (null != os) &#123;
+                    os.close();
+                &#125; 
+            &#125; catch (Exception e) &#123;
+                e.printStackTrace();
+            &#125;
+            
+            try &#123;
+                if(null!=is) &#123;
+                    is.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
+<h2 id="IO对接流"><a href="#IO对接流" class="headerlink" title="IO对接流"></a>IO对接流</h2><ol>
+<li><p>图片读取到字节数组</p>
+<p>1)图片到程序</p>
+<p>2)程序到字节数组</p>
+</li>
+<li><p>字节数组写出到文件</p>
+<p>1)字节数组到程序</p>
+<p>2)程序到文件</p>
+</li>
+</ol>
+<p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * 1、图片读取到字节数组
+ * 2、字节数组写出到文件
+ * @author Senley
+ *
+ */
+public class IOTest &#123;
+
+    public static void main(String[] args) &#123;
+        //图片转成字节数组
+        byte[] datas = fileToByteArray(&quot;p.png&quot;);
+        System.out.println(datas.length);
+        byteArrayToFile(datas, &quot;p-byte.png&quot;);
+    &#125;
+    
+    /**
+     * 1、图片读取到字节数组
+     * 1)、图片到程序 FileInputStream
+     * 2)、程序到字节数组 ByteArrayOutputStream
+     */
+    public static byte[] fileToByteArray(String filePath) &#123;
+        //1、创建源与目的地
+        File src = new File(filePath);
+        byte[] dest = null;
+        //2、选择流
+        InputStream is = null;
+        ByteArrayOutputStream baos = null;
+        try &#123;
+            is = new FileInputStream(src);
+            baos = new ByteArrayOutputStream();
+            //3、操作（分段读取）
+            byte[] flush = new byte[1024*10];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                baos.write(flush,0,len); //写出到字节数组中
+            &#125;
+            baos.flush();
+            return baos.toByteArray();
+        &#125; catch (FileNotFoundException e) &#123;
+            e.printStackTrace();
+        &#125; catch (IOException e) &#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //4、释放资源
+            try &#123;
+                if(null!=is) &#123;
+                    is.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        return null;
+    &#125;
+    /**
+     * 2、字节数组写出到文件
+     * 1)、字节数组到程序 ByteArrayInputStream
+     * 2)、程序到文件 FileOutputStream
+     */
+    public static void byteArrayToFile(byte[] src,String filePath) &#123;
+        //1、创建源
+        File dest = new File(filePath);
+        //2、选择流
+        InputStream is = null;
+        OutputStream os = null;
+        try &#123;
+            is = new ByteArrayInputStream(src);
+            os = new FileOutputStream(dest);
+            //3、操作（分段读取）
+            byte[] flush = new byte[5];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                os.write(flush,0,len);//写出到文件
+            &#125;
+            os.flush();
+        &#125;catch (IOException e) &#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //4、释放资源
+            try &#123;
+                if (null != os) &#123;
+                    os.close();
+                &#125; 
+            &#125; catch (Exception e) &#123;
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
  
-
-    </header>
-    
+      <!-- reward -->
       
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-  
-  </div>
-  </div>
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2021" class="archive-year">2021</a>
-    </div>
-    <div class="archives">
-      
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/" class="archive-article-date">
-  <time datetime="2021-11-26T15:40:12.000Z" itemprop="datePublished">11/26</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/"
-    >使用递归及面向对象思想统计文件夹大小</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/" class="archive-article-date">
-  <time datetime="2021-11-21T17:52:12.000Z" itemprop="datePublished">11/22</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/"
-    >使用容器存储表格数据</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  <time datetime="2021-11-21T13:09:08.000Z" itemprop="datePublished">11/21</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/"
-    >遍历集合的方法总结</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/" class="archive-article-date">
-  <time datetime="2021-11-18T14:05:03.000Z" itemprop="datePublished">11/18</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/"
-    >自定义一个HashSet</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/" class="archive-article-date">
-  <time datetime="2021-11-14T12:00:08.000Z" itemprop="datePublished">11/14</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/"
-    >自定义一个HashMap</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" class="archive-article-date">
-  <time datetime="2021-11-10T14:38:12.000Z" itemprop="datePublished">11/10</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/"
-    >HashMap底层实现原理</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/" class="archive-article-date">
-  <time datetime="2021-11-08T10:30:06.000Z" itemprop="datePublished">11/08</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/"
-    >自定义一个LinkedList</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/" class="archive-article-date">
-  <time datetime="2021-11-07T13:52:28.000Z" itemprop="datePublished">11/07</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/"
-    >自定义一个ArrayList</a> 
-</h2>
- 
-
-    </header>
-    
-      
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-
-    
-    
-  </div>
-</article>
-      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
       
     </div>
-  </div>
-  
-  
+    
 
-  
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IO/" rel="tag">IO</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">使用递归及面向对象思想统计文件夹大小</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
 </section>
       <footer class="footer">
   <div class="outer">
@@ -478,6 +590,22 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
 <link
