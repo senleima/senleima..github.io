@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-01-01T08:20:34.713Z</updated>
+  <updated>2022-01-13T17:40:57.699Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>装饰器设计模式的理解与实现</title>
+    <link href="http://example.com/2022/01/14/%E8%A3%85%E9%A5%B0%E5%99%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%90%86%E8%A7%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0/"/>
+    <id>http://example.com/2022/01/14/%E8%A3%85%E9%A5%B0%E5%99%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%90%86%E8%A7%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0/</id>
+    <published>2022-01-13T17:22:05.000Z</published>
+    <updated>2022-01-13T17:40:57.699Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;装饰器设计模式的理解与实现&quot;&gt;&lt;a href=&quot;#装饰器设计模式的理解与实现&quot; class=&quot;headerlink&quot; title=&quot;装饰器设计模式的理解与实现&quot;&gt;&lt;/a&gt;&lt;strong&gt;装饰器设计模式&lt;/strong&gt;的理解与实现&lt;/h1&gt;&lt;h2</summary>
+        
+      
+    
+    
+    
+    <category term="Java基础" scheme="http://example.com/categories/Java%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="DesignPattern" scheme="http://example.com/tags/DesignPattern/"/>
+    
+  </entry>
   
   <entry>
     <title>IO文件拷贝与对接流</title>
