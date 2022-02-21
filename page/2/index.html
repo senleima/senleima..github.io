@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>Archives |  senleima</title>
+      <title> senleima</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -58,259 +58,299 @@
     
       
     <main class="content on">
-      <section class="outer">
+      
+<section class="cover">
+    
+      
+      <a class="forkMe" href="https://github.com/senleima"
+        target="_blank"><img width="149" height="149" src="/images/forkme.png"
+          class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
+    
+  <div class="cover-frame">
+    <div class="bg-box">
+      <img src="/images/cover1.jpg" alt="image frame" />
+    </div>
+    <div class="cover-inner text-center text-white">
+      <h1><a href="/">senleima</a></h1>
+      <div id="subtitle-box">
+        
+        <span id="subtitle"></span>
+        
+      </div>
+      <div>
+        
+      </div>
+    </div>
+  </div>
+  <div class="cover-learn-more">
+    <a href="javascript:void(0)" class="anchor"><i class="ri-arrow-down-line"></i></a>
+  </div>
+</section>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js"></script>
+
+
+<!-- Subtitle -->
+
+  <script>
+    try {
+      var typed = new Typed("#subtitle", {
+        strings: ['欢迎来到Senley的博客', '愿你一生努力，一生被爱', '想要的都拥有，得不到的都释怀'],
+        startDelay: 0,
+        typeSpeed: 200,
+        loop: true,
+        backSpeed: 100,
+        showCursor: true
+      });
+    } catch (err) {
+      console.log(err)
+    }
+  </script>
   
+<div id="main">
+  <section class="outer">
+  
+  
+  
+
+<div class="notice" style="margin-top:50px">
+    <i class="ri-heart-fill"></i>
+    <div class="notice-content" id="broad"></div>
+</div>
+<script type="text/javascript">
+    fetch('https://v1.hitokoto.cn')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("broad").innerHTML = data.hitokoto;
+        })
+        .catch(console.error)
+</script>
+
+<style>
+    .notice {
+        padding: 20px;
+        border: 1px dashed #e6e6e6;
+        color: #969696;
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        background: #fbfbfb50;
+        border-radius: 10px;
+    }
+
+    .notice i {
+        float: left;
+        color: #999;
+        font-size: 16px;
+        padding-right: 10px;
+        vertical-align: middle;
+        margin-top: -2px;
+    }
+
+    .notice-content {
+        display: initial;
+        vertical-align: middle;
+    }
+</style>
   
   <article class="articles">
     
     
-    <h1 class="page-type-title">Archives</h1>
     
     
-  
-  
-  
-  
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2022" class="archive-year">2022</a>
+    <article
+  id="post-自定义一个ArrayList"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/"
+    >自定义一个ArrayList</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/" class="article-date">
+  <time datetime="2021-11-07T13:52:28.000Z" itemprop="datePublished">2021-11-07</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
     </div>
-    <div class="archives">
       
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2022/02/22/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E7%AE%80%E5%8D%95%E6%A8%A1%E6%8B%9F/" class="archive-article-date">
-  <time datetime="2022-02-21T16:36:03.000Z" itemprop="datePublished">02/22</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
        
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2022/02/22/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E7%AE%80%E5%8D%95%E6%A8%A1%E6%8B%9F/"
-    >多线程的实现方式及简单模拟</a> 
-</h2>
- 
+  <h1 id="自定义一个ArrayList"><a href="#自定义一个ArrayList" class="headerlink" title="自定义一个ArrayList"></a>自定义一个ArrayList</h1><h2 id="ArrayList特点和底层实现"><a href="#ArrayList特点和底层实现" class="headerlink" title="ArrayList特点和底层实现"></a>ArrayList特点和底层实现</h2><p>ArrayList底层是用数组实现的存储。 特点：查询效率高，增删效率低，线程不安全。查看源码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071028176.png" alt="自定义一个ArrayList1"></p>
+<p>可以看出ArrayList底层使用Object数组来存储元素数据。所有的方法，都围绕这个核心的Object数组来开展。</p>
+<p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
+<h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2022/01/14/%E8%A3%85%E9%A5%B0%E5%99%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%90%86%E8%A7%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
-  <time datetime="2022-01-13T17:22:05.000Z" itemprop="datePublished">01/14</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2022/01/14/%E8%A3%85%E9%A5%B0%E5%99%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%90%86%E8%A7%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0/"
-    >装饰器设计模式的理解与实现</a> 
-</h2>
- 
+import javax.management.RuntimeErrorException;
 
-    </header>
+/**
+ * 自定义实现一个ArrayList,体会底层原理
+ * @author Senley
+ *
+ */
+public class MslArrayList&lt;E&gt; &#123;
     
+    private Object[] elementData;
+    private int size;
+    private static final int DEFALT_CAPACITY = 10;
     
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/" class="archive-article-date">
-  <time datetime="2022-01-01T08:01:06.000Z" itemprop="datePublished">01/01</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/"
-    >IO文件拷贝与对接流</a> 
-</h2>
+    public MslArrayList() &#123;
+        elementData = new Object[DEFALT_CAPACITY];
+    &#125;
+    
+    public MslArrayList(int capacity) &#123;
+        if(capacity&lt;0) &#123;
+            throw new RuntimeException(&quot;容器的容量不能为负数&quot;);
+        &#125;else if(capacity==0) &#123;
+            elementData = new Object[DEFALT_CAPACITY];
+        &#125;else &#123;
+            elementData = new Object[capacity];
+        &#125;
+    &#125;
+    
+    public int size() &#123;
+        return size;
+    &#125;
+    
+    public boolean isEmpty() &#123;
+        return size==0?true:false;
+    &#125;
+    
+    public void add(E element) &#123;
+        //什么时候扩容
+        if(size == elementData.length) &#123;
+            //扩容操作
+            Object[] newArray = new Object[elementData.length + (elementData.length&gt;&gt;1)];//10--&gt;10+10/2
+            System.arraycopy(elementData, 0, newArray, 0, elementData.length);
+            elementData = newArray;        
+        &#125;
+        elementData[size++] = element;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        return (E) elementData[index];
+    &#125;
+    
+    public void set(E element,int index) &#123;
+        checkRange(index);
+        elementData[index] = element;
+    &#125;
+    
+    public void checkRange(int index) &#123;
+        //索引合法判断[0,size)
+        if(index&lt;0 || index&gt;size-1) &#123;
+            //不合法
+            throw new RuntimeException(&quot;索引不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    public void remove(E element) &#123;
+        //将element和所有元素挨个比较,获得第一个比较为true的,返回.
+        for(int i=0;i&lt;size;i++) &#123;
+            if(element.equals(get(i))) &#123;//容器中所有的比较操作都是用的equals而不是==
+                //将该元素从此处移除
+                remove(i);
+            &#125;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        int numMoved = elementData.length-index-1;
+        if(numMoved&gt;0) &#123;
+            System.arraycopy(elementData, index+1, elementData, index, elementData.length-index-1);
+        &#125;
+        elementData[--size] = null;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(int i=0;i&lt;size;i++) &#123;
+            sb.append(elementData[i]+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+    public static void main(String[] args) &#123;
+        MslArrayList m = new MslArrayList(20);
+        for(int i=0;i&lt;40;i++) &#123;
+            m.add(&quot;senley&quot;+i);
+        &#125;
+        System.out.println(m);
+        m.set(&quot;test&quot;, 10);
+        System.out.println(m.get(10));
+        m.remove(3);
+        System.out.println(m);
+        m.remove(&quot;test&quot;);
+        System.out.println(m);
+        System.out.println(m.size);
+        System.out.println(m.isEmpty());
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+test
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+38
+false
+</code></pre>
  
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-  
-  </div>
-  </div>
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2021" class="archive-year">2021</a>
-    </div>
-    <div class="archives">
-      
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/" class="archive-article-date">
-  <time datetime="2021-11-26T15:40:12.000Z" itemprop="datePublished">11/26</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/26/%E4%BD%BF%E7%94%A8%E9%80%92%E5%BD%92%E5%8F%8A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E7%BB%9F%E8%AE%A1%E6%96%87%E4%BB%B6%E5%A4%B9%E5%A4%A7%E5%B0%8F/"
-    >使用递归及面向对象思想统计文件夹大小</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/" class="archive-article-date">
-  <time datetime="2021-11-21T17:52:12.000Z" itemprop="datePublished">11/22</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/"
-    >使用容器存储表格数据</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  <time datetime="2021-11-21T13:09:08.000Z" itemprop="datePublished">11/21</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/"
-    >遍历集合的方法总结</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/" class="archive-article-date">
-  <time datetime="2021-11-18T14:05:03.000Z" itemprop="datePublished">11/18</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/"
-    >自定义一个HashSet</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/" class="archive-article-date">
-  <time datetime="2021-11-14T12:00:08.000Z" itemprop="datePublished">11/14</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/"
-    >自定义一个HashMap</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" class="archive-article-date">
-  <time datetime="2021-11-10T14:38:12.000Z" itemprop="datePublished">11/10</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/10/HashMap%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/"
-    >HashMap底层实现原理</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/" class="archive-article-date">
-  <time datetime="2021-11-08T10:30:06.000Z" itemprop="datePublished">11/08</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/"
-    >自定义一个LinkedList</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
+      <!-- reward -->
       
     </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ArrayList/" rel="tag">ArrayList</a></li></ul>
+
+    </footer>
   </div>
-  
+
+    
+ 
+    
+</article>
+
+    
+  </article>
   
 
   
   <nav class="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/">下一页</a>
+    <a class="extend prev" rel="prev" href="/">上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
   </nav>
   
 </section>
+</div>
+
       <footer class="footer">
   <div class="outer">
     <ul>

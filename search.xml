@@ -1564,4 +1564,566 @@ class Suger extends Decorate&#123;
         <tag>DesignPattern</tag>
       </tags>
   </entry>
+  <entry>
+    <title>多线程的实现方式及简单模拟</title>
+    <url>/2022/02/22/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E7%AE%80%E5%8D%95%E6%A8%A1%E6%8B%9F/</url>
+    <content><![CDATA[<h1 id="多线程的实现方式及简单模拟"><a href="#多线程的实现方式及简单模拟" class="headerlink" title="多线程的实现方式及简单模拟"></a>多线程的实现方式及简单模拟</h1><h2 id="多线程的实现方式"><a href="#多线程的实现方式" class="headerlink" title="多线程的实现方式"></a>多线程的实现方式</h2><ol>
+<li>继承Thread类<ul>
+<li>1、创建：继承Thread + 重写run</li>
+<li>2、启动：创建子类对象 + start</li>
+</ul>
+</li>
+<li>Runnable接口（<strong>避免单继承的局限性，优先使用接口</strong>）<ul>
+<li>1、创建：实现Runnable + 重写run</li>
+<li>2、启动：创建实现类对象 + Thread对象 + start</li>
+</ul>
+</li>
+<li>Callable接口<ul>
+<li>1、创建目标对象</li>
+<li>2、创建执行服务</li>
+<li>3、提交执行</li>
+<li>4、获取结果</li>
+<li>5、关闭服务</li>
+</ul>
+</li>
+</ol>
+<h2 id="多线程的简单模拟"><a href="#多线程的简单模拟" class="headerlink" title="多线程的简单模拟"></a>多线程的简单模拟</h2><h3 id="模拟12306"><a href="#模拟12306" class="headerlink" title="模拟12306"></a>模拟12306</h3><p>代码如下：</p>
+<pre><code class="java">package com.msl.thread;
+/**
+ * 模拟12306
+ * @author Senley
+ *
+ */
+public class Web12306 implements Runnable &#123;
+    //票数
+    private int ticketNums = 99;
+    
+    @Override
+    public void run() &#123;
+        while(true) &#123;
+            if(ticketNums&lt;0) &#123;
+                break;
+            &#125;
+            try &#123;
+                Thread.sleep(200);
+            &#125; catch (InterruptedException e) &#123;
+                e.printStackTrace();
+            &#125;
+            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+ticketNums--);
+        &#125;
+    &#125;
+    
+    public static void main(String[] args) &#123;
+        //一份资源
+        Web12306 web = new Web12306();
+        System.out.println(Thread.currentThread().getName());
+        //多个代理
+        new Thread(web,&quot;码畜&quot;).start();
+        new Thread(web,&quot;码农&quot;).start();
+        new Thread(web,&quot;码蟥&quot;).start();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">main
+码畜--&gt;99
+码蟥--&gt;97
+码农--&gt;98
+码农--&gt;96
+码蟥--&gt;96
+码畜--&gt;96
+码畜--&gt;95
+码农--&gt;95
+码蟥--&gt;95
+码畜--&gt;94
+码农--&gt;94
+码蟥--&gt;93
+码蟥--&gt;92
+码农--&gt;91
+码畜--&gt;90
+码畜--&gt;89
+码农--&gt;88
+码蟥--&gt;88
+码蟥--&gt;87
+码畜--&gt;86
+码农--&gt;85
+码蟥--&gt;84
+码农--&gt;84
+码畜--&gt;83
+码畜--&gt;82
+码蟥--&gt;82
+码农--&gt;82
+码蟥--&gt;80
+码农--&gt;81
+码畜--&gt;81
+码畜--&gt;79
+码蟥--&gt;78
+码农--&gt;79
+码农--&gt;77
+码畜--&gt;77
+码蟥--&gt;77
+码畜--&gt;76
+码农--&gt;74
+码蟥--&gt;75
+码农--&gt;73
+码蟥--&gt;72
+码畜--&gt;73
+码农--&gt;71
+码畜--&gt;71
+码蟥--&gt;70
+码农--&gt;69
+码蟥--&gt;68
+码畜--&gt;69
+码蟥--&gt;66
+码农--&gt;67
+码畜--&gt;65
+码蟥--&gt;62
+码农--&gt;63
+码畜--&gt;64
+码畜--&gt;61
+码蟥--&gt;60
+码农--&gt;59
+码畜--&gt;58
+码蟥--&gt;57
+码农--&gt;58
+码农--&gt;56
+码畜--&gt;56
+码蟥--&gt;56
+码蟥--&gt;55
+码农--&gt;55
+码畜--&gt;54
+码蟥--&gt;53
+码农--&gt;51
+码畜--&gt;52
+码畜--&gt;50
+码蟥--&gt;50
+码农--&gt;50
+码农--&gt;48
+码蟥--&gt;49
+码畜--&gt;47
+码畜--&gt;44
+码农--&gt;45
+码蟥--&gt;46
+码畜--&gt;43
+码农--&gt;41
+码蟥--&gt;42
+码农--&gt;39
+码畜--&gt;40
+码蟥--&gt;40
+码畜--&gt;38
+码农--&gt;38
+码蟥--&gt;38
+码畜--&gt;37
+码农--&gt;37
+码蟥--&gt;37
+码蟥--&gt;35
+码农--&gt;35
+码畜--&gt;36
+码畜--&gt;34
+码蟥--&gt;34
+码农--&gt;34
+码农--&gt;33
+码畜--&gt;33
+码蟥--&gt;33
+码蟥--&gt;32
+码农--&gt;32
+码畜--&gt;32
+码畜--&gt;31
+码农--&gt;31
+码蟥--&gt;31
+码蟥--&gt;30
+码畜--&gt;30
+码农--&gt;30
+码农--&gt;29
+码蟥--&gt;28
+码畜--&gt;29
+码畜--&gt;27
+码农--&gt;26
+码蟥--&gt;27
+码畜--&gt;25
+码农--&gt;25
+码蟥--&gt;25
+码蟥--&gt;24
+码农--&gt;23
+码畜--&gt;23
+码蟥--&gt;22
+码农--&gt;22
+码畜--&gt;22
+码畜--&gt;21
+码蟥--&gt;19
+码农--&gt;20
+码蟥--&gt;18
+码畜--&gt;18
+码农--&gt;17
+码蟥--&gt;16
+码农--&gt;15
+码畜--&gt;14
+码畜--&gt;13
+码农--&gt;13
+码蟥--&gt;13
+码蟥--&gt;12
+码农--&gt;11
+码畜--&gt;12
+码农--&gt;10
+码畜--&gt;9
+码蟥--&gt;8
+码农--&gt;7
+码畜--&gt;6
+码蟥--&gt;7
+码畜--&gt;5
+码农--&gt;3
+码蟥--&gt;4
+码蟥--&gt;2
+码农--&gt;2
+码畜--&gt;2
+码畜--&gt;0
+码农--&gt;1
+码蟥--&gt;1
+</code></pre>
+<h3 id="模拟龟兔赛跑"><a href="#模拟龟兔赛跑" class="headerlink" title="模拟龟兔赛跑"></a>模拟龟兔赛跑</h3><p>代码如下：</p>
+<pre><code class="java">package com.msl.thread;
+/**
+ * 模拟龟兔赛跑
+ * @author Senley
+ *
+ */
+public class Racer implements Runnable&#123;
+    private String winner;//胜利者
+    @Override
+    public void run() &#123;
+        for(int steps=1;steps&lt;=100;steps++) &#123;
+            //模拟休息
+            if(Thread.currentThread().getName().equals(&quot;rabbit&quot;)&amp;&amp;steps%10==0) &#123;
+                try &#123;
+                    Thread.sleep(100);
+                &#125; catch (InterruptedException e) &#123;
+                    e.printStackTrace();
+                &#125;
+            &#125;
+            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+steps);
+            //比赛是否结束
+            boolean flag = gameOver(steps);
+            if(flag) &#123;
+                break;
+            &#125;
+        &#125;
+    &#125;
+    
+    private boolean gameOver(int steps) &#123;
+        if(winner!=null) &#123;//存在胜利者
+            return true;
+        &#125;else &#123;
+            if(steps==100) &#123;
+                winner = Thread.currentThread().getName();
+                System.out.println(&quot;winner--&gt;&quot;+winner);
+                return true;
+            &#125;
+        &#125;
+        return false;
+    &#125;
+    
+    public static void main(String[] args) &#123;
+        Racer racer = new Racer();
+        new Thread(racer,&quot;tortoise&quot;).start();
+        new Thread(racer,&quot;rabbit&quot;).start();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">tortoise--&gt;1
+rabbit--&gt;1
+rabbit--&gt;2
+rabbit--&gt;3
+rabbit--&gt;4
+rabbit--&gt;5
+rabbit--&gt;6
+rabbit--&gt;7
+rabbit--&gt;8
+rabbit--&gt;9
+tortoise--&gt;2
+tortoise--&gt;3
+tortoise--&gt;4
+tortoise--&gt;5
+tortoise--&gt;6
+tortoise--&gt;7
+tortoise--&gt;8
+tortoise--&gt;9
+tortoise--&gt;10
+tortoise--&gt;11
+tortoise--&gt;12
+tortoise--&gt;13
+tortoise--&gt;14
+tortoise--&gt;15
+tortoise--&gt;16
+tortoise--&gt;17
+tortoise--&gt;18
+tortoise--&gt;19
+tortoise--&gt;20
+tortoise--&gt;21
+tortoise--&gt;22
+tortoise--&gt;23
+tortoise--&gt;24
+tortoise--&gt;25
+tortoise--&gt;26
+tortoise--&gt;27
+tortoise--&gt;28
+tortoise--&gt;29
+tortoise--&gt;30
+tortoise--&gt;31
+tortoise--&gt;32
+tortoise--&gt;33
+tortoise--&gt;34
+tortoise--&gt;35
+tortoise--&gt;36
+tortoise--&gt;37
+tortoise--&gt;38
+tortoise--&gt;39
+tortoise--&gt;40
+tortoise--&gt;41
+tortoise--&gt;42
+tortoise--&gt;43
+tortoise--&gt;44
+tortoise--&gt;45
+tortoise--&gt;46
+tortoise--&gt;47
+tortoise--&gt;48
+tortoise--&gt;49
+tortoise--&gt;50
+tortoise--&gt;51
+tortoise--&gt;52
+tortoise--&gt;53
+tortoise--&gt;54
+tortoise--&gt;55
+tortoise--&gt;56
+tortoise--&gt;57
+tortoise--&gt;58
+tortoise--&gt;59
+tortoise--&gt;60
+tortoise--&gt;61
+tortoise--&gt;62
+tortoise--&gt;63
+tortoise--&gt;64
+tortoise--&gt;65
+tortoise--&gt;66
+tortoise--&gt;67
+tortoise--&gt;68
+tortoise--&gt;69
+tortoise--&gt;70
+tortoise--&gt;71
+tortoise--&gt;72
+tortoise--&gt;73
+tortoise--&gt;74
+tortoise--&gt;75
+tortoise--&gt;76
+tortoise--&gt;77
+tortoise--&gt;78
+tortoise--&gt;79
+tortoise--&gt;80
+tortoise--&gt;81
+tortoise--&gt;82
+tortoise--&gt;83
+tortoise--&gt;84
+tortoise--&gt;85
+tortoise--&gt;86
+tortoise--&gt;87
+tortoise--&gt;88
+tortoise--&gt;89
+tortoise--&gt;90
+tortoise--&gt;91
+tortoise--&gt;92
+tortoise--&gt;93
+tortoise--&gt;94
+tortoise--&gt;95
+tortoise--&gt;96
+tortoise--&gt;97
+tortoise--&gt;98
+tortoise--&gt;99
+tortoise--&gt;100
+winner--&gt;tortoise
+rabbit--&gt;10
+</code></pre>
+<h3 id="模拟龟兔赛跑（使用Callable）"><a href="#模拟龟兔赛跑（使用Callable）" class="headerlink" title="模拟龟兔赛跑（使用Callable）"></a>模拟龟兔赛跑（使用Callable）</h3><p>代码如下：</p>
+<pre><code class="java">package com.msl.thread;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+/**
+ * 模拟龟兔赛跑
+ * @author Senley
+ *
+ */
+public class CRacer implements Callable&lt;Integer&gt;&#123;
+    private String winner;//胜利者
+    @Override
+    public Integer call() throws Exception &#123;
+        for(int steps=1;steps&lt;=100;steps++) &#123;
+            //模拟休息
+            if(Thread.currentThread().getName().equals(&quot;pool-1-thread-1&quot;)&amp;&amp;steps%10==0) &#123;
+                Thread.sleep(100);
+            &#125;
+            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+steps);
+            //比赛是否结束
+            boolean flag = gameOver(steps);
+            if(flag) &#123;
+                return steps;
+            &#125;
+        &#125;
+        return null;
+    &#125;
+    
+    private boolean gameOver(int steps) &#123;
+        if(winner!=null) &#123;//存在胜利者
+            return true;
+        &#125;else &#123;
+            if(steps==100) &#123;
+                winner = Thread.currentThread().getName();
+                System.out.println(&quot;winner--&gt;&quot;+winner);
+                return true;
+            &#125;
+        &#125;
+        return false;
+    &#125;
+    
+    public static void main(String[] args) throws InterruptedException, ExecutionException &#123;
+        CRacer racer = new CRacer();
+        //创建执行服务: 
+        ExecutorService  ser=Executors.newFixedThreadPool(2);
+        //提交执行: 
+        Future&lt;Integer&gt; result1 =ser.submit(racer) ;
+        Future&lt;Integer&gt; result2 =ser.submit(racer) ;
+        //获取结果:  
+        Integer r1 =result1.get();
+        Integer r2 =result2.get();
+        System.out.println(r1+&quot;--&gt;&quot;+r2);
+        //关闭服务:  
+        ser.shutdownNow();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">pool-1-thread-2--&gt;1
+pool-1-thread-1--&gt;1
+pool-1-thread-1--&gt;2
+pool-1-thread-1--&gt;3
+pool-1-thread-1--&gt;4
+pool-1-thread-1--&gt;5
+pool-1-thread-1--&gt;6
+pool-1-thread-1--&gt;7
+pool-1-thread-1--&gt;8
+pool-1-thread-1--&gt;9
+pool-1-thread-2--&gt;2
+pool-1-thread-2--&gt;3
+pool-1-thread-2--&gt;4
+pool-1-thread-2--&gt;5
+pool-1-thread-2--&gt;6
+pool-1-thread-2--&gt;7
+pool-1-thread-2--&gt;8
+pool-1-thread-2--&gt;9
+pool-1-thread-2--&gt;10
+pool-1-thread-2--&gt;11
+pool-1-thread-2--&gt;12
+pool-1-thread-2--&gt;13
+pool-1-thread-2--&gt;14
+pool-1-thread-2--&gt;15
+pool-1-thread-2--&gt;16
+pool-1-thread-2--&gt;17
+pool-1-thread-2--&gt;18
+pool-1-thread-2--&gt;19
+pool-1-thread-2--&gt;20
+pool-1-thread-2--&gt;21
+pool-1-thread-2--&gt;22
+pool-1-thread-2--&gt;23
+pool-1-thread-2--&gt;24
+pool-1-thread-2--&gt;25
+pool-1-thread-2--&gt;26
+pool-1-thread-2--&gt;27
+pool-1-thread-2--&gt;28
+pool-1-thread-2--&gt;29
+pool-1-thread-2--&gt;30
+pool-1-thread-2--&gt;31
+pool-1-thread-2--&gt;32
+pool-1-thread-2--&gt;33
+pool-1-thread-2--&gt;34
+pool-1-thread-2--&gt;35
+pool-1-thread-2--&gt;36
+pool-1-thread-2--&gt;37
+pool-1-thread-2--&gt;38
+pool-1-thread-2--&gt;39
+pool-1-thread-2--&gt;40
+pool-1-thread-2--&gt;41
+pool-1-thread-2--&gt;42
+pool-1-thread-2--&gt;43
+pool-1-thread-2--&gt;44
+pool-1-thread-2--&gt;45
+pool-1-thread-2--&gt;46
+pool-1-thread-2--&gt;47
+pool-1-thread-2--&gt;48
+pool-1-thread-2--&gt;49
+pool-1-thread-2--&gt;50
+pool-1-thread-2--&gt;51
+pool-1-thread-2--&gt;52
+pool-1-thread-2--&gt;53
+pool-1-thread-2--&gt;54
+pool-1-thread-2--&gt;55
+pool-1-thread-2--&gt;56
+pool-1-thread-2--&gt;57
+pool-1-thread-2--&gt;58
+pool-1-thread-2--&gt;59
+pool-1-thread-2--&gt;60
+pool-1-thread-2--&gt;61
+pool-1-thread-2--&gt;62
+pool-1-thread-2--&gt;63
+pool-1-thread-2--&gt;64
+pool-1-thread-2--&gt;65
+pool-1-thread-2--&gt;66
+pool-1-thread-2--&gt;67
+pool-1-thread-2--&gt;68
+pool-1-thread-2--&gt;69
+pool-1-thread-2--&gt;70
+pool-1-thread-2--&gt;71
+pool-1-thread-2--&gt;72
+pool-1-thread-2--&gt;73
+pool-1-thread-2--&gt;74
+pool-1-thread-2--&gt;75
+pool-1-thread-2--&gt;76
+pool-1-thread-2--&gt;77
+pool-1-thread-2--&gt;78
+pool-1-thread-2--&gt;79
+pool-1-thread-2--&gt;80
+pool-1-thread-2--&gt;81
+pool-1-thread-2--&gt;82
+pool-1-thread-2--&gt;83
+pool-1-thread-2--&gt;84
+pool-1-thread-2--&gt;85
+pool-1-thread-2--&gt;86
+pool-1-thread-2--&gt;87
+pool-1-thread-2--&gt;88
+pool-1-thread-2--&gt;89
+pool-1-thread-2--&gt;90
+pool-1-thread-2--&gt;91
+pool-1-thread-2--&gt;92
+pool-1-thread-2--&gt;93
+pool-1-thread-2--&gt;94
+pool-1-thread-2--&gt;95
+pool-1-thread-2--&gt;96
+pool-1-thread-2--&gt;97
+pool-1-thread-2--&gt;98
+pool-1-thread-2--&gt;99
+pool-1-thread-2--&gt;100
+winner--&gt;pool-1-thread-2
+pool-1-thread-1--&gt;10
+10--&gt;100
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Thread</tag>
+      </tags>
+  </entry>
 </search>
