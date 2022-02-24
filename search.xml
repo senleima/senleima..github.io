@@ -2126,4 +2126,121 @@ pool-1-thread-1--&gt;10
         <tag>Thread</tag>
       </tags>
   </entry>
+  <entry>
+    <title>多线程synchronized实现简单的影院购票功能</title>
+    <url>/2022/02/25/%E5%A4%9A%E7%BA%BF%E7%A8%8Bsynchronized%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E5%BD%B1%E9%99%A2%E8%B4%AD%E7%A5%A8%E5%8A%9F%E8%83%BD/</url>
+    <content><![CDATA[<h1 id="多线程synchronized实现简单的影院购票功能"><a href="#多线程synchronized实现简单的影院购票功能" class="headerlink" title="多线程synchronized实现简单的影院购票功能"></a>多线程synchronized实现简单的影院购票功能</h1><p>由于同一进程的多个线程共享同一块存储空间，在带来方便的同时，也带来了访问冲突的问题。解决该问题的机制是synchronized关键字，它包括两种用法：synchronized 方法和 synchronized 块。</p>
+<h2 id="synchronized-方法"><a href="#synchronized-方法" class="headerlink" title="synchronized 方法"></a><strong>synchronized 方法</strong></h2><p> 通过在方法声明中加入 synchronized关键字来声明，语法如下：</p>
+<pre><code class="java">public synchronized void accessVal(int newVal);
+</code></pre>
+<p>synchronized 方法控制对“对象的类成员变量”的访问：每个对象对应一把锁，每个 synchronized 方法都必须获得调用该方法的对象的锁方能执行，否则所属线程阻塞，方法一旦执行，就独占该锁，直到从该方法返回时才将锁释放，此后被阻塞的线程方能获得该锁，重新进入可执行状态。</p>
+<h2 id="synchronized-块"><a href="#synchronized-块" class="headerlink" title="synchronized 块"></a><strong>synchronized 块</strong></h2><p>synchronized 方法的缺陷：若将一个大的方法声明为synchronized 将会大大影响效率。</p>
+<p>Java 为我们提供了更好的解决办法，那就是 synchronized 块。 块可以让我们精确地控制到具体的“成员变量”，缩小同步的范围，提高效率。</p>
+<p>synchronized 块：通过 synchronized关键字来声明synchronized 块，语法如下：</p>
+<pre><code class="java">synchronized(syncObject)
+　  &#123; 
+　　 //允许访问控制的代码 
+　  &#125;
+</code></pre>
+<h2 id="实现简单的影院购票功能"><a href="#实现简单的影院购票功能" class="headerlink" title="实现简单的影院购票功能"></a>实现简单的影院购票功能</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.syn;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 实现简单的影院购票功能 - 快乐影院
+ * @author Senley
+ *
+ */
+public class HappyCinema2 &#123;
+    public static void main(String[] args) &#123;
+        //可用位置
+        List&lt;Integer&gt; available = new ArrayList&lt;Integer&gt;();
+        available.add(1);
+        available.add(2);
+        available.add(5);
+        available.add(6);
+        available.add(7);
+        //顾客需要的位置
+        List&lt;Integer&gt; seats1 = new ArrayList&lt;Integer&gt;();
+        seats1.add(1);
+        seats1.add(2);
+        List&lt;Integer&gt; seats2 = new ArrayList&lt;Integer&gt;();
+        seats2.add(3);
+        seats2.add(6);
+        
+        MslCinema m = new MslCinema(available, &quot;Happy Cinema&quot;);
+        new Thread(new HappyCustomer(m, seats1),&quot;张三&quot;).start();
+        new Thread(new HappyCustomer(m, seats2),&quot;李四&quot;).start();
+    &#125;
+    
+&#125;
+
+//影院
+class MslCinema&#123;
+    List&lt;Integer&gt; available; //可用的位置
+    String name; //名称
+    
+    public MslCinema(List&lt;Integer&gt; available, String name) &#123;
+        this.available = available;
+        this.name = name;
+    &#125;
+    
+    //购票
+    public boolean bookTickets(List&lt;Integer&gt; seats) &#123;
+        System.out.println(&quot;欢迎光临&quot;+this.name+&quot;，可用位置为：&quot;+available);
+        List&lt;Integer&gt; copy = new ArrayList&lt;Integer&gt;();
+        copy.addAll(available);
+        //相减
+        copy.removeAll(seats);
+        //判断大小
+        if(available.size()-seats.size()!=copy.size()) &#123;
+            return false;
+        &#125;
+        //成功
+        available = copy;
+        return true;
+    &#125;
+&#125;
+
+//顾客
+class HappyCustomer implements Runnable&#123;
+    MslCinema cinema;
+    List&lt;Integer&gt; seats;
+
+    public HappyCustomer(MslCinema cinema, List&lt;Integer&gt; seats) &#123;
+        super();
+        this.cinema = cinema;
+        this.seats = seats;
+    &#125;
+
+    @Override
+    public void run() &#123;
+        synchronized(cinema) &#123;
+            boolean flag = cinema.bookTickets(seats);
+            if(flag) &#123;
+                System.out.println(&quot;出票成功--&quot;+Thread.currentThread().getName()+&quot;--位置为&quot;+seats);
+            &#125;else &#123;
+                System.out.println(&quot;出票失败--&quot;+Thread.currentThread().getName()+&quot;--位置不够&quot;);        
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">欢迎光临Happy Cinema，可用位置为：[1, 2, 5, 6, 7]
+出票成功--张三--位置为[1, 2]
+欢迎光临Happy Cinema，可用位置为：[5, 6, 7]
+出票失败--李四--位置不够
+</code></pre>
+<p>“synchronized (cinema)” 意味着线程需要获得cinema对象的“锁”才有资格运行同步块中的代码。cinema对象的“锁”也称为“互斥锁”，在同一时刻只能被一个线程使用。A线程拥有锁，则可以调用“同步块”中的代码；B线程没有锁，则进入cinema对象的“锁池队列”等待，直到A线程使用完毕释放了cinema对象的锁，B线程得到锁才可以开始调用“同步块”中的代码。</p>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Thread</tag>
+      </tags>
+  </entry>
 </search>

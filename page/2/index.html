@@ -161,6 +161,199 @@
     
     
     <article
+  id="post-自定义一个LinkedList"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/"
+    >自定义一个LinkedList</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/" class="article-date">
+  <time datetime="2021-11-08T10:30:06.000Z" itemprop="datePublished">2021-11-08</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="自定义一个LinkedList"><a href="#自定义一个LinkedList" class="headerlink" title="自定义一个LinkedList"></a>自定义一个LinkedList</h1><h2 id="LinkedList特点和底层实现"><a href="#LinkedList特点和底层实现" class="headerlink" title="LinkedList特点和底层实现"></a>LinkedList特点和底层实现</h2><p>LinkedList底层用双向链表实现的存储。特点：查询效率低，增删效率高，线程不安全。</p>
+<p>双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。 所以，从双向链表中的任意一个节点开始，都可以很方便地找到所有节点。下图为LinkedList的存储结构图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A81.png" alt="自定义一个链表1"></p>
+<p>每个节点都应该有3部分内容：</p>
+<pre><code class="java">class  Node &#123;
+        Node  previous;     //前一个节点
+        Object  element;    //本节点保存的数据
+        Node  next;         //后一个节点
+&#125;
+</code></pre>
+<p>查看LinkedList的源码，可以看到里面包含了双向链表的相关代码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A82.png" alt="自定义一个链表2"></p>
+<h2 id="自定义一个LinkedList，体会底层原理"><a href="#自定义一个LinkedList，体会底层原理" class="headerlink" title="自定义一个LinkedList，体会底层原理"></a>自定义一个LinkedList，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+/**
+ * 自定义实现一个链表
+ * @author Senley
+ */
+public class MslLinkedList&lt;E&gt; &#123;
+    
+    private Node first;
+    private Node last;
+    private int size;
+    
+    public static void main(String[] args) &#123;
+        MslLinkedList&lt;String&gt; list = new MslLinkedList();
+        list.add(&quot;a&quot;);
+        list.add(&quot;b&quot;);
+        list.add(&quot;c&quot;);
+        System.out.println(list);
+        System.out.println(list.get(2));
+        list.remove(0);
+        System.out.println(list);
+        list.add(1, &quot;插入&quot;);
+        System.out.println(list);
+    &#125;
+    
+    public void add(int index,E element) &#123;
+        checkRange(index);
+        Node newNode = new Node(element);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            up.next = newNode;
+            newNode.previous = up;
+            newNode.next = temp;
+            temp.previous = newNode;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            Node down = temp.next;
+            if(up!=null) &#123;
+                up.next = down;
+            &#125;
+            if(down!=null) &#123;
+                down.previous = up;
+            &#125;
+            //被删除的元素是第一个元素时
+            if(index==0) &#123;
+                first = down;
+            &#125;
+            //被删除的元素是最后一个元素时
+            if(index==size-1) &#123;
+                last = up;
+            &#125;
+            size--;
+        &#125;
+    &#125;
+    
+    public void add(E element) &#123;
+        Node node = new Node(element);
+        if(first==null) &#123;
+//            node.previous = null;
+//            node.next = null;
+            first = node;
+            last = node;
+        &#125;else &#123;
+            node.previous = last;
+            node.next = null;
+            last.next = node;
+            last = node;
+        &#125;
+        size++;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        return temp!=null?(E)temp.element:null;
+    &#125;
+    
+    private void checkRange(int index) &#123;
+        if(index&lt;0 || index&gt;size-1) &#123;
+            throw new RuntimeException(&quot;索引数字不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    private Node getNode(int index) &#123;
+        checkRange(index);
+        Node temp = null;
+        if(index&lt;=(size&gt;&gt;1)) &#123;//size&gt;&gt;1相当于除以2
+            temp = first;
+            for(int i=0;i&lt;index;i++) &#123;
+                temp = temp.next;
+            &#125;
+        &#125;else &#123;
+            temp = last;
+            for(int i=size-1;i&gt;index;i--) &#123;
+                temp = temp.previous;
+            &#125;
+        &#125; 
+        return temp;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //[a b c] first = a, last = c
+        StringBuilder sb = new StringBuilder(&quot;[&quot;);
+        Node temp = first;
+        while(temp!=null) &#123;
+            sb.append(temp.element+&quot;,&quot;);
+            temp = temp.next;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[a,b,c]
+c
+[b,c]
+[b,插入,c]
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LinkedList/" rel="tag">LinkedList</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-自定义一个ArrayList"
   class="article article-type-post"
   itemscope
