@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title> senleima</title>
+      <title>多线程可重入锁的原理实现 |  senleima</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -67,17 +67,31 @@
   data-scroll-reveal
 >
   <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  多线程可重入锁的原理实现
+</h1>
+ 
+
+      
+    </header>
      
     <div class="article-meta">
       <a href="/2022/02/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81%E7%9A%84%E5%8E%9F%E7%90%86%E5%AE%9E%E7%8E%B0/" class="article-date">
-  <time datetime="2022-02-27T16:27:06.125Z" itemprop="datePublished">2022-02-28</time>
-</a>   
+  <time datetime="2022-02-27T16:39:02.000Z" itemprop="datePublished">2022-02-28</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+  
 <div class="word_count">
     <span class="post-time">
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">325</span>
+            <span class="post-count">301</span>
         </span>
     </span>
 
@@ -101,8 +115,7 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>title: 多线程可重入锁的原理实现<br>date: 2022-02-28 00:14:01<br>categories: Java基础<br>tags: Thread</p>
-<h1 id="多线程可重入锁的原理实现"><a href="#多线程可重入锁的原理实现" class="headerlink" title="多线程可重入锁的原理实现"></a>多线程可重入锁的原理实现</h1><h2 id="可重入锁"><a href="#可重入锁" class="headerlink" title="可重入锁"></a>可重入锁</h2><p>锁作为并发共享数据保证一致性的工具，大多数内置锁都是可重入的，也就是说，如果某个线程试图获取一个已经由它自己持有的锁时，那么这个请求会立刻成功，并且会将这个锁的计数值加1，而当线程退出同步代码块时，计数器将会递减，当计数值等于0时，锁释放。如果没有可重入锁的支持，在第二次企图获得锁时将会进入死锁状态。</p>
+  <h1 id="多线程可重入锁的原理实现"><a href="#多线程可重入锁的原理实现" class="headerlink" title="多线程可重入锁的原理实现"></a>多线程可重入锁的原理实现</h1><h2 id="可重入锁"><a href="#可重入锁" class="headerlink" title="可重入锁"></a>可重入锁</h2><p>锁作为并发共享数据保证一致性的工具，大多数内置锁都是可重入的，也就是说，如果某个线程试图获取一个已经由它自己持有的锁时，那么这个请求会立刻成功，并且会将这个锁的计数值加1，而当线程退出同步代码块时，计数器将会递减，当计数值等于0时，锁释放。如果没有可重入锁的支持，在第二次企图获得锁时将会进入死锁状态。</p>
 <p>可重入锁随处可见，如synchronized 和ReentrantLock。</p>
 <h2 id="原理实现"><a href="#原理实现" class="headerlink" title="原理实现"></a><strong>原理实现</strong></h2><p>手动实现一个可重入锁，代码如下：</p>
 <pre><code class="java">package com.msl.others;
@@ -223,6 +236,8 @@ public class LockTest &#123;
 </div>
 
 <div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Thread/" rel="tag">Thread</a></li></ul>
+
     </footer>
   </div>
 

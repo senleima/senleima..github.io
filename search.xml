@@ -115,6 +115,208 @@
       </tags>
   </entry>
   <entry>
+    <title>IO文件拷贝与对接流</title>
+    <url>/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/</url>
+    <content><![CDATA[<h1 id="IO文件拷贝与对接流"><a href="#IO文件拷贝与对接流" class="headerlink" title="IO文件拷贝与对接流"></a>IO文件拷贝与对接流</h1><h2 id="IO文件拷贝"><a href="#IO文件拷贝" class="headerlink" title="IO文件拷贝"></a>IO文件拷贝</h2><p>IO文件拷贝：文件字节输入输出流。</p>
+<ol>
+<li>创建源</li>
+<li>选择流</li>
+<li>操作</li>
+<li>释放资源</li>
+</ol>
+<p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * 文件拷贝：文件字节输入、输出流
+ * 1、创建源
+ * 2、选择流
+ * 3、操作（写出内容）
+ * 4、释放资源
+ * @author Senley
+ *
+ */
+public class Copy &#123;
+
+    public static void main(String[] args) &#123;
+        copy(&quot;src/com/msl/io/Copy.java&quot;,&quot;copy.txt&quot;);
+    &#125;
+    /**
+     * 文件的拷贝
+     * @param srcPath
+     * @param destPath
+     */
+    public static void copy(String srcPath,String destPath) &#123;
+        //1、创建源
+        File src = new File(srcPath);//源头
+        File dest = new File(destPath);//目的地
+        //2、选择流
+        InputStream is = null;
+        OutputStream os = null;
+        try &#123;
+            is = new FileInputStream(src);
+            os = new FileOutputStream(dest);
+            //3、操作
+            byte[] flush = new byte[1024];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                os.write(flush,0,len);
+            &#125;
+        &#125;catch(FileNotFoundException e)&#123;
+            e.printStackTrace();
+        &#125;catch(IOException e)&#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //释放资源 分别关闭 先打开的后关闭
+            try &#123;
+                if (null != os) &#123;
+                    os.close();
+                &#125; 
+            &#125; catch (Exception e) &#123;
+                e.printStackTrace();
+            &#125;
+            
+            try &#123;
+                if(null!=is) &#123;
+                    is.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
+<h2 id="IO对接流"><a href="#IO对接流" class="headerlink" title="IO对接流"></a>IO对接流</h2><ol>
+<li><p>图片读取到字节数组</p>
+<p>1)图片到程序</p>
+<p>2)程序到字节数组</p>
+</li>
+<li><p>字节数组写出到文件</p>
+<p>1)字节数组到程序</p>
+<p>2)程序到文件</p>
+</li>
+</ol>
+<p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * 1、图片读取到字节数组
+ * 2、字节数组写出到文件
+ * @author Senley
+ *
+ */
+public class IOTest &#123;
+
+    public static void main(String[] args) &#123;
+        //图片转成字节数组
+        byte[] datas = fileToByteArray(&quot;p.png&quot;);
+        System.out.println(datas.length);
+        byteArrayToFile(datas, &quot;p-byte.png&quot;);
+    &#125;
+    
+    /**
+     * 1、图片读取到字节数组
+     * 1)、图片到程序 FileInputStream
+     * 2)、程序到字节数组 ByteArrayOutputStream
+     */
+    public static byte[] fileToByteArray(String filePath) &#123;
+        //1、创建源与目的地
+        File src = new File(filePath);
+        byte[] dest = null;
+        //2、选择流
+        InputStream is = null;
+        ByteArrayOutputStream baos = null;
+        try &#123;
+            is = new FileInputStream(src);
+            baos = new ByteArrayOutputStream();
+            //3、操作（分段读取）
+            byte[] flush = new byte[1024*10];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                baos.write(flush,0,len); //写出到字节数组中
+            &#125;
+            baos.flush();
+            return baos.toByteArray();
+        &#125; catch (FileNotFoundException e) &#123;
+            e.printStackTrace();
+        &#125; catch (IOException e) &#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //4、释放资源
+            try &#123;
+                if(null!=is) &#123;
+                    is.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        return null;
+    &#125;
+    /**
+     * 2、字节数组写出到文件
+     * 1)、字节数组到程序 ByteArrayInputStream
+     * 2)、程序到文件 FileOutputStream
+     */
+    public static void byteArrayToFile(byte[] src,String filePath) &#123;
+        //1、创建源
+        File dest = new File(filePath);
+        //2、选择流
+        InputStream is = null;
+        OutputStream os = null;
+        try &#123;
+            is = new ByteArrayInputStream(src);
+            os = new FileOutputStream(dest);
+            //3、操作（分段读取）
+            byte[] flush = new byte[5];//缓冲容器
+            int len = -1;//接收长度
+            while((len=is.read(flush))!=-1) &#123;
+                os.write(flush,0,len);//写出到文件
+            &#125;
+            os.flush();
+        &#125;catch (IOException e) &#123;
+            e.printStackTrace();
+        &#125;finally &#123;
+            //4、释放资源
+            try &#123;
+                if (null != os) &#123;
+                    os.close();
+                &#125; 
+            &#125; catch (Exception e) &#123;
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>IO</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用容器存储表格数据</title>
     <url>/2021/11/22/%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE/</url>
     <content><![CDATA[<h1 id="使用容器存储表格数据"><a href="#使用容器存储表格数据" class="headerlink" title="使用容器存储表格数据"></a><strong>使用容器存储表格数据</strong></h1><p>使用容器存储以下表格数据。</p>
@@ -305,695 +507,6 @@ id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
       </categories>
       <tags>
         <tag>StoreData</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自定义一个HashSet</title>
-    <url>/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/</url>
-    <content><![CDATA[<h1 id="自定义一个HashSet"><a href="#自定义一个HashSet" class="headerlink" title="自定义一个HashSet"></a>自定义一个HashSet</h1><h2 id="HashSet特点和底层实现"><a href="#HashSet特点和底层实现" class="headerlink" title="HashSet特点和底层实现"></a>HashSet特点和底层实现</h2><ul>
-<li><p>HashSet底层是HashMap；</p>
-</li>
-<li><p>向Hashset中添加元素, 实际上是把这个元素作为键添加到底层的HashMap中；</p>
-</li>
-<li><p>HashSet实际上就是底层HashMap的键的集合。</p>
-</li>
-</ul>
-<p> HashSet是采用哈希算法实现，底层实际是用HashMap实现的(HashSet本质就是一个简化版的HashMap)，因此，查询效率和增删效率都比较高。查看HashSet的源码：</p>
-<pre><code class="java">public class HashSet&lt;E&gt; extends AbstractSet&lt;E&gt; implements Set&lt;E&gt;, Cloneable, java.io.Serializable&#123;
-    static final long serialVersionUID = -5024744406713321676L;
-
-    private transient HashMap&lt;E,Object&gt; map;
-
-    // Dummy value to associate with an Object in the backing Map
-    private static final Object PRESENT = new Object();
-
-    /**
-     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
-     * default initial capacity (16) and load factor (0.75).
-     */
-    public HashSet() &#123;
-        map = new HashMap&lt;&gt;();
-    &#125;
-    
-     /**
-     * Adds the specified element to this set if it is not already present.
-     * More formally, adds the specified element &lt;tt&gt;e&lt;/tt&gt; to this set if
-     * this set contains no element &lt;tt&gt;e2&lt;/tt&gt; such that
-     * &lt;tt&gt;(e==null&amp;nbsp;?&amp;nbsp;e2==null&amp;nbsp;:&amp;nbsp;e.equals(e2))&lt;/tt&gt;.
-     * If this set already contains the element, the call leaves the set
-     * unchanged and returns &lt;tt&gt;false&lt;/tt&gt;.
-     *
-     * @param e element to be added to this set
-     * @return &lt;tt&gt;true&lt;/tt&gt; if this set did not already contain the specified
-     * element
-     */
-    public boolean add(E e) &#123;
-        return map.put(e, PRESENT)==null;
-    &#125;
-    //以下代码省略
-&#125;
-</code></pre>
-<p>可以发现里面有个map属性，这就是HashSet的核心秘密。再看add()方法，可以发现增加一个元素，说白了就是在map中增加一个键值对，键对象就是这个元素，值对象是名为PRESENT的Object对象。说白了就是“往set中加入元素，本质就是把这个元素作为key加入到了内部的map中”。</p>
-<p>由于map中key都是不可重复的，因此，Set天然具有“不可重复”的特性。</p>
-<h2 id="自定义一个HashSet，体会底层原理"><a href="#自定义一个HashSet，体会底层原理" class="headerlink" title="自定义一个HashSet，体会底层原理"></a>自定义一个HashSet，体会底层原理</h2><p>代码如下：</p>
-<pre><code class="java">package com.msl.mycollection;
-
-import java.util.HashMap;
-
-/**
- * 手动实现一个HashSet，深刻理解HashSet底层原理
- * @author Senley
- *
- */
-public class MslHashSet &#123;
-    HashMap map;
-    private static final Object PRESENT = new Object();
-    
-    public static void main(String[] args) &#123;
-        MslHashSet set = new MslHashSet();
-        set.add(&quot;aaa&quot;);
-        set.add(&quot;bbb&quot;);
-        set.add(&quot;ccc&quot;);
-        System.out.println(set);
-    &#125;
-    
-    public MslHashSet()&#123;
-        map = new HashMap();
-    &#125;
-    
-    public int size() &#123;
-        return map.size();
-    &#125;
-    
-    public void add(Object o) &#123;
-        map.put(o, PRESENT);
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        StringBuilder sb = new StringBuilder();
-        sb.append(&quot;[&quot;);
-        for(Object key:map.keySet()) &#123;
-            sb.append(key+&quot;,&quot;);
-        &#125;
-        sb.setCharAt(sb.length()-1, &#39;]&#39;);
-        return sb.toString();
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">[aaa,ccc,bbb]
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>HashSet</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自定义一个HashMap</title>
-    <url>/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/</url>
-    <content><![CDATA[<h1 id="自定义一个HashMap"><a href="#自定义一个HashMap" class="headerlink" title="自定义一个HashMap"></a>自定义一个HashMap</h1><h2 id="HashMap的结构"><a href="#HashMap的结构" class="headerlink" title="HashMap的结构"></a>HashMap的结构</h2><p>在HashMap底层实现原理中，聊过Node&lt;K,V&gt;[]数组的结构，也是HashMap的结构。如下：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E6%95%B0%E7%BB%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node数组存储结构"></p>
-<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code class="java">package com.msl.mycollection;
-/**
- * 用于MslHashMap中
- * @author Senley
- *
- */
-public class Node&lt;K,V&gt; &#123;
-    int hash;
-    K key;
-    V value;
-    Node next;
-&#125;
-</code></pre>
-<h2 id="自定义一个HashMap，体会底层原理"><a href="#自定义一个HashMap，体会底层原理" class="headerlink" title="自定义一个HashMap，体会底层原理"></a>自定义一个HashMap，体会底层原理</h2><p>在上述基础上自定义实现一个HashMap，实现如下简单功能：</p>
-<ol>
-<li>实现put方法增加键值对；</li>
-<li>解决键重复问题和链表生成问题；</li>
-<li>实现toString方法，方便查看Map中的键值对信息；</li>
-<li>实现get方法，根据键对象获得对应的值对象；</li>
-<li>增加泛型。</li>
-</ol>
-<p>代码如下：</p>
-<pre><code class="java">package com.msl.mycollection;
-/**
- * 自定义一个HashMap
- * @author Senley
- *
- */
-public class MslHashMap&lt;K,V&gt; &#123;
-    Node[] table;  //位桶数组。bucket array
-    int size;      //存放的键值对的个数
-    
-    public static void main(String[] args) &#123;
-        MslHashMap&lt;Integer,String&gt; m = new MslHashMap&lt;&gt;();
-        m.put(10, &quot;aa&quot;);
-        m.put(20, &quot;bb&quot;);
-        m.put(30, &quot;cc&quot;);
-        m.put(20, &quot;ss&quot;);
-        
-        m.put(53, &quot;ee&quot;);
-        m.put(69, &quot;ff&quot;);
-        m.put(85, &quot;gg&quot;);
-        
-        System.out.println(m);
-        
-//        for(int i=10;i&lt;100;i++) &#123;
-//            System.out.println(i+&quot;---&quot;+myHash(i,16)); //53,69,85
-//        &#125;
-        
-        System.out.println(m.get(53));
-    &#125;
-    
-    public MslHashMap() &#123;
-        table = new Node[16]; //长度一般定义成2的整数幂
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        //&#123;10:aa,20:bb&#125;
-        StringBuilder sb = new StringBuilder(&quot;&#123;&quot;);
-        //遍历bucket数组
-        for(int i=0;i&lt;table.length;i++) &#123;
-            Node temp = table[i];
-            //遍历链表
-            while(temp!=null) &#123;
-                sb.append(temp.key+&quot;:&quot;+temp.value+&quot;,&quot;);
-                temp = temp.next;
-            &#125;
-        &#125;
-        sb.setCharAt(sb.length()-1, &#39;&#125;&#39;);
-        return sb.toString();
-    &#125;
-    
-    public void put(K key,V value) &#123;
-        //还需要考虑数组扩容问题！
-        
-        //定义了新的结点对象
-        Node newNode = new Node();
-        newNode.hash = myHash(key.hashCode(),table.length);
-        newNode.key = key;
-        newNode.value = value;
-        newNode.next = null;
-        
-        Node temp = table[newNode.hash];
-        Node iterLast = null; //正在遍历的最后一个元素
-        boolean keyRepeat = false; 
-        if(temp == null) &#123;
-            //此处数组元素为空，则直接将新结点放进去
-            table[newNode.hash] = newNode;
-            size++;
-        &#125;else &#123;
-            //此处数组元素不为空，则遍历对应链表
-            while(temp!=null) &#123;
-                //判断key如果重复，则覆盖
-                if(temp.key.equals(key)) &#123;
-                    keyRepeat = true;
-                    System.out.println(&quot;key重复了&quot;);
-                    temp.value = value; //只是覆盖value即可，其他的值（hash,key,next）保持不变
-                    break;
-                &#125;else &#123;
-                    //key不重复，则遍历下一个
-                    iterLast = temp;
-                    temp = temp.next;
-                &#125;
-            &#125;
-            if(!keyRepeat) &#123; //如果没有发生key重复的情况，则添加到链表最后
-                iterLast.next = newNode;
-                size++;
-            &#125;
-        &#125;
-    &#125;
-    
-    public V get(K key) &#123;
-        int hash = myHash(key.hashCode(),table.length);
-        V value = null;
-        if(table[hash]!=null) &#123;
-            Node temp = table[hash];
-            while(temp!=null) &#123;
-                if(temp.key.equals(key)) &#123; //如果相等则说明找对了键值对，返回相应的value
-                    value = (V) temp.value;
-                    break;
-                &#125;else &#123;
-                    temp = temp.next;
-                &#125;
-            &#125;
-        &#125;
-        return value;
-    &#125;
-    
-    public static int myHash(int v,int length) &#123;
-//        System.out.println(&quot;hash in myHash:&quot;+(v&amp;(length-1))); //直接位运算，效率高
-//        System.out.println(&quot;hash in myHash:&quot;+(v%(length-1))); //取模运算，效率低
-        return v&amp;(length-1);
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">key重复了
-&#123;20:ss,53:ee,69:ff,85:gg,10:aa,30:cc&#125;
-ee
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>HashMap</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自定义一个ArrayList</title>
-    <url>/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/</url>
-    <content><![CDATA[<h1 id="自定义一个ArrayList"><a href="#自定义一个ArrayList" class="headerlink" title="自定义一个ArrayList"></a>自定义一个ArrayList</h1><h2 id="ArrayList特点和底层实现"><a href="#ArrayList特点和底层实现" class="headerlink" title="ArrayList特点和底层实现"></a>ArrayList特点和底层实现</h2><p>ArrayList底层是用数组实现的存储。 特点：查询效率高，增删效率低，线程不安全。查看源码：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071028176.png" alt="自定义一个ArrayList1"></p>
-<p>可以看出ArrayList底层使用Object数组来存储元素数据。所有的方法，都围绕这个核心的Object数组来开展。</p>
-<p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
-<h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
-<pre><code class="java">package com.msl.mycollection;
-
-import javax.management.RuntimeErrorException;
-
-/**
- * 自定义实现一个ArrayList,体会底层原理
- * @author Senley
- *
- */
-public class MslArrayList&lt;E&gt; &#123;
-    
-    private Object[] elementData;
-    private int size;
-    private static final int DEFALT_CAPACITY = 10;
-    
-    public MslArrayList() &#123;
-        elementData = new Object[DEFALT_CAPACITY];
-    &#125;
-    
-    public MslArrayList(int capacity) &#123;
-        if(capacity&lt;0) &#123;
-            throw new RuntimeException(&quot;容器的容量不能为负数&quot;);
-        &#125;else if(capacity==0) &#123;
-            elementData = new Object[DEFALT_CAPACITY];
-        &#125;else &#123;
-            elementData = new Object[capacity];
-        &#125;
-    &#125;
-    
-    public int size() &#123;
-        return size;
-    &#125;
-    
-    public boolean isEmpty() &#123;
-        return size==0?true:false;
-    &#125;
-    
-    public void add(E element) &#123;
-        //什么时候扩容
-        if(size == elementData.length) &#123;
-            //扩容操作
-            Object[] newArray = new Object[elementData.length + (elementData.length&gt;&gt;1)];//10--&gt;10+10/2
-            System.arraycopy(elementData, 0, newArray, 0, elementData.length);
-            elementData = newArray;        
-        &#125;
-        elementData[size++] = element;
-    &#125;
-    
-    public E get(int index) &#123;
-        checkRange(index);
-        return (E) elementData[index];
-    &#125;
-    
-    public void set(E element,int index) &#123;
-        checkRange(index);
-        elementData[index] = element;
-    &#125;
-    
-    public void checkRange(int index) &#123;
-        //索引合法判断[0,size)
-        if(index&lt;0 || index&gt;size-1) &#123;
-            //不合法
-            throw new RuntimeException(&quot;索引不合法:&quot;+index);
-        &#125;
-    &#125;
-    
-    public void remove(E element) &#123;
-        //将element和所有元素挨个比较,获得第一个比较为true的,返回.
-        for(int i=0;i&lt;size;i++) &#123;
-            if(element.equals(get(i))) &#123;//容器中所有的比较操作都是用的equals而不是==
-                //将该元素从此处移除
-                remove(i);
-            &#125;
-        &#125;
-    &#125;
-    
-    public void remove(int index) &#123;
-        int numMoved = elementData.length-index-1;
-        if(numMoved&gt;0) &#123;
-            System.arraycopy(elementData, index+1, elementData, index, elementData.length-index-1);
-        &#125;
-        elementData[--size] = null;
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        StringBuilder sb = new StringBuilder();
-        sb.append(&quot;[&quot;);
-        for(int i=0;i&lt;size;i++) &#123;
-            sb.append(elementData[i]+&quot;,&quot;);
-        &#125;
-        sb.setCharAt(sb.length()-1, &#39;]&#39;);
-        return sb.toString();
-    &#125;
-    
-    public static void main(String[] args) &#123;
-        MslArrayList m = new MslArrayList(20);
-        for(int i=0;i&lt;40;i++) &#123;
-            m.add(&quot;senley&quot;+i);
-        &#125;
-        System.out.println(m);
-        m.set(&quot;test&quot;, 10);
-        System.out.println(m.get(10));
-        m.remove(3);
-        System.out.println(m);
-        m.remove(&quot;test&quot;);
-        System.out.println(m);
-        System.out.println(m.size);
-        System.out.println(m.isEmpty());
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
-test
-[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
-[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
-38
-false
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>ArrayList</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自定义一个LinkedList</title>
-    <url>/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/</url>
-    <content><![CDATA[<h1 id="自定义一个LinkedList"><a href="#自定义一个LinkedList" class="headerlink" title="自定义一个LinkedList"></a>自定义一个LinkedList</h1><h2 id="LinkedList特点和底层实现"><a href="#LinkedList特点和底层实现" class="headerlink" title="LinkedList特点和底层实现"></a>LinkedList特点和底层实现</h2><p>LinkedList底层用双向链表实现的存储。特点：查询效率低，增删效率高，线程不安全。</p>
-<p>双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。 所以，从双向链表中的任意一个节点开始，都可以很方便地找到所有节点。下图为LinkedList的存储结构图：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A81.png" alt="自定义一个链表1"></p>
-<p>每个节点都应该有3部分内容：</p>
-<pre><code class="java">class  Node &#123;
-        Node  previous;     //前一个节点
-        Object  element;    //本节点保存的数据
-        Node  next;         //后一个节点
-&#125;
-</code></pre>
-<p>查看LinkedList的源码，可以看到里面包含了双向链表的相关代码：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A82.png" alt="自定义一个链表2"></p>
-<h2 id="自定义一个LinkedList，体会底层原理"><a href="#自定义一个LinkedList，体会底层原理" class="headerlink" title="自定义一个LinkedList，体会底层原理"></a>自定义一个LinkedList，体会底层原理</h2><p>代码如下：</p>
-<pre><code class="java">package com.msl.mycollection;
-/**
- * 自定义实现一个链表
- * @author Senley
- */
-public class MslLinkedList&lt;E&gt; &#123;
-    
-    private Node first;
-    private Node last;
-    private int size;
-    
-    public static void main(String[] args) &#123;
-        MslLinkedList&lt;String&gt; list = new MslLinkedList();
-        list.add(&quot;a&quot;);
-        list.add(&quot;b&quot;);
-        list.add(&quot;c&quot;);
-        System.out.println(list);
-        System.out.println(list.get(2));
-        list.remove(0);
-        System.out.println(list);
-        list.add(1, &quot;插入&quot;);
-        System.out.println(list);
-    &#125;
-    
-    public void add(int index,E element) &#123;
-        checkRange(index);
-        Node newNode = new Node(element);
-        Node temp = getNode(index);
-        if(temp!=null) &#123;
-            Node up = temp.previous;
-            up.next = newNode;
-            newNode.previous = up;
-            newNode.next = temp;
-            temp.previous = newNode;
-        &#125;
-    &#125;
-    
-    public void remove(int index) &#123;
-        checkRange(index);
-        Node temp = getNode(index);
-        if(temp!=null) &#123;
-            Node up = temp.previous;
-            Node down = temp.next;
-            if(up!=null) &#123;
-                up.next = down;
-            &#125;
-            if(down!=null) &#123;
-                down.previous = up;
-            &#125;
-            //被删除的元素是第一个元素时
-            if(index==0) &#123;
-                first = down;
-            &#125;
-            //被删除的元素是最后一个元素时
-            if(index==size-1) &#123;
-                last = up;
-            &#125;
-            size--;
-        &#125;
-    &#125;
-    
-    public void add(E element) &#123;
-        Node node = new Node(element);
-        if(first==null) &#123;
-//            node.previous = null;
-//            node.next = null;
-            first = node;
-            last = node;
-        &#125;else &#123;
-            node.previous = last;
-            node.next = null;
-            last.next = node;
-            last = node;
-        &#125;
-        size++;
-    &#125;
-    
-    public E get(int index) &#123;
-        checkRange(index);
-        Node temp = getNode(index);
-        return temp!=null?(E)temp.element:null;
-    &#125;
-    
-    private void checkRange(int index) &#123;
-        if(index&lt;0 || index&gt;size-1) &#123;
-            throw new RuntimeException(&quot;索引数字不合法:&quot;+index);
-        &#125;
-    &#125;
-    
-    private Node getNode(int index) &#123;
-        checkRange(index);
-        Node temp = null;
-        if(index&lt;=(size&gt;&gt;1)) &#123;//size&gt;&gt;1相当于除以2
-            temp = first;
-            for(int i=0;i&lt;index;i++) &#123;
-                temp = temp.next;
-            &#125;
-        &#125;else &#123;
-            temp = last;
-            for(int i=size-1;i&gt;index;i--) &#123;
-                temp = temp.previous;
-            &#125;
-        &#125; 
-        return temp;
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        //[a b c] first = a, last = c
-        StringBuilder sb = new StringBuilder(&quot;[&quot;);
-        Node temp = first;
-        while(temp!=null) &#123;
-            sb.append(temp.element+&quot;,&quot;);
-            temp = temp.next;
-        &#125;
-        sb.setCharAt(sb.length()-1, &#39;]&#39;);
-        return sb.toString();
-    &#125;
-    
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">[a,b,c]
-c
-[b,c]
-[b,插入,c]
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>LinkedList</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>遍历集合的方法总结</title>
-    <url>/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<h1 id="遍历集合-容器-的方法总结"><a href="#遍历集合-容器-的方法总结" class="headerlink" title="遍历集合(容器)的方法总结"></a><strong>遍历集合(容器)的方法总结</strong></h1><h2 id="使用Iterator迭代器遍历容器元素"><a href="#使用Iterator迭代器遍历容器元素" class="headerlink" title="使用Iterator迭代器遍历容器元素"></a>使用Iterator迭代器遍历容器元素</h2><h2 id="Iterator迭代器"><a href="#Iterator迭代器" class="headerlink" title="Iterator迭代器"></a>Iterator迭代器</h2><p>Java集合框架的集合类，我们有时候称之为容器。容器的种类有很多种，如ArrayList、LinkedList、HashSet…，每种容器都有自己的特点，ArrayList底层维护的是一个数组；LinkedList是链表结构；HashSet依赖的是哈希表，每种容器都有自己特有的数据结构。</p>
-<p>因为容器的内部结构不同，很多时候可能不知道该怎样去遍历一个容器中的元素。所以为了使对容器内元素的操作更为简单，Java引入了迭代器模式。</p>
-<p><strong>把访问逻辑从不同类型的集合类中抽取出来，从而避免向外部暴露集合的内部结构。</strong></p>
-<p>使用Iterator遍历List、Set、Map，代码如下：</p>
-<pre><code class="java">package com.msl.collection;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-/**
- * 测试迭代器遍历集合
- * @author Senley
- *
- */
-public class TestIterator &#123;
-    public static void main(String[] args) &#123;
-        testIteratorList();
-        testIteratorSet();
-        testIteratorMap();
-    &#125;
-    
-    public static void testIteratorList() &#123;
-        List&lt;String&gt; list = new ArrayList&lt;&gt;();
-        list.add(&quot;aa&quot;);
-        list.add(&quot;bb&quot;);
-        list.add(&quot;cc&quot;);
-        
-        //使用Iterator遍历List
-        for(Iterator&lt;String&gt; iter=list.iterator();iter.hasNext();) &#123;
-            String temp = iter.next();
-            System.out.println(temp);
-        &#125;
-    &#125;
-    
-    public static void testIteratorSet() &#123;
-        Set&lt;String&gt; set = new HashSet&lt;&gt;();
-        set.add(&quot;aa&quot;);
-        set.add(&quot;bb&quot;);
-        set.add(&quot;cc&quot;);
-        
-        //使用Iterator遍历Set
-        for(Iterator&lt;String&gt; iter=set.iterator();iter.hasNext();) &#123;
-            String temp = iter.next();
-            System.out.println(temp);
-        &#125;
-    &#125;
-    
-    public static void testIteratorMap() &#123;
-        Map&lt;Integer,String&gt; map = new HashMap&lt;&gt;();
-        map.put(100,&quot;aa&quot;);
-        map.put(200,&quot;bb&quot;);
-        map.put(300,&quot;cc&quot;);
-        
-        //使用Iterator遍历Map，第一种方式
-        Set&lt;Entry&lt;Integer,String&gt;&gt; ss = map.entrySet();
-        for(Iterator&lt;Entry&lt;Integer,String&gt;&gt; iter=ss.iterator();iter.hasNext();) &#123;
-            Entry&lt;Integer,String&gt; temp = iter.next();
-            System.out.println(temp.getKey()+&quot;---&quot;+temp.getValue());
-        &#125;
-        
-        //使用Iterator遍历Map，第二种方式
-        Set&lt;Integer&gt; keySet = map.keySet();
-        for(Iterator&lt;Integer&gt; iter=keySet.iterator();iter.hasNext();) &#123;
-            Integer key = iter.next();
-            System.out.println(key+&quot;---&quot;+map.get(key));
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">aa
-bb
-cc
-aa
-bb
-cc
-100---aa
-200---bb
-300---cc
-100---aa
-200---bb
-300---cc
-</code></pre>
-<h2 id="遍历集合-容器-的方法"><a href="#遍历集合-容器-的方法" class="headerlink" title="遍历集合(容器)的方法"></a>遍历集合(容器)的方法</h2><h3 id="遍历List方法一：普通for循环"><a href="#遍历List方法一：普通for循环" class="headerlink" title="遍历List方法一：普通for循环"></a>遍历List方法一：普通for循环</h3><pre><code class="java">for(int i=0;i&lt;list.size();i++)&#123;//list为集合的对象名
-    String temp = (String)list.get(i);
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历List方法二：增强for循环"><a href="#遍历List方法二：增强for循环" class="headerlink" title="遍历List方法二：增强for循环"></a>遍历List方法二：增强for循环</h3><pre><code class="java">for (String temp : list) &#123;
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历List方法三：使用Iterator迭代器-1"><a href="#遍历List方法三：使用Iterator迭代器-1" class="headerlink" title="遍历List方法三：使用Iterator迭代器(1)"></a>遍历List方法三：使用Iterator迭代器(1)</h3><pre><code class="java">for(Iterator iter = list.iterator();iter.hasNext();)&#123;
-    String temp = (String)iter.next();
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历List方法四：使用Iterator迭代器-2"><a href="#遍历List方法四：使用Iterator迭代器-2" class="headerlink" title="遍历List方法四：使用Iterator迭代器(2)"></a>遍历List方法四：使用Iterator迭代器(2)</h3><pre><code class="java">Iterator iter = list.iterator();
-while(iter.hasNext())&#123;
-    Object  obj = iter.next();
-    iter.remove();//如果要遍历时，删除集合中的元素，建议使用这种方式
-    System.out.println(obj);
-&#125;
-</code></pre>
-<h3 id="遍历Set方法一：增强for循环"><a href="#遍历Set方法一：增强for循环" class="headerlink" title="遍历Set方法一：增强for循环"></a>遍历Set方法一：增强for循环</h3><pre><code class="java">for(String temp:set)&#123;
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历Set方法二：使用Iterator迭代器"><a href="#遍历Set方法二：使用Iterator迭代器" class="headerlink" title="遍历Set方法二：使用Iterator迭代器"></a>遍历Set方法二：使用Iterator迭代器</h3><pre><code class="java">for(Iterator iter = set.iterator();iter.hasNext();)&#123;
-    String temp = (String)iter.next();
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历Map方法一：根据key获取value"><a href="#遍历Map方法一：根据key获取value" class="headerlink" title="遍历Map方法一：根据key获取value"></a>遍历Map方法一：根据key获取value</h3><pre><code class="java">Map&lt;Integer, Man&gt; maps = new HashMap&lt;Integer, Man&gt;();
-Set&lt;Integer&gt; keySet = maps.keySet();
-for(Integer id : keySet)&#123;
-    System.out.println(maps.get(id).name);
-&#125;
-</code></pre>
-<h3 id="遍历Map方法二：使用entrySet"><a href="#遍历Map方法二：使用entrySet" class="headerlink" title="遍历Map方法二：使用entrySet"></a>遍历Map方法二：使用entrySet</h3><pre><code class="java">Set&lt;Entry&lt;Integer, Man&gt;&gt; ss = maps.entrySet();
-for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
-    Entry e = (Entry) iterator.next(); 
-    System.out.println(e.getKey()+&quot;--&quot;+e.getValue());
-&#125;
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>Collection</tag>
       </tags>
   </entry>
   <entry>
@@ -1236,887 +749,53 @@ public class DirSize &#123;
       </tags>
   </entry>
   <entry>
-    <title>IO文件拷贝与对接流</title>
-    <url>/2022/01/01/IO%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E4%B8%8E%E5%AF%B9%E6%8E%A5%E6%B5%81/</url>
-    <content><![CDATA[<h1 id="IO文件拷贝与对接流"><a href="#IO文件拷贝与对接流" class="headerlink" title="IO文件拷贝与对接流"></a>IO文件拷贝与对接流</h1><h2 id="IO文件拷贝"><a href="#IO文件拷贝" class="headerlink" title="IO文件拷贝"></a>IO文件拷贝</h2><p>IO文件拷贝：文件字节输入输出流。</p>
-<ol>
-<li>创建源</li>
-<li>选择流</li>
-<li>操作</li>
-<li>释放资源</li>
-</ol>
-<p>代码如下：</p>
-<pre><code class="java">package com.msl.io;
+    <title>多线程可重入锁的原理实现</title>
+    <url>/2022/02/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81%E7%9A%84%E5%8E%9F%E7%90%86%E5%AE%9E%E7%8E%B0/</url>
+    <content><![CDATA[<h1 id="多线程可重入锁的原理实现"><a href="#多线程可重入锁的原理实现" class="headerlink" title="多线程可重入锁的原理实现"></a>多线程可重入锁的原理实现</h1><h2 id="可重入锁"><a href="#可重入锁" class="headerlink" title="可重入锁"></a>可重入锁</h2><p>锁作为并发共享数据保证一致性的工具，大多数内置锁都是可重入的，也就是说，如果某个线程试图获取一个已经由它自己持有的锁时，那么这个请求会立刻成功，并且会将这个锁的计数值加1，而当线程退出同步代码块时，计数器将会递减，当计数值等于0时，锁释放。如果没有可重入锁的支持，在第二次企图获得锁时将会进入死锁状态。</p>
+<p>可重入锁随处可见，如synchronized 和ReentrantLock。</p>
+<h2 id="原理实现"><a href="#原理实现" class="headerlink" title="原理实现"></a><strong>原理实现</strong></h2><p>手动实现一个可重入锁，代码如下：</p>
+<pre><code class="java">package com.msl.others;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 文件拷贝：文件字节输入、输出流
- * 1、创建源
- * 2、选择流
- * 3、操作（写出内容）
- * 4、释放资源
+ * 可重入锁: 锁可以延续使用 + 计数器
+ * 
  * @author Senley
  *
  */
-public class Copy &#123;
-
-    public static void main(String[] args) &#123;
-        copy(&quot;src/com/msl/io/Copy.java&quot;,&quot;copy.txt&quot;);
+public class LockTest &#123;
+    ReentrantLock lock = new ReentrantLock();
+    public void a() throws InterruptedException &#123;
+        lock.lock();
+        System.out.println(lock.getHoldCount());
+        doSomething();
+        lock.unlock();
+        System.out.println(lock.getHoldCount());
     &#125;
-    /**
-     * 文件的拷贝
-     * @param srcPath
-     * @param destPath
-     */
-    public static void copy(String srcPath,String destPath) &#123;
-        //1、创建源
-        File src = new File(srcPath);//源头
-        File dest = new File(destPath);//目的地
-        //2、选择流
-        InputStream is = null;
-        OutputStream os = null;
-        try &#123;
-            is = new FileInputStream(src);
-            os = new FileOutputStream(dest);
-            //3、操作
-            byte[] flush = new byte[1024];//缓冲容器
-            int len = -1;//接收长度
-            while((len=is.read(flush))!=-1) &#123;
-                os.write(flush,0,len);
-            &#125;
-        &#125;catch(FileNotFoundException e)&#123;
-            e.printStackTrace();
-        &#125;catch(IOException e)&#123;
-            e.printStackTrace();
-        &#125;finally &#123;
-            //释放资源 分别关闭 先打开的后关闭
-            try &#123;
-                if (null != os) &#123;
-                    os.close();
-                &#125; 
-            &#125; catch (Exception e) &#123;
-                e.printStackTrace();
-            &#125;
-            
-            try &#123;
-                if(null!=is) &#123;
-                    is.close();
-                &#125;
-            &#125; catch (IOException e) &#123;
-                e.printStackTrace();
-            &#125;
-        &#125;
+    //不可重入
+    public void doSomething() throws InterruptedException &#123;
+        lock.lock();
+        System.out.println(lock.getHoldCount());
+        //...................
+        lock.unlock();
+        System.out.println(lock.getHoldCount());
+    &#125;
+    public static void main(String[] args) throws InterruptedException &#123;
+        LockTest04 test = new LockTest04();
+        test.a();            
+        Thread.sleep(1000);        
+        System.out.println(test.lock.getHoldCount());
     &#125;
 
 &#125;
 </code></pre>
-<h2 id="IO对接流"><a href="#IO对接流" class="headerlink" title="IO对接流"></a>IO对接流</h2><ol>
-<li><p>图片读取到字节数组</p>
-<p>1)图片到程序</p>
-<p>2)程序到字节数组</p>
-</li>
-<li><p>字节数组写出到文件</p>
-<p>1)字节数组到程序</p>
-<p>2)程序到文件</p>
-</li>
-</ol>
-<p>代码如下：</p>
-<pre><code class="java">package com.msl.io;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-/**
- * 1、图片读取到字节数组
- * 2、字节数组写出到文件
- * @author Senley
- *
- */
-public class IOTest &#123;
-
-    public static void main(String[] args) &#123;
-        //图片转成字节数组
-        byte[] datas = fileToByteArray(&quot;p.png&quot;);
-        System.out.println(datas.length);
-        byteArrayToFile(datas, &quot;p-byte.png&quot;);
-    &#125;
-    
-    /**
-     * 1、图片读取到字节数组
-     * 1)、图片到程序 FileInputStream
-     * 2)、程序到字节数组 ByteArrayOutputStream
-     */
-    public static byte[] fileToByteArray(String filePath) &#123;
-        //1、创建源与目的地
-        File src = new File(filePath);
-        byte[] dest = null;
-        //2、选择流
-        InputStream is = null;
-        ByteArrayOutputStream baos = null;
-        try &#123;
-            is = new FileInputStream(src);
-            baos = new ByteArrayOutputStream();
-            //3、操作（分段读取）
-            byte[] flush = new byte[1024*10];//缓冲容器
-            int len = -1;//接收长度
-            while((len=is.read(flush))!=-1) &#123;
-                baos.write(flush,0,len); //写出到字节数组中
-            &#125;
-            baos.flush();
-            return baos.toByteArray();
-        &#125; catch (FileNotFoundException e) &#123;
-            e.printStackTrace();
-        &#125; catch (IOException e) &#123;
-            e.printStackTrace();
-        &#125;finally &#123;
-            //4、释放资源
-            try &#123;
-                if(null!=is) &#123;
-                    is.close();
-                &#125;
-            &#125; catch (IOException e) &#123;
-                e.printStackTrace();
-            &#125;
-        &#125;
-        return null;
-    &#125;
-    /**
-     * 2、字节数组写出到文件
-     * 1)、字节数组到程序 ByteArrayInputStream
-     * 2)、程序到文件 FileOutputStream
-     */
-    public static void byteArrayToFile(byte[] src,String filePath) &#123;
-        //1、创建源
-        File dest = new File(filePath);
-        //2、选择流
-        InputStream is = null;
-        OutputStream os = null;
-        try &#123;
-            is = new ByteArrayInputStream(src);
-            os = new FileOutputStream(dest);
-            //3、操作（分段读取）
-            byte[] flush = new byte[5];//缓冲容器
-            int len = -1;//接收长度
-            while((len=is.read(flush))!=-1) &#123;
-                os.write(flush,0,len);//写出到文件
-            &#125;
-            os.flush();
-        &#125;catch (IOException e) &#123;
-            e.printStackTrace();
-        &#125;finally &#123;
-            //4、释放资源
-            try &#123;
-                if (null != os) &#123;
-                    os.close();
-                &#125; 
-            &#125; catch (Exception e) &#123;
-            &#125;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>IO</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>装饰器设计模式的理解与实现</title>
-    <url>/2022/01/14/%E8%A3%85%E9%A5%B0%E5%99%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%90%86%E8%A7%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0/</url>
-    <content><![CDATA[<h1 id="装饰器设计模式的理解与实现"><a href="#装饰器设计模式的理解与实现" class="headerlink" title="装饰器设计模式的理解与实现"></a><strong>装饰器设计模式</strong>的理解与实现</h1><h2 id="设计模式的分类"><a href="#设计模式的分类" class="headerlink" title="设计模式的分类"></a>设计模式的分类</h2><p>总体来说设计模式分为三大类：</p>
-<p>创建型模式，共五种：工厂方法模式、抽象工厂模式、单例模式、建造者模式、原型模式。</p>
-<p>结构型模式，共七种：适配器模式、装饰器模式、代理模式、外观模式、桥接模式、组合模式、享元模式。</p>
-<p>行为型模式，共十一种：策略模式、模板方法模式、观察者模式、迭代子模式、责任链模式、命令模式、备忘录模式、状态模式、访问者模式、中介者模式、解释器模式。</p>
-<h2 id="装饰器设计模式的定义与特点"><a href="#装饰器设计模式的定义与特点" class="headerlink" title="装饰器设计模式的定义与特点"></a>装饰器设计模式的定义与特点</h2><p>装饰（Decorator）模式的定义：指在不改变现有对象结构的情况下，动态地给该对象增加一些职责（即增加其额外功能）的模式，它属于对象结构型模式。</p>
-<p>装饰（Decorator）模式的主要优点有：</p>
-<ul>
-<li>装饰器是继承的有力补充，比继承灵活，在不改变原有对象的情况下，动态地给一个对象扩展功能，即插即用。</li>
-<li>通过使用不用装饰类及这些装饰类的排列组合，可以实现不同效果。</li>
-<li>装饰器模式完全遵守开闭原则。</li>
-</ul>
-<p>其主要缺点是：</p>
-<p>装饰模式会增加许多子类，过度使用会增加程序复杂性。</p>
-<h2 id="装饰器设计模式的结构与实现"><a href="#装饰器设计模式的结构与实现" class="headerlink" title="装饰器设计模式的结构与实现"></a>装饰器设计模式的结构与实现</h2><h3 id="模式结构"><a href="#模式结构" class="headerlink" title="模式结构"></a>模式结构</h3><ul>
-<li>抽象构件（Component）角色：定义一个抽象接口以规范准备接收附加责任的对象。</li>
-<li>具体构件（ConcreteComponent）角色：实现抽象构件，通过装饰角色为其添加一些职责。</li>
-<li>抽象装饰（Decorator）角色：继承抽象构件，并包含具体构件的实例，可以通过其子类扩展具体构件的功能。</li>
-<li>具体装饰（ConcreteDecorator）角色：实现抽象装饰的相关方法，并给具体构件对象添加附加的责任。</li>
-</ul>
-<h3 id="模式实现"><a href="#模式实现" class="headerlink" title="模式实现"></a>模式实现</h3><p>代码如下：</p>
-<pre><code class="java">package com.msl.io;
-/**
- * 模拟咖啡
- * 1、抽象组件:需要装饰的抽象对象(接口或抽象父类)
- * 2、具体组件:需要装饰的对象
- * 3、抽象装饰类:包含了对抽象组件的引用以及装饰者共有的方法
- * 4、具体装饰类:被装饰的对象
- * @author Senley
- *
- */
-public class DecorateTest &#123;
-    public static void main(String[] args) &#123;
-        Drink coffer = new Coffer();
-        Drink suger = new Suger(coffer);//装饰
-        System.out.println(suger.info()+&quot;--&gt;&quot;+suger.cost());
-        Drink milk = new Milk(coffer);//装饰
-        System.out.println(milk.info()+&quot;--&gt;&quot;+milk.cost());
-        milk = new Milk(suger);//装饰
-        System.out.println(milk.info()+&quot;--&gt;&quot;+milk.cost());
-    &#125;
-&#125;
-
-//抽象组件
-interface Drink&#123;
-    double cost();//费用
-    String info();//说明
-&#125;
-
-//具体组件
-class Coffer implements Drink&#123;
-    private String name =&quot;原味咖啡&quot;;
-    @Override
-    public double cost() &#123;
-        return 10;
-    &#125;
-
-    @Override
-    public String info() &#123;
-        return name;
-    &#125;
-&#125;
-
-//抽象装饰类
-abstract class Decorate implements Drink&#123;
-    //对抽象组件的引用
-    private Drink drink;
-    public Decorate(Drink drink) &#123;
-        this.drink = drink;
-    &#125;
-    @Override
-    public double cost() &#123;
-        return this.drink.cost();
-    &#125;
-
-    @Override
-    public String info() &#123;
-        return this.drink.info();
-    &#125;
-&#125;
-
-//具体装饰类
-class Milk extends Decorate&#123;
-    public Milk(Drink drink) &#123;
-        super(drink);
-    &#125;
-    @Override
-    public double cost() &#123;
-        return super.cost()*4;
-    &#125;
-
-    @Override
-    public String info() &#123;
-        return super.info()+&quot;加入了牛奶&quot;;
-    &#125;
-&#125;
-
-class Suger extends Decorate&#123;
-    public Suger(Drink drink) &#123;
-        super(drink);
-    &#125;
-    @Override
-    public double cost() &#123;
-        return super.cost()*2;
-    &#125;
-
-    @Override
-    public String info() &#123;
-        return super.info()+&quot;加入了蔗糖&quot;;
-    &#125;    
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">原味咖啡加入了蔗糖--&gt;20.0
-原味咖啡加入了牛奶--&gt;40.0
-原味咖啡加入了蔗糖加入了牛奶--&gt;80.0
-</code></pre>
-]]></content>
-      <categories>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>DesignPattern</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>多线程的实现方式及简单模拟</title>
-    <url>/2022/02/22/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E7%AE%80%E5%8D%95%E6%A8%A1%E6%8B%9F/</url>
-    <content><![CDATA[<h1 id="多线程的实现方式及简单模拟"><a href="#多线程的实现方式及简单模拟" class="headerlink" title="多线程的实现方式及简单模拟"></a>多线程的实现方式及简单模拟</h1><h2 id="多线程的实现方式"><a href="#多线程的实现方式" class="headerlink" title="多线程的实现方式"></a>多线程的实现方式</h2><ol>
-<li>继承Thread类<ul>
-<li>1、创建：继承Thread + 重写run</li>
-<li>2、启动：创建子类对象 + start</li>
-</ul>
-</li>
-<li>Runnable接口（<strong>避免单继承的局限性，优先使用接口</strong>）<ul>
-<li>1、创建：实现Runnable + 重写run</li>
-<li>2、启动：创建实现类对象 + Thread对象 + start</li>
-</ul>
-</li>
-<li>Callable接口<ul>
-<li>1、创建目标对象</li>
-<li>2、创建执行服务</li>
-<li>3、提交执行</li>
-<li>4、获取结果</li>
-<li>5、关闭服务</li>
-</ul>
-</li>
-</ol>
-<h2 id="多线程的简单模拟"><a href="#多线程的简单模拟" class="headerlink" title="多线程的简单模拟"></a>多线程的简单模拟</h2><h3 id="模拟12306"><a href="#模拟12306" class="headerlink" title="模拟12306"></a>模拟12306</h3><p>代码如下：</p>
-<pre><code class="java">package com.msl.thread;
-/**
- * 模拟12306
- * @author Senley
- *
- */
-public class Web12306 implements Runnable &#123;
-    //票数
-    private int ticketNums = 99;
-    
-    @Override
-    public void run() &#123;
-        while(true) &#123;
-            if(ticketNums&lt;0) &#123;
-                break;
-            &#125;
-            try &#123;
-                Thread.sleep(200);
-            &#125; catch (InterruptedException e) &#123;
-                e.printStackTrace();
-            &#125;
-            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+ticketNums--);
-        &#125;
-    &#125;
-    
-    public static void main(String[] args) &#123;
-        //一份资源
-        Web12306 web = new Web12306();
-        System.out.println(Thread.currentThread().getName());
-        //多个代理
-        new Thread(web,&quot;码畜&quot;).start();
-        new Thread(web,&quot;码农&quot;).start();
-        new Thread(web,&quot;码蟥&quot;).start();
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">main
-码畜--&gt;99
-码蟥--&gt;97
-码农--&gt;98
-码农--&gt;96
-码蟥--&gt;96
-码畜--&gt;96
-码畜--&gt;95
-码农--&gt;95
-码蟥--&gt;95
-码畜--&gt;94
-码农--&gt;94
-码蟥--&gt;93
-码蟥--&gt;92
-码农--&gt;91
-码畜--&gt;90
-码畜--&gt;89
-码农--&gt;88
-码蟥--&gt;88
-码蟥--&gt;87
-码畜--&gt;86
-码农--&gt;85
-码蟥--&gt;84
-码农--&gt;84
-码畜--&gt;83
-码畜--&gt;82
-码蟥--&gt;82
-码农--&gt;82
-码蟥--&gt;80
-码农--&gt;81
-码畜--&gt;81
-码畜--&gt;79
-码蟥--&gt;78
-码农--&gt;79
-码农--&gt;77
-码畜--&gt;77
-码蟥--&gt;77
-码畜--&gt;76
-码农--&gt;74
-码蟥--&gt;75
-码农--&gt;73
-码蟥--&gt;72
-码畜--&gt;73
-码农--&gt;71
-码畜--&gt;71
-码蟥--&gt;70
-码农--&gt;69
-码蟥--&gt;68
-码畜--&gt;69
-码蟥--&gt;66
-码农--&gt;67
-码畜--&gt;65
-码蟥--&gt;62
-码农--&gt;63
-码畜--&gt;64
-码畜--&gt;61
-码蟥--&gt;60
-码农--&gt;59
-码畜--&gt;58
-码蟥--&gt;57
-码农--&gt;58
-码农--&gt;56
-码畜--&gt;56
-码蟥--&gt;56
-码蟥--&gt;55
-码农--&gt;55
-码畜--&gt;54
-码蟥--&gt;53
-码农--&gt;51
-码畜--&gt;52
-码畜--&gt;50
-码蟥--&gt;50
-码农--&gt;50
-码农--&gt;48
-码蟥--&gt;49
-码畜--&gt;47
-码畜--&gt;44
-码农--&gt;45
-码蟥--&gt;46
-码畜--&gt;43
-码农--&gt;41
-码蟥--&gt;42
-码农--&gt;39
-码畜--&gt;40
-码蟥--&gt;40
-码畜--&gt;38
-码农--&gt;38
-码蟥--&gt;38
-码畜--&gt;37
-码农--&gt;37
-码蟥--&gt;37
-码蟥--&gt;35
-码农--&gt;35
-码畜--&gt;36
-码畜--&gt;34
-码蟥--&gt;34
-码农--&gt;34
-码农--&gt;33
-码畜--&gt;33
-码蟥--&gt;33
-码蟥--&gt;32
-码农--&gt;32
-码畜--&gt;32
-码畜--&gt;31
-码农--&gt;31
-码蟥--&gt;31
-码蟥--&gt;30
-码畜--&gt;30
-码农--&gt;30
-码农--&gt;29
-码蟥--&gt;28
-码畜--&gt;29
-码畜--&gt;27
-码农--&gt;26
-码蟥--&gt;27
-码畜--&gt;25
-码农--&gt;25
-码蟥--&gt;25
-码蟥--&gt;24
-码农--&gt;23
-码畜--&gt;23
-码蟥--&gt;22
-码农--&gt;22
-码畜--&gt;22
-码畜--&gt;21
-码蟥--&gt;19
-码农--&gt;20
-码蟥--&gt;18
-码畜--&gt;18
-码农--&gt;17
-码蟥--&gt;16
-码农--&gt;15
-码畜--&gt;14
-码畜--&gt;13
-码农--&gt;13
-码蟥--&gt;13
-码蟥--&gt;12
-码农--&gt;11
-码畜--&gt;12
-码农--&gt;10
-码畜--&gt;9
-码蟥--&gt;8
-码农--&gt;7
-码畜--&gt;6
-码蟥--&gt;7
-码畜--&gt;5
-码农--&gt;3
-码蟥--&gt;4
-码蟥--&gt;2
-码农--&gt;2
-码畜--&gt;2
-码畜--&gt;0
-码农--&gt;1
-码蟥--&gt;1
-</code></pre>
-<h3 id="模拟龟兔赛跑"><a href="#模拟龟兔赛跑" class="headerlink" title="模拟龟兔赛跑"></a>模拟龟兔赛跑</h3><p>代码如下：</p>
-<pre><code class="java">package com.msl.thread;
-/**
- * 模拟龟兔赛跑
- * @author Senley
- *
- */
-public class Racer implements Runnable&#123;
-    private String winner;//胜利者
-    @Override
-    public void run() &#123;
-        for(int steps=1;steps&lt;=100;steps++) &#123;
-            //模拟休息
-            if(Thread.currentThread().getName().equals(&quot;rabbit&quot;)&amp;&amp;steps%10==0) &#123;
-                try &#123;
-                    Thread.sleep(100);
-                &#125; catch (InterruptedException e) &#123;
-                    e.printStackTrace();
-                &#125;
-            &#125;
-            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+steps);
-            //比赛是否结束
-            boolean flag = gameOver(steps);
-            if(flag) &#123;
-                break;
-            &#125;
-        &#125;
-    &#125;
-    
-    private boolean gameOver(int steps) &#123;
-        if(winner!=null) &#123;//存在胜利者
-            return true;
-        &#125;else &#123;
-            if(steps==100) &#123;
-                winner = Thread.currentThread().getName();
-                System.out.println(&quot;winner--&gt;&quot;+winner);
-                return true;
-            &#125;
-        &#125;
-        return false;
-    &#125;
-    
-    public static void main(String[] args) &#123;
-        Racer racer = new Racer();
-        new Thread(racer,&quot;tortoise&quot;).start();
-        new Thread(racer,&quot;rabbit&quot;).start();
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">tortoise--&gt;1
-rabbit--&gt;1
-rabbit--&gt;2
-rabbit--&gt;3
-rabbit--&gt;4
-rabbit--&gt;5
-rabbit--&gt;6
-rabbit--&gt;7
-rabbit--&gt;8
-rabbit--&gt;9
-tortoise--&gt;2
-tortoise--&gt;3
-tortoise--&gt;4
-tortoise--&gt;5
-tortoise--&gt;6
-tortoise--&gt;7
-tortoise--&gt;8
-tortoise--&gt;9
-tortoise--&gt;10
-tortoise--&gt;11
-tortoise--&gt;12
-tortoise--&gt;13
-tortoise--&gt;14
-tortoise--&gt;15
-tortoise--&gt;16
-tortoise--&gt;17
-tortoise--&gt;18
-tortoise--&gt;19
-tortoise--&gt;20
-tortoise--&gt;21
-tortoise--&gt;22
-tortoise--&gt;23
-tortoise--&gt;24
-tortoise--&gt;25
-tortoise--&gt;26
-tortoise--&gt;27
-tortoise--&gt;28
-tortoise--&gt;29
-tortoise--&gt;30
-tortoise--&gt;31
-tortoise--&gt;32
-tortoise--&gt;33
-tortoise--&gt;34
-tortoise--&gt;35
-tortoise--&gt;36
-tortoise--&gt;37
-tortoise--&gt;38
-tortoise--&gt;39
-tortoise--&gt;40
-tortoise--&gt;41
-tortoise--&gt;42
-tortoise--&gt;43
-tortoise--&gt;44
-tortoise--&gt;45
-tortoise--&gt;46
-tortoise--&gt;47
-tortoise--&gt;48
-tortoise--&gt;49
-tortoise--&gt;50
-tortoise--&gt;51
-tortoise--&gt;52
-tortoise--&gt;53
-tortoise--&gt;54
-tortoise--&gt;55
-tortoise--&gt;56
-tortoise--&gt;57
-tortoise--&gt;58
-tortoise--&gt;59
-tortoise--&gt;60
-tortoise--&gt;61
-tortoise--&gt;62
-tortoise--&gt;63
-tortoise--&gt;64
-tortoise--&gt;65
-tortoise--&gt;66
-tortoise--&gt;67
-tortoise--&gt;68
-tortoise--&gt;69
-tortoise--&gt;70
-tortoise--&gt;71
-tortoise--&gt;72
-tortoise--&gt;73
-tortoise--&gt;74
-tortoise--&gt;75
-tortoise--&gt;76
-tortoise--&gt;77
-tortoise--&gt;78
-tortoise--&gt;79
-tortoise--&gt;80
-tortoise--&gt;81
-tortoise--&gt;82
-tortoise--&gt;83
-tortoise--&gt;84
-tortoise--&gt;85
-tortoise--&gt;86
-tortoise--&gt;87
-tortoise--&gt;88
-tortoise--&gt;89
-tortoise--&gt;90
-tortoise--&gt;91
-tortoise--&gt;92
-tortoise--&gt;93
-tortoise--&gt;94
-tortoise--&gt;95
-tortoise--&gt;96
-tortoise--&gt;97
-tortoise--&gt;98
-tortoise--&gt;99
-tortoise--&gt;100
-winner--&gt;tortoise
-rabbit--&gt;10
-</code></pre>
-<h3 id="模拟龟兔赛跑（使用Callable）"><a href="#模拟龟兔赛跑（使用Callable）" class="headerlink" title="模拟龟兔赛跑（使用Callable）"></a>模拟龟兔赛跑（使用Callable）</h3><p>代码如下：</p>
-<pre><code class="java">package com.msl.thread;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-/**
- * 模拟龟兔赛跑
- * @author Senley
- *
- */
-public class CRacer implements Callable&lt;Integer&gt;&#123;
-    private String winner;//胜利者
-    @Override
-    public Integer call() throws Exception &#123;
-        for(int steps=1;steps&lt;=100;steps++) &#123;
-            //模拟休息
-            if(Thread.currentThread().getName().equals(&quot;pool-1-thread-1&quot;)&amp;&amp;steps%10==0) &#123;
-                Thread.sleep(100);
-            &#125;
-            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+steps);
-            //比赛是否结束
-            boolean flag = gameOver(steps);
-            if(flag) &#123;
-                return steps;
-            &#125;
-        &#125;
-        return null;
-    &#125;
-    
-    private boolean gameOver(int steps) &#123;
-        if(winner!=null) &#123;//存在胜利者
-            return true;
-        &#125;else &#123;
-            if(steps==100) &#123;
-                winner = Thread.currentThread().getName();
-                System.out.println(&quot;winner--&gt;&quot;+winner);
-                return true;
-            &#125;
-        &#125;
-        return false;
-    &#125;
-    
-    public static void main(String[] args) throws InterruptedException, ExecutionException &#123;
-        CRacer racer = new CRacer();
-        //创建执行服务: 
-        ExecutorService  ser=Executors.newFixedThreadPool(2);
-        //提交执行: 
-        Future&lt;Integer&gt; result1 =ser.submit(racer) ;
-        Future&lt;Integer&gt; result2 =ser.submit(racer) ;
-        //获取结果:  
-        Integer r1 =result1.get();
-        Integer r2 =result2.get();
-        System.out.println(r1+&quot;--&gt;&quot;+r2);
-        //关闭服务:  
-        ser.shutdownNow();
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">pool-1-thread-2--&gt;1
-pool-1-thread-1--&gt;1
-pool-1-thread-1--&gt;2
-pool-1-thread-1--&gt;3
-pool-1-thread-1--&gt;4
-pool-1-thread-1--&gt;5
-pool-1-thread-1--&gt;6
-pool-1-thread-1--&gt;7
-pool-1-thread-1--&gt;8
-pool-1-thread-1--&gt;9
-pool-1-thread-2--&gt;2
-pool-1-thread-2--&gt;3
-pool-1-thread-2--&gt;4
-pool-1-thread-2--&gt;5
-pool-1-thread-2--&gt;6
-pool-1-thread-2--&gt;7
-pool-1-thread-2--&gt;8
-pool-1-thread-2--&gt;9
-pool-1-thread-2--&gt;10
-pool-1-thread-2--&gt;11
-pool-1-thread-2--&gt;12
-pool-1-thread-2--&gt;13
-pool-1-thread-2--&gt;14
-pool-1-thread-2--&gt;15
-pool-1-thread-2--&gt;16
-pool-1-thread-2--&gt;17
-pool-1-thread-2--&gt;18
-pool-1-thread-2--&gt;19
-pool-1-thread-2--&gt;20
-pool-1-thread-2--&gt;21
-pool-1-thread-2--&gt;22
-pool-1-thread-2--&gt;23
-pool-1-thread-2--&gt;24
-pool-1-thread-2--&gt;25
-pool-1-thread-2--&gt;26
-pool-1-thread-2--&gt;27
-pool-1-thread-2--&gt;28
-pool-1-thread-2--&gt;29
-pool-1-thread-2--&gt;30
-pool-1-thread-2--&gt;31
-pool-1-thread-2--&gt;32
-pool-1-thread-2--&gt;33
-pool-1-thread-2--&gt;34
-pool-1-thread-2--&gt;35
-pool-1-thread-2--&gt;36
-pool-1-thread-2--&gt;37
-pool-1-thread-2--&gt;38
-pool-1-thread-2--&gt;39
-pool-1-thread-2--&gt;40
-pool-1-thread-2--&gt;41
-pool-1-thread-2--&gt;42
-pool-1-thread-2--&gt;43
-pool-1-thread-2--&gt;44
-pool-1-thread-2--&gt;45
-pool-1-thread-2--&gt;46
-pool-1-thread-2--&gt;47
-pool-1-thread-2--&gt;48
-pool-1-thread-2--&gt;49
-pool-1-thread-2--&gt;50
-pool-1-thread-2--&gt;51
-pool-1-thread-2--&gt;52
-pool-1-thread-2--&gt;53
-pool-1-thread-2--&gt;54
-pool-1-thread-2--&gt;55
-pool-1-thread-2--&gt;56
-pool-1-thread-2--&gt;57
-pool-1-thread-2--&gt;58
-pool-1-thread-2--&gt;59
-pool-1-thread-2--&gt;60
-pool-1-thread-2--&gt;61
-pool-1-thread-2--&gt;62
-pool-1-thread-2--&gt;63
-pool-1-thread-2--&gt;64
-pool-1-thread-2--&gt;65
-pool-1-thread-2--&gt;66
-pool-1-thread-2--&gt;67
-pool-1-thread-2--&gt;68
-pool-1-thread-2--&gt;69
-pool-1-thread-2--&gt;70
-pool-1-thread-2--&gt;71
-pool-1-thread-2--&gt;72
-pool-1-thread-2--&gt;73
-pool-1-thread-2--&gt;74
-pool-1-thread-2--&gt;75
-pool-1-thread-2--&gt;76
-pool-1-thread-2--&gt;77
-pool-1-thread-2--&gt;78
-pool-1-thread-2--&gt;79
-pool-1-thread-2--&gt;80
-pool-1-thread-2--&gt;81
-pool-1-thread-2--&gt;82
-pool-1-thread-2--&gt;83
-pool-1-thread-2--&gt;84
-pool-1-thread-2--&gt;85
-pool-1-thread-2--&gt;86
-pool-1-thread-2--&gt;87
-pool-1-thread-2--&gt;88
-pool-1-thread-2--&gt;89
-pool-1-thread-2--&gt;90
-pool-1-thread-2--&gt;91
-pool-1-thread-2--&gt;92
-pool-1-thread-2--&gt;93
-pool-1-thread-2--&gt;94
-pool-1-thread-2--&gt;95
-pool-1-thread-2--&gt;96
-pool-1-thread-2--&gt;97
-pool-1-thread-2--&gt;98
-pool-1-thread-2--&gt;99
-pool-1-thread-2--&gt;100
-winner--&gt;pool-1-thread-2
-pool-1-thread-1--&gt;10
-10--&gt;100
+<p>结果如下:</p>
+<pre><code class="java">1
+2
+1
+0
+0
 </code></pre>
 ]]></content>
       <categories>
@@ -2706,55 +1385,1381 @@ class Tv&#123;
       </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/2022/02/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81%E7%9A%84%E5%8E%9F%E7%90%86%E5%AE%9E%E7%8E%B0/</url>
-    <content><![CDATA[<p>title: 多线程可重入锁的原理实现<br>date: 2022-02-28 00:14:01<br>categories: Java基础<br>tags: Thread</p>
-<h1 id="多线程可重入锁的原理实现"><a href="#多线程可重入锁的原理实现" class="headerlink" title="多线程可重入锁的原理实现"></a>多线程可重入锁的原理实现</h1><h2 id="可重入锁"><a href="#可重入锁" class="headerlink" title="可重入锁"></a>可重入锁</h2><p>锁作为并发共享数据保证一致性的工具，大多数内置锁都是可重入的，也就是说，如果某个线程试图获取一个已经由它自己持有的锁时，那么这个请求会立刻成功，并且会将这个锁的计数值加1，而当线程退出同步代码块时，计数器将会递减，当计数值等于0时，锁释放。如果没有可重入锁的支持，在第二次企图获得锁时将会进入死锁状态。</p>
-<p>可重入锁随处可见，如synchronized 和ReentrantLock。</p>
-<h2 id="原理实现"><a href="#原理实现" class="headerlink" title="原理实现"></a><strong>原理实现</strong></h2><p>手动实现一个可重入锁，代码如下：</p>
-<pre><code class="java">package com.msl.others;
-
-import java.util.concurrent.locks.ReentrantLock;
-
+    <title>多线程的实现方式及简单模拟</title>
+    <url>/2022/02/22/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E7%AE%80%E5%8D%95%E6%A8%A1%E6%8B%9F/</url>
+    <content><![CDATA[<h1 id="多线程的实现方式及简单模拟"><a href="#多线程的实现方式及简单模拟" class="headerlink" title="多线程的实现方式及简单模拟"></a>多线程的实现方式及简单模拟</h1><h2 id="多线程的实现方式"><a href="#多线程的实现方式" class="headerlink" title="多线程的实现方式"></a>多线程的实现方式</h2><ol>
+<li>继承Thread类<ul>
+<li>1、创建：继承Thread + 重写run</li>
+<li>2、启动：创建子类对象 + start</li>
+</ul>
+</li>
+<li>Runnable接口（<strong>避免单继承的局限性，优先使用接口</strong>）<ul>
+<li>1、创建：实现Runnable + 重写run</li>
+<li>2、启动：创建实现类对象 + Thread对象 + start</li>
+</ul>
+</li>
+<li>Callable接口<ul>
+<li>1、创建目标对象</li>
+<li>2、创建执行服务</li>
+<li>3、提交执行</li>
+<li>4、获取结果</li>
+<li>5、关闭服务</li>
+</ul>
+</li>
+</ol>
+<h2 id="多线程的简单模拟"><a href="#多线程的简单模拟" class="headerlink" title="多线程的简单模拟"></a>多线程的简单模拟</h2><h3 id="模拟12306"><a href="#模拟12306" class="headerlink" title="模拟12306"></a>模拟12306</h3><p>代码如下：</p>
+<pre><code class="java">package com.msl.thread;
 /**
- * 可重入锁: 锁可以延续使用 + 计数器
- * 
+ * 模拟12306
  * @author Senley
  *
  */
-public class LockTest &#123;
-    ReentrantLock lock = new ReentrantLock();
-    public void a() throws InterruptedException &#123;
-        lock.lock();
-        System.out.println(lock.getHoldCount());
-        doSomething();
-        lock.unlock();
-        System.out.println(lock.getHoldCount());
+public class Web12306 implements Runnable &#123;
+    //票数
+    private int ticketNums = 99;
+    
+    @Override
+    public void run() &#123;
+        while(true) &#123;
+            if(ticketNums&lt;0) &#123;
+                break;
+            &#125;
+            try &#123;
+                Thread.sleep(200);
+            &#125; catch (InterruptedException e) &#123;
+                e.printStackTrace();
+            &#125;
+            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+ticketNums--);
+        &#125;
     &#125;
-    //不可重入
-    public void doSomething() throws InterruptedException &#123;
-        lock.lock();
-        System.out.println(lock.getHoldCount());
-        //...................
-        lock.unlock();
-        System.out.println(lock.getHoldCount());
+    
+    public static void main(String[] args) &#123;
+        //一份资源
+        Web12306 web = new Web12306();
+        System.out.println(Thread.currentThread().getName());
+        //多个代理
+        new Thread(web,&quot;码畜&quot;).start();
+        new Thread(web,&quot;码农&quot;).start();
+        new Thread(web,&quot;码蟥&quot;).start();
     &#125;
-    public static void main(String[] args) throws InterruptedException &#123;
-        LockTest04 test = new LockTest04();
-        test.a();            
-        Thread.sleep(1000);        
-        System.out.println(test.lock.getHoldCount());
-    &#125;
-
 &#125;
 </code></pre>
-<p>结果如下:</p>
-<pre><code class="java">1
-2
-1
-0
-0
+<p>结果如下：</p>
+<pre><code class="java">main
+码畜--&gt;99
+码蟥--&gt;97
+码农--&gt;98
+码农--&gt;96
+码蟥--&gt;96
+码畜--&gt;96
+码畜--&gt;95
+码农--&gt;95
+码蟥--&gt;95
+码畜--&gt;94
+码农--&gt;94
+码蟥--&gt;93
+码蟥--&gt;92
+码农--&gt;91
+码畜--&gt;90
+码畜--&gt;89
+码农--&gt;88
+码蟥--&gt;88
+码蟥--&gt;87
+码畜--&gt;86
+码农--&gt;85
+码蟥--&gt;84
+码农--&gt;84
+码畜--&gt;83
+码畜--&gt;82
+码蟥--&gt;82
+码农--&gt;82
+码蟥--&gt;80
+码农--&gt;81
+码畜--&gt;81
+码畜--&gt;79
+码蟥--&gt;78
+码农--&gt;79
+码农--&gt;77
+码畜--&gt;77
+码蟥--&gt;77
+码畜--&gt;76
+码农--&gt;74
+码蟥--&gt;75
+码农--&gt;73
+码蟥--&gt;72
+码畜--&gt;73
+码农--&gt;71
+码畜--&gt;71
+码蟥--&gt;70
+码农--&gt;69
+码蟥--&gt;68
+码畜--&gt;69
+码蟥--&gt;66
+码农--&gt;67
+码畜--&gt;65
+码蟥--&gt;62
+码农--&gt;63
+码畜--&gt;64
+码畜--&gt;61
+码蟥--&gt;60
+码农--&gt;59
+码畜--&gt;58
+码蟥--&gt;57
+码农--&gt;58
+码农--&gt;56
+码畜--&gt;56
+码蟥--&gt;56
+码蟥--&gt;55
+码农--&gt;55
+码畜--&gt;54
+码蟥--&gt;53
+码农--&gt;51
+码畜--&gt;52
+码畜--&gt;50
+码蟥--&gt;50
+码农--&gt;50
+码农--&gt;48
+码蟥--&gt;49
+码畜--&gt;47
+码畜--&gt;44
+码农--&gt;45
+码蟥--&gt;46
+码畜--&gt;43
+码农--&gt;41
+码蟥--&gt;42
+码农--&gt;39
+码畜--&gt;40
+码蟥--&gt;40
+码畜--&gt;38
+码农--&gt;38
+码蟥--&gt;38
+码畜--&gt;37
+码农--&gt;37
+码蟥--&gt;37
+码蟥--&gt;35
+码农--&gt;35
+码畜--&gt;36
+码畜--&gt;34
+码蟥--&gt;34
+码农--&gt;34
+码农--&gt;33
+码畜--&gt;33
+码蟥--&gt;33
+码蟥--&gt;32
+码农--&gt;32
+码畜--&gt;32
+码畜--&gt;31
+码农--&gt;31
+码蟥--&gt;31
+码蟥--&gt;30
+码畜--&gt;30
+码农--&gt;30
+码农--&gt;29
+码蟥--&gt;28
+码畜--&gt;29
+码畜--&gt;27
+码农--&gt;26
+码蟥--&gt;27
+码畜--&gt;25
+码农--&gt;25
+码蟥--&gt;25
+码蟥--&gt;24
+码农--&gt;23
+码畜--&gt;23
+码蟥--&gt;22
+码农--&gt;22
+码畜--&gt;22
+码畜--&gt;21
+码蟥--&gt;19
+码农--&gt;20
+码蟥--&gt;18
+码畜--&gt;18
+码农--&gt;17
+码蟥--&gt;16
+码农--&gt;15
+码畜--&gt;14
+码畜--&gt;13
+码农--&gt;13
+码蟥--&gt;13
+码蟥--&gt;12
+码农--&gt;11
+码畜--&gt;12
+码农--&gt;10
+码畜--&gt;9
+码蟥--&gt;8
+码农--&gt;7
+码畜--&gt;6
+码蟥--&gt;7
+码畜--&gt;5
+码农--&gt;3
+码蟥--&gt;4
+码蟥--&gt;2
+码农--&gt;2
+码畜--&gt;2
+码畜--&gt;0
+码农--&gt;1
+码蟥--&gt;1
+</code></pre>
+<h3 id="模拟龟兔赛跑"><a href="#模拟龟兔赛跑" class="headerlink" title="模拟龟兔赛跑"></a>模拟龟兔赛跑</h3><p>代码如下：</p>
+<pre><code class="java">package com.msl.thread;
+/**
+ * 模拟龟兔赛跑
+ * @author Senley
+ *
+ */
+public class Racer implements Runnable&#123;
+    private String winner;//胜利者
+    @Override
+    public void run() &#123;
+        for(int steps=1;steps&lt;=100;steps++) &#123;
+            //模拟休息
+            if(Thread.currentThread().getName().equals(&quot;rabbit&quot;)&amp;&amp;steps%10==0) &#123;
+                try &#123;
+                    Thread.sleep(100);
+                &#125; catch (InterruptedException e) &#123;
+                    e.printStackTrace();
+                &#125;
+            &#125;
+            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+steps);
+            //比赛是否结束
+            boolean flag = gameOver(steps);
+            if(flag) &#123;
+                break;
+            &#125;
+        &#125;
+    &#125;
+    
+    private boolean gameOver(int steps) &#123;
+        if(winner!=null) &#123;//存在胜利者
+            return true;
+        &#125;else &#123;
+            if(steps==100) &#123;
+                winner = Thread.currentThread().getName();
+                System.out.println(&quot;winner--&gt;&quot;+winner);
+                return true;
+            &#125;
+        &#125;
+        return false;
+    &#125;
+    
+    public static void main(String[] args) &#123;
+        Racer racer = new Racer();
+        new Thread(racer,&quot;tortoise&quot;).start();
+        new Thread(racer,&quot;rabbit&quot;).start();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">tortoise--&gt;1
+rabbit--&gt;1
+rabbit--&gt;2
+rabbit--&gt;3
+rabbit--&gt;4
+rabbit--&gt;5
+rabbit--&gt;6
+rabbit--&gt;7
+rabbit--&gt;8
+rabbit--&gt;9
+tortoise--&gt;2
+tortoise--&gt;3
+tortoise--&gt;4
+tortoise--&gt;5
+tortoise--&gt;6
+tortoise--&gt;7
+tortoise--&gt;8
+tortoise--&gt;9
+tortoise--&gt;10
+tortoise--&gt;11
+tortoise--&gt;12
+tortoise--&gt;13
+tortoise--&gt;14
+tortoise--&gt;15
+tortoise--&gt;16
+tortoise--&gt;17
+tortoise--&gt;18
+tortoise--&gt;19
+tortoise--&gt;20
+tortoise--&gt;21
+tortoise--&gt;22
+tortoise--&gt;23
+tortoise--&gt;24
+tortoise--&gt;25
+tortoise--&gt;26
+tortoise--&gt;27
+tortoise--&gt;28
+tortoise--&gt;29
+tortoise--&gt;30
+tortoise--&gt;31
+tortoise--&gt;32
+tortoise--&gt;33
+tortoise--&gt;34
+tortoise--&gt;35
+tortoise--&gt;36
+tortoise--&gt;37
+tortoise--&gt;38
+tortoise--&gt;39
+tortoise--&gt;40
+tortoise--&gt;41
+tortoise--&gt;42
+tortoise--&gt;43
+tortoise--&gt;44
+tortoise--&gt;45
+tortoise--&gt;46
+tortoise--&gt;47
+tortoise--&gt;48
+tortoise--&gt;49
+tortoise--&gt;50
+tortoise--&gt;51
+tortoise--&gt;52
+tortoise--&gt;53
+tortoise--&gt;54
+tortoise--&gt;55
+tortoise--&gt;56
+tortoise--&gt;57
+tortoise--&gt;58
+tortoise--&gt;59
+tortoise--&gt;60
+tortoise--&gt;61
+tortoise--&gt;62
+tortoise--&gt;63
+tortoise--&gt;64
+tortoise--&gt;65
+tortoise--&gt;66
+tortoise--&gt;67
+tortoise--&gt;68
+tortoise--&gt;69
+tortoise--&gt;70
+tortoise--&gt;71
+tortoise--&gt;72
+tortoise--&gt;73
+tortoise--&gt;74
+tortoise--&gt;75
+tortoise--&gt;76
+tortoise--&gt;77
+tortoise--&gt;78
+tortoise--&gt;79
+tortoise--&gt;80
+tortoise--&gt;81
+tortoise--&gt;82
+tortoise--&gt;83
+tortoise--&gt;84
+tortoise--&gt;85
+tortoise--&gt;86
+tortoise--&gt;87
+tortoise--&gt;88
+tortoise--&gt;89
+tortoise--&gt;90
+tortoise--&gt;91
+tortoise--&gt;92
+tortoise--&gt;93
+tortoise--&gt;94
+tortoise--&gt;95
+tortoise--&gt;96
+tortoise--&gt;97
+tortoise--&gt;98
+tortoise--&gt;99
+tortoise--&gt;100
+winner--&gt;tortoise
+rabbit--&gt;10
+</code></pre>
+<h3 id="模拟龟兔赛跑（使用Callable）"><a href="#模拟龟兔赛跑（使用Callable）" class="headerlink" title="模拟龟兔赛跑（使用Callable）"></a>模拟龟兔赛跑（使用Callable）</h3><p>代码如下：</p>
+<pre><code class="java">package com.msl.thread;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+/**
+ * 模拟龟兔赛跑
+ * @author Senley
+ *
+ */
+public class CRacer implements Callable&lt;Integer&gt;&#123;
+    private String winner;//胜利者
+    @Override
+    public Integer call() throws Exception &#123;
+        for(int steps=1;steps&lt;=100;steps++) &#123;
+            //模拟休息
+            if(Thread.currentThread().getName().equals(&quot;pool-1-thread-1&quot;)&amp;&amp;steps%10==0) &#123;
+                Thread.sleep(100);
+            &#125;
+            System.out.println(Thread.currentThread().getName()+&quot;--&gt;&quot;+steps);
+            //比赛是否结束
+            boolean flag = gameOver(steps);
+            if(flag) &#123;
+                return steps;
+            &#125;
+        &#125;
+        return null;
+    &#125;
+    
+    private boolean gameOver(int steps) &#123;
+        if(winner!=null) &#123;//存在胜利者
+            return true;
+        &#125;else &#123;
+            if(steps==100) &#123;
+                winner = Thread.currentThread().getName();
+                System.out.println(&quot;winner--&gt;&quot;+winner);
+                return true;
+            &#125;
+        &#125;
+        return false;
+    &#125;
+    
+    public static void main(String[] args) throws InterruptedException, ExecutionException &#123;
+        CRacer racer = new CRacer();
+        //创建执行服务: 
+        ExecutorService  ser=Executors.newFixedThreadPool(2);
+        //提交执行: 
+        Future&lt;Integer&gt; result1 =ser.submit(racer) ;
+        Future&lt;Integer&gt; result2 =ser.submit(racer) ;
+        //获取结果:  
+        Integer r1 =result1.get();
+        Integer r2 =result2.get();
+        System.out.println(r1+&quot;--&gt;&quot;+r2);
+        //关闭服务:  
+        ser.shutdownNow();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">pool-1-thread-2--&gt;1
+pool-1-thread-1--&gt;1
+pool-1-thread-1--&gt;2
+pool-1-thread-1--&gt;3
+pool-1-thread-1--&gt;4
+pool-1-thread-1--&gt;5
+pool-1-thread-1--&gt;6
+pool-1-thread-1--&gt;7
+pool-1-thread-1--&gt;8
+pool-1-thread-1--&gt;9
+pool-1-thread-2--&gt;2
+pool-1-thread-2--&gt;3
+pool-1-thread-2--&gt;4
+pool-1-thread-2--&gt;5
+pool-1-thread-2--&gt;6
+pool-1-thread-2--&gt;7
+pool-1-thread-2--&gt;8
+pool-1-thread-2--&gt;9
+pool-1-thread-2--&gt;10
+pool-1-thread-2--&gt;11
+pool-1-thread-2--&gt;12
+pool-1-thread-2--&gt;13
+pool-1-thread-2--&gt;14
+pool-1-thread-2--&gt;15
+pool-1-thread-2--&gt;16
+pool-1-thread-2--&gt;17
+pool-1-thread-2--&gt;18
+pool-1-thread-2--&gt;19
+pool-1-thread-2--&gt;20
+pool-1-thread-2--&gt;21
+pool-1-thread-2--&gt;22
+pool-1-thread-2--&gt;23
+pool-1-thread-2--&gt;24
+pool-1-thread-2--&gt;25
+pool-1-thread-2--&gt;26
+pool-1-thread-2--&gt;27
+pool-1-thread-2--&gt;28
+pool-1-thread-2--&gt;29
+pool-1-thread-2--&gt;30
+pool-1-thread-2--&gt;31
+pool-1-thread-2--&gt;32
+pool-1-thread-2--&gt;33
+pool-1-thread-2--&gt;34
+pool-1-thread-2--&gt;35
+pool-1-thread-2--&gt;36
+pool-1-thread-2--&gt;37
+pool-1-thread-2--&gt;38
+pool-1-thread-2--&gt;39
+pool-1-thread-2--&gt;40
+pool-1-thread-2--&gt;41
+pool-1-thread-2--&gt;42
+pool-1-thread-2--&gt;43
+pool-1-thread-2--&gt;44
+pool-1-thread-2--&gt;45
+pool-1-thread-2--&gt;46
+pool-1-thread-2--&gt;47
+pool-1-thread-2--&gt;48
+pool-1-thread-2--&gt;49
+pool-1-thread-2--&gt;50
+pool-1-thread-2--&gt;51
+pool-1-thread-2--&gt;52
+pool-1-thread-2--&gt;53
+pool-1-thread-2--&gt;54
+pool-1-thread-2--&gt;55
+pool-1-thread-2--&gt;56
+pool-1-thread-2--&gt;57
+pool-1-thread-2--&gt;58
+pool-1-thread-2--&gt;59
+pool-1-thread-2--&gt;60
+pool-1-thread-2--&gt;61
+pool-1-thread-2--&gt;62
+pool-1-thread-2--&gt;63
+pool-1-thread-2--&gt;64
+pool-1-thread-2--&gt;65
+pool-1-thread-2--&gt;66
+pool-1-thread-2--&gt;67
+pool-1-thread-2--&gt;68
+pool-1-thread-2--&gt;69
+pool-1-thread-2--&gt;70
+pool-1-thread-2--&gt;71
+pool-1-thread-2--&gt;72
+pool-1-thread-2--&gt;73
+pool-1-thread-2--&gt;74
+pool-1-thread-2--&gt;75
+pool-1-thread-2--&gt;76
+pool-1-thread-2--&gt;77
+pool-1-thread-2--&gt;78
+pool-1-thread-2--&gt;79
+pool-1-thread-2--&gt;80
+pool-1-thread-2--&gt;81
+pool-1-thread-2--&gt;82
+pool-1-thread-2--&gt;83
+pool-1-thread-2--&gt;84
+pool-1-thread-2--&gt;85
+pool-1-thread-2--&gt;86
+pool-1-thread-2--&gt;87
+pool-1-thread-2--&gt;88
+pool-1-thread-2--&gt;89
+pool-1-thread-2--&gt;90
+pool-1-thread-2--&gt;91
+pool-1-thread-2--&gt;92
+pool-1-thread-2--&gt;93
+pool-1-thread-2--&gt;94
+pool-1-thread-2--&gt;95
+pool-1-thread-2--&gt;96
+pool-1-thread-2--&gt;97
+pool-1-thread-2--&gt;98
+pool-1-thread-2--&gt;99
+pool-1-thread-2--&gt;100
+winner--&gt;pool-1-thread-2
+pool-1-thread-1--&gt;10
+10--&gt;100
 </code></pre>
 ]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Thread</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义一个ArrayList</title>
+    <url>/2021/11/07/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAArrayList/</url>
+    <content><![CDATA[<h1 id="自定义一个ArrayList"><a href="#自定义一个ArrayList" class="headerlink" title="自定义一个ArrayList"></a>自定义一个ArrayList</h1><h2 id="ArrayList特点和底层实现"><a href="#ArrayList特点和底层实现" class="headerlink" title="ArrayList特点和底层实现"></a>ArrayList特点和底层实现</h2><p>ArrayList底层是用数组实现的存储。 特点：查询效率高，增删效率低，线程不安全。查看源码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071028176.png" alt="自定义一个ArrayList1"></p>
+<p>可以看出ArrayList底层使用Object数组来存储元素数据。所有的方法，都围绕这个核心的Object数组来开展。</p>
+<p>我们知道，数组长度是有限的，而ArrayList是可以存放任意数量的对象，长度不受限制，那么它是怎么实现的呢?本质上就是通过定义新的更大的数组，将旧数组中的内容拷贝到新数组，来实现扩容。 ArrayList的Object数组初始化长度为10，如果我们存储满了这个数组，需要存储第11个对象，就会定义新的长度更大的数组，并将原数组内容和新的元素一起加入到新数组中，源码如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/202111071030809.png" alt="自定义一个ArrayList2"></p>
+<h2 id="自定义一个ArrayList，体会底层原理"><a href="#自定义一个ArrayList，体会底层原理" class="headerlink" title="自定义一个ArrayList，体会底层原理"></a>自定义一个ArrayList，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+
+import javax.management.RuntimeErrorException;
+
+/**
+ * 自定义实现一个ArrayList,体会底层原理
+ * @author Senley
+ *
+ */
+public class MslArrayList&lt;E&gt; &#123;
+    
+    private Object[] elementData;
+    private int size;
+    private static final int DEFALT_CAPACITY = 10;
+    
+    public MslArrayList() &#123;
+        elementData = new Object[DEFALT_CAPACITY];
+    &#125;
+    
+    public MslArrayList(int capacity) &#123;
+        if(capacity&lt;0) &#123;
+            throw new RuntimeException(&quot;容器的容量不能为负数&quot;);
+        &#125;else if(capacity==0) &#123;
+            elementData = new Object[DEFALT_CAPACITY];
+        &#125;else &#123;
+            elementData = new Object[capacity];
+        &#125;
+    &#125;
+    
+    public int size() &#123;
+        return size;
+    &#125;
+    
+    public boolean isEmpty() &#123;
+        return size==0?true:false;
+    &#125;
+    
+    public void add(E element) &#123;
+        //什么时候扩容
+        if(size == elementData.length) &#123;
+            //扩容操作
+            Object[] newArray = new Object[elementData.length + (elementData.length&gt;&gt;1)];//10--&gt;10+10/2
+            System.arraycopy(elementData, 0, newArray, 0, elementData.length);
+            elementData = newArray;        
+        &#125;
+        elementData[size++] = element;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        return (E) elementData[index];
+    &#125;
+    
+    public void set(E element,int index) &#123;
+        checkRange(index);
+        elementData[index] = element;
+    &#125;
+    
+    public void checkRange(int index) &#123;
+        //索引合法判断[0,size)
+        if(index&lt;0 || index&gt;size-1) &#123;
+            //不合法
+            throw new RuntimeException(&quot;索引不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    public void remove(E element) &#123;
+        //将element和所有元素挨个比较,获得第一个比较为true的,返回.
+        for(int i=0;i&lt;size;i++) &#123;
+            if(element.equals(get(i))) &#123;//容器中所有的比较操作都是用的equals而不是==
+                //将该元素从此处移除
+                remove(i);
+            &#125;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        int numMoved = elementData.length-index-1;
+        if(numMoved&gt;0) &#123;
+            System.arraycopy(elementData, index+1, elementData, index, elementData.length-index-1);
+        &#125;
+        elementData[--size] = null;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(int i=0;i&lt;size;i++) &#123;
+            sb.append(elementData[i]+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+    public static void main(String[] args) &#123;
+        MslArrayList m = new MslArrayList(20);
+        for(int i=0;i&lt;40;i++) &#123;
+            m.add(&quot;senley&quot;+i);
+        &#125;
+        System.out.println(m);
+        m.set(&quot;test&quot;, 10);
+        System.out.println(m.get(10));
+        m.remove(3);
+        System.out.println(m);
+        m.remove(&quot;test&quot;);
+        System.out.println(m);
+        System.out.println(m.size);
+        System.out.println(m.isEmpty());
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[senley0,senley1,senley2,senley3,senley4,senley5,senley6,senley7,senley8,senley9,senley10,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+test
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,test,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+[senley0,senley1,senley2,senley4,senley5,senley6,senley7,senley8,senley9,senley11,senley12,senley13,senley14,senley15,senley16,senley17,senley18,senley19,senley20,senley21,senley22,senley23,senley24,senley25,senley26,senley27,senley28,senley29,senley30,senley31,senley32,senley33,senley34,senley35,senley36,senley37,senley38,senley39]
+38
+false
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>ArrayList</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义一个HashSet</title>
+    <url>/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/</url>
+    <content><![CDATA[<h1 id="自定义一个HashSet"><a href="#自定义一个HashSet" class="headerlink" title="自定义一个HashSet"></a>自定义一个HashSet</h1><h2 id="HashSet特点和底层实现"><a href="#HashSet特点和底层实现" class="headerlink" title="HashSet特点和底层实现"></a>HashSet特点和底层实现</h2><ul>
+<li><p>HashSet底层是HashMap；</p>
+</li>
+<li><p>向Hashset中添加元素, 实际上是把这个元素作为键添加到底层的HashMap中；</p>
+</li>
+<li><p>HashSet实际上就是底层HashMap的键的集合。</p>
+</li>
+</ul>
+<p> HashSet是采用哈希算法实现，底层实际是用HashMap实现的(HashSet本质就是一个简化版的HashMap)，因此，查询效率和增删效率都比较高。查看HashSet的源码：</p>
+<pre><code class="java">public class HashSet&lt;E&gt; extends AbstractSet&lt;E&gt; implements Set&lt;E&gt;, Cloneable, java.io.Serializable&#123;
+    static final long serialVersionUID = -5024744406713321676L;
+
+    private transient HashMap&lt;E,Object&gt; map;
+
+    // Dummy value to associate with an Object in the backing Map
+    private static final Object PRESENT = new Object();
+
+    /**
+     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
+     * default initial capacity (16) and load factor (0.75).
+     */
+    public HashSet() &#123;
+        map = new HashMap&lt;&gt;();
+    &#125;
+    
+     /**
+     * Adds the specified element to this set if it is not already present.
+     * More formally, adds the specified element &lt;tt&gt;e&lt;/tt&gt; to this set if
+     * this set contains no element &lt;tt&gt;e2&lt;/tt&gt; such that
+     * &lt;tt&gt;(e==null&amp;nbsp;?&amp;nbsp;e2==null&amp;nbsp;:&amp;nbsp;e.equals(e2))&lt;/tt&gt;.
+     * If this set already contains the element, the call leaves the set
+     * unchanged and returns &lt;tt&gt;false&lt;/tt&gt;.
+     *
+     * @param e element to be added to this set
+     * @return &lt;tt&gt;true&lt;/tt&gt; if this set did not already contain the specified
+     * element
+     */
+    public boolean add(E e) &#123;
+        return map.put(e, PRESENT)==null;
+    &#125;
+    //以下代码省略
+&#125;
+</code></pre>
+<p>可以发现里面有个map属性，这就是HashSet的核心秘密。再看add()方法，可以发现增加一个元素，说白了就是在map中增加一个键值对，键对象就是这个元素，值对象是名为PRESENT的Object对象。说白了就是“往set中加入元素，本质就是把这个元素作为key加入到了内部的map中”。</p>
+<p>由于map中key都是不可重复的，因此，Set天然具有“不可重复”的特性。</p>
+<h2 id="自定义一个HashSet，体会底层原理"><a href="#自定义一个HashSet，体会底层原理" class="headerlink" title="自定义一个HashSet，体会底层原理"></a>自定义一个HashSet，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+
+import java.util.HashMap;
+
+/**
+ * 手动实现一个HashSet，深刻理解HashSet底层原理
+ * @author Senley
+ *
+ */
+public class MslHashSet &#123;
+    HashMap map;
+    private static final Object PRESENT = new Object();
+    
+    public static void main(String[] args) &#123;
+        MslHashSet set = new MslHashSet();
+        set.add(&quot;aaa&quot;);
+        set.add(&quot;bbb&quot;);
+        set.add(&quot;ccc&quot;);
+        System.out.println(set);
+    &#125;
+    
+    public MslHashSet()&#123;
+        map = new HashMap();
+    &#125;
+    
+    public int size() &#123;
+        return map.size();
+    &#125;
+    
+    public void add(Object o) &#123;
+        map.put(o, PRESENT);
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(Object key:map.keySet()) &#123;
+            sb.append(key+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[aaa,ccc,bbb]
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>HashSet</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义一个HashMap</title>
+    <url>/2021/11/14/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashMap/</url>
+    <content><![CDATA[<h1 id="自定义一个HashMap"><a href="#自定义一个HashMap" class="headerlink" title="自定义一个HashMap"></a>自定义一个HashMap</h1><h2 id="HashMap的结构"><a href="#HashMap的结构" class="headerlink" title="HashMap的结构"></a>HashMap的结构</h2><p>在HashMap底层实现原理中，聊过Node&lt;K,V&gt;[]数组的结构，也是HashMap的结构。如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Node%E6%95%B0%E7%BB%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.png" alt="Node数组存储结构"></p>
+<h2 id="自定义一个Node类"><a href="#自定义一个Node类" class="headerlink" title="自定义一个Node类"></a>自定义一个Node类</h2><pre><code class="java">package com.msl.mycollection;
+/**
+ * 用于MslHashMap中
+ * @author Senley
+ *
+ */
+public class Node&lt;K,V&gt; &#123;
+    int hash;
+    K key;
+    V value;
+    Node next;
+&#125;
+</code></pre>
+<h2 id="自定义一个HashMap，体会底层原理"><a href="#自定义一个HashMap，体会底层原理" class="headerlink" title="自定义一个HashMap，体会底层原理"></a>自定义一个HashMap，体会底层原理</h2><p>在上述基础上自定义实现一个HashMap，实现如下简单功能：</p>
+<ol>
+<li>实现put方法增加键值对；</li>
+<li>解决键重复问题和链表生成问题；</li>
+<li>实现toString方法，方便查看Map中的键值对信息；</li>
+<li>实现get方法，根据键对象获得对应的值对象；</li>
+<li>增加泛型。</li>
+</ol>
+<p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+/**
+ * 自定义一个HashMap
+ * @author Senley
+ *
+ */
+public class MslHashMap&lt;K,V&gt; &#123;
+    Node[] table;  //位桶数组。bucket array
+    int size;      //存放的键值对的个数
+    
+    public static void main(String[] args) &#123;
+        MslHashMap&lt;Integer,String&gt; m = new MslHashMap&lt;&gt;();
+        m.put(10, &quot;aa&quot;);
+        m.put(20, &quot;bb&quot;);
+        m.put(30, &quot;cc&quot;);
+        m.put(20, &quot;ss&quot;);
+        
+        m.put(53, &quot;ee&quot;);
+        m.put(69, &quot;ff&quot;);
+        m.put(85, &quot;gg&quot;);
+        
+        System.out.println(m);
+        
+//        for(int i=10;i&lt;100;i++) &#123;
+//            System.out.println(i+&quot;---&quot;+myHash(i,16)); //53,69,85
+//        &#125;
+        
+        System.out.println(m.get(53));
+    &#125;
+    
+    public MslHashMap() &#123;
+        table = new Node[16]; //长度一般定义成2的整数幂
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //&#123;10:aa,20:bb&#125;
+        StringBuilder sb = new StringBuilder(&quot;&#123;&quot;);
+        //遍历bucket数组
+        for(int i=0;i&lt;table.length;i++) &#123;
+            Node temp = table[i];
+            //遍历链表
+            while(temp!=null) &#123;
+                sb.append(temp.key+&quot;:&quot;+temp.value+&quot;,&quot;);
+                temp = temp.next;
+            &#125;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;&#125;&#39;);
+        return sb.toString();
+    &#125;
+    
+    public void put(K key,V value) &#123;
+        //还需要考虑数组扩容问题！
+        
+        //定义了新的结点对象
+        Node newNode = new Node();
+        newNode.hash = myHash(key.hashCode(),table.length);
+        newNode.key = key;
+        newNode.value = value;
+        newNode.next = null;
+        
+        Node temp = table[newNode.hash];
+        Node iterLast = null; //正在遍历的最后一个元素
+        boolean keyRepeat = false; 
+        if(temp == null) &#123;
+            //此处数组元素为空，则直接将新结点放进去
+            table[newNode.hash] = newNode;
+            size++;
+        &#125;else &#123;
+            //此处数组元素不为空，则遍历对应链表
+            while(temp!=null) &#123;
+                //判断key如果重复，则覆盖
+                if(temp.key.equals(key)) &#123;
+                    keyRepeat = true;
+                    System.out.println(&quot;key重复了&quot;);
+                    temp.value = value; //只是覆盖value即可，其他的值（hash,key,next）保持不变
+                    break;
+                &#125;else &#123;
+                    //key不重复，则遍历下一个
+                    iterLast = temp;
+                    temp = temp.next;
+                &#125;
+            &#125;
+            if(!keyRepeat) &#123; //如果没有发生key重复的情况，则添加到链表最后
+                iterLast.next = newNode;
+                size++;
+            &#125;
+        &#125;
+    &#125;
+    
+    public V get(K key) &#123;
+        int hash = myHash(key.hashCode(),table.length);
+        V value = null;
+        if(table[hash]!=null) &#123;
+            Node temp = table[hash];
+            while(temp!=null) &#123;
+                if(temp.key.equals(key)) &#123; //如果相等则说明找对了键值对，返回相应的value
+                    value = (V) temp.value;
+                    break;
+                &#125;else &#123;
+                    temp = temp.next;
+                &#125;
+            &#125;
+        &#125;
+        return value;
+    &#125;
+    
+    public static int myHash(int v,int length) &#123;
+//        System.out.println(&quot;hash in myHash:&quot;+(v&amp;(length-1))); //直接位运算，效率高
+//        System.out.println(&quot;hash in myHash:&quot;+(v%(length-1))); //取模运算，效率低
+        return v&amp;(length-1);
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">key重复了
+&#123;20:ss,53:ee,69:ff,85:gg,10:aa,30:cc&#125;
+ee
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>HashMap</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义一个LinkedList</title>
+    <url>/2021/11/08/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AALinkedList/</url>
+    <content><![CDATA[<h1 id="自定义一个LinkedList"><a href="#自定义一个LinkedList" class="headerlink" title="自定义一个LinkedList"></a>自定义一个LinkedList</h1><h2 id="LinkedList特点和底层实现"><a href="#LinkedList特点和底层实现" class="headerlink" title="LinkedList特点和底层实现"></a>LinkedList特点和底层实现</h2><p>LinkedList底层用双向链表实现的存储。特点：查询效率低，增删效率高，线程不安全。</p>
+<p>双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。 所以，从双向链表中的任意一个节点开始，都可以很方便地找到所有节点。下图为LinkedList的存储结构图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A81.png" alt="自定义一个链表1"></p>
+<p>每个节点都应该有3部分内容：</p>
+<pre><code class="java">class  Node &#123;
+        Node  previous;     //前一个节点
+        Object  element;    //本节点保存的数据
+        Node  next;         //后一个节点
+&#125;
+</code></pre>
+<p>查看LinkedList的源码，可以看到里面包含了双向链表的相关代码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A82.png" alt="自定义一个链表2"></p>
+<h2 id="自定义一个LinkedList，体会底层原理"><a href="#自定义一个LinkedList，体会底层原理" class="headerlink" title="自定义一个LinkedList，体会底层原理"></a>自定义一个LinkedList，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+/**
+ * 自定义实现一个链表
+ * @author Senley
+ */
+public class MslLinkedList&lt;E&gt; &#123;
+    
+    private Node first;
+    private Node last;
+    private int size;
+    
+    public static void main(String[] args) &#123;
+        MslLinkedList&lt;String&gt; list = new MslLinkedList();
+        list.add(&quot;a&quot;);
+        list.add(&quot;b&quot;);
+        list.add(&quot;c&quot;);
+        System.out.println(list);
+        System.out.println(list.get(2));
+        list.remove(0);
+        System.out.println(list);
+        list.add(1, &quot;插入&quot;);
+        System.out.println(list);
+    &#125;
+    
+    public void add(int index,E element) &#123;
+        checkRange(index);
+        Node newNode = new Node(element);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            up.next = newNode;
+            newNode.previous = up;
+            newNode.next = temp;
+            temp.previous = newNode;
+        &#125;
+    &#125;
+    
+    public void remove(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        if(temp!=null) &#123;
+            Node up = temp.previous;
+            Node down = temp.next;
+            if(up!=null) &#123;
+                up.next = down;
+            &#125;
+            if(down!=null) &#123;
+                down.previous = up;
+            &#125;
+            //被删除的元素是第一个元素时
+            if(index==0) &#123;
+                first = down;
+            &#125;
+            //被删除的元素是最后一个元素时
+            if(index==size-1) &#123;
+                last = up;
+            &#125;
+            size--;
+        &#125;
+    &#125;
+    
+    public void add(E element) &#123;
+        Node node = new Node(element);
+        if(first==null) &#123;
+//            node.previous = null;
+//            node.next = null;
+            first = node;
+            last = node;
+        &#125;else &#123;
+            node.previous = last;
+            node.next = null;
+            last.next = node;
+            last = node;
+        &#125;
+        size++;
+    &#125;
+    
+    public E get(int index) &#123;
+        checkRange(index);
+        Node temp = getNode(index);
+        return temp!=null?(E)temp.element:null;
+    &#125;
+    
+    private void checkRange(int index) &#123;
+        if(index&lt;0 || index&gt;size-1) &#123;
+            throw new RuntimeException(&quot;索引数字不合法:&quot;+index);
+        &#125;
+    &#125;
+    
+    private Node getNode(int index) &#123;
+        checkRange(index);
+        Node temp = null;
+        if(index&lt;=(size&gt;&gt;1)) &#123;//size&gt;&gt;1相当于除以2
+            temp = first;
+            for(int i=0;i&lt;index;i++) &#123;
+                temp = temp.next;
+            &#125;
+        &#125;else &#123;
+            temp = last;
+            for(int i=size-1;i&gt;index;i--) &#123;
+                temp = temp.previous;
+            &#125;
+        &#125; 
+        return temp;
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        //[a b c] first = a, last = c
+        StringBuilder sb = new StringBuilder(&quot;[&quot;);
+        Node temp = first;
+        while(temp!=null) &#123;
+            sb.append(temp.element+&quot;,&quot;);
+            temp = temp.next;
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+    
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[a,b,c]
+c
+[b,c]
+[b,插入,c]
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>LinkedList</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>装饰器设计模式的理解与实现</title>
+    <url>/2022/01/14/%E8%A3%85%E9%A5%B0%E5%99%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%90%86%E8%A7%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0/</url>
+    <content><![CDATA[<h1 id="装饰器设计模式的理解与实现"><a href="#装饰器设计模式的理解与实现" class="headerlink" title="装饰器设计模式的理解与实现"></a><strong>装饰器设计模式</strong>的理解与实现</h1><h2 id="设计模式的分类"><a href="#设计模式的分类" class="headerlink" title="设计模式的分类"></a>设计模式的分类</h2><p>总体来说设计模式分为三大类：</p>
+<p>创建型模式，共五种：工厂方法模式、抽象工厂模式、单例模式、建造者模式、原型模式。</p>
+<p>结构型模式，共七种：适配器模式、装饰器模式、代理模式、外观模式、桥接模式、组合模式、享元模式。</p>
+<p>行为型模式，共十一种：策略模式、模板方法模式、观察者模式、迭代子模式、责任链模式、命令模式、备忘录模式、状态模式、访问者模式、中介者模式、解释器模式。</p>
+<h2 id="装饰器设计模式的定义与特点"><a href="#装饰器设计模式的定义与特点" class="headerlink" title="装饰器设计模式的定义与特点"></a>装饰器设计模式的定义与特点</h2><p>装饰（Decorator）模式的定义：指在不改变现有对象结构的情况下，动态地给该对象增加一些职责（即增加其额外功能）的模式，它属于对象结构型模式。</p>
+<p>装饰（Decorator）模式的主要优点有：</p>
+<ul>
+<li>装饰器是继承的有力补充，比继承灵活，在不改变原有对象的情况下，动态地给一个对象扩展功能，即插即用。</li>
+<li>通过使用不用装饰类及这些装饰类的排列组合，可以实现不同效果。</li>
+<li>装饰器模式完全遵守开闭原则。</li>
+</ul>
+<p>其主要缺点是：</p>
+<p>装饰模式会增加许多子类，过度使用会增加程序复杂性。</p>
+<h2 id="装饰器设计模式的结构与实现"><a href="#装饰器设计模式的结构与实现" class="headerlink" title="装饰器设计模式的结构与实现"></a>装饰器设计模式的结构与实现</h2><h3 id="模式结构"><a href="#模式结构" class="headerlink" title="模式结构"></a>模式结构</h3><ul>
+<li>抽象构件（Component）角色：定义一个抽象接口以规范准备接收附加责任的对象。</li>
+<li>具体构件（ConcreteComponent）角色：实现抽象构件，通过装饰角色为其添加一些职责。</li>
+<li>抽象装饰（Decorator）角色：继承抽象构件，并包含具体构件的实例，可以通过其子类扩展具体构件的功能。</li>
+<li>具体装饰（ConcreteDecorator）角色：实现抽象装饰的相关方法，并给具体构件对象添加附加的责任。</li>
+</ul>
+<h3 id="模式实现"><a href="#模式实现" class="headerlink" title="模式实现"></a>模式实现</h3><p>代码如下：</p>
+<pre><code class="java">package com.msl.io;
+/**
+ * 模拟咖啡
+ * 1、抽象组件:需要装饰的抽象对象(接口或抽象父类)
+ * 2、具体组件:需要装饰的对象
+ * 3、抽象装饰类:包含了对抽象组件的引用以及装饰者共有的方法
+ * 4、具体装饰类:被装饰的对象
+ * @author Senley
+ *
+ */
+public class DecorateTest &#123;
+    public static void main(String[] args) &#123;
+        Drink coffer = new Coffer();
+        Drink suger = new Suger(coffer);//装饰
+        System.out.println(suger.info()+&quot;--&gt;&quot;+suger.cost());
+        Drink milk = new Milk(coffer);//装饰
+        System.out.println(milk.info()+&quot;--&gt;&quot;+milk.cost());
+        milk = new Milk(suger);//装饰
+        System.out.println(milk.info()+&quot;--&gt;&quot;+milk.cost());
+    &#125;
+&#125;
+
+//抽象组件
+interface Drink&#123;
+    double cost();//费用
+    String info();//说明
+&#125;
+
+//具体组件
+class Coffer implements Drink&#123;
+    private String name =&quot;原味咖啡&quot;;
+    @Override
+    public double cost() &#123;
+        return 10;
+    &#125;
+
+    @Override
+    public String info() &#123;
+        return name;
+    &#125;
+&#125;
+
+//抽象装饰类
+abstract class Decorate implements Drink&#123;
+    //对抽象组件的引用
+    private Drink drink;
+    public Decorate(Drink drink) &#123;
+        this.drink = drink;
+    &#125;
+    @Override
+    public double cost() &#123;
+        return this.drink.cost();
+    &#125;
+
+    @Override
+    public String info() &#123;
+        return this.drink.info();
+    &#125;
+&#125;
+
+//具体装饰类
+class Milk extends Decorate&#123;
+    public Milk(Drink drink) &#123;
+        super(drink);
+    &#125;
+    @Override
+    public double cost() &#123;
+        return super.cost()*4;
+    &#125;
+
+    @Override
+    public String info() &#123;
+        return super.info()+&quot;加入了牛奶&quot;;
+    &#125;
+&#125;
+
+class Suger extends Decorate&#123;
+    public Suger(Drink drink) &#123;
+        super(drink);
+    &#125;
+    @Override
+    public double cost() &#123;
+        return super.cost()*2;
+    &#125;
+
+    @Override
+    public String info() &#123;
+        return super.info()+&quot;加入了蔗糖&quot;;
+    &#125;    
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">原味咖啡加入了蔗糖--&gt;20.0
+原味咖啡加入了牛奶--&gt;40.0
+原味咖啡加入了蔗糖加入了牛奶--&gt;80.0
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>DesignPattern</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>遍历集合的方法总结</title>
+    <url>/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h1 id="遍历集合-容器-的方法总结"><a href="#遍历集合-容器-的方法总结" class="headerlink" title="遍历集合(容器)的方法总结"></a><strong>遍历集合(容器)的方法总结</strong></h1><h2 id="使用Iterator迭代器遍历容器元素"><a href="#使用Iterator迭代器遍历容器元素" class="headerlink" title="使用Iterator迭代器遍历容器元素"></a>使用Iterator迭代器遍历容器元素</h2><h2 id="Iterator迭代器"><a href="#Iterator迭代器" class="headerlink" title="Iterator迭代器"></a>Iterator迭代器</h2><p>Java集合框架的集合类，我们有时候称之为容器。容器的种类有很多种，如ArrayList、LinkedList、HashSet…，每种容器都有自己的特点，ArrayList底层维护的是一个数组；LinkedList是链表结构；HashSet依赖的是哈希表，每种容器都有自己特有的数据结构。</p>
+<p>因为容器的内部结构不同，很多时候可能不知道该怎样去遍历一个容器中的元素。所以为了使对容器内元素的操作更为简单，Java引入了迭代器模式。</p>
+<p><strong>把访问逻辑从不同类型的集合类中抽取出来，从而避免向外部暴露集合的内部结构。</strong></p>
+<p>使用Iterator遍历List、Set、Map，代码如下：</p>
+<pre><code class="java">package com.msl.collection;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+/**
+ * 测试迭代器遍历集合
+ * @author Senley
+ *
+ */
+public class TestIterator &#123;
+    public static void main(String[] args) &#123;
+        testIteratorList();
+        testIteratorSet();
+        testIteratorMap();
+    &#125;
+    
+    public static void testIteratorList() &#123;
+        List&lt;String&gt; list = new ArrayList&lt;&gt;();
+        list.add(&quot;aa&quot;);
+        list.add(&quot;bb&quot;);
+        list.add(&quot;cc&quot;);
+        
+        //使用Iterator遍历List
+        for(Iterator&lt;String&gt; iter=list.iterator();iter.hasNext();) &#123;
+            String temp = iter.next();
+            System.out.println(temp);
+        &#125;
+    &#125;
+    
+    public static void testIteratorSet() &#123;
+        Set&lt;String&gt; set = new HashSet&lt;&gt;();
+        set.add(&quot;aa&quot;);
+        set.add(&quot;bb&quot;);
+        set.add(&quot;cc&quot;);
+        
+        //使用Iterator遍历Set
+        for(Iterator&lt;String&gt; iter=set.iterator();iter.hasNext();) &#123;
+            String temp = iter.next();
+            System.out.println(temp);
+        &#125;
+    &#125;
+    
+    public static void testIteratorMap() &#123;
+        Map&lt;Integer,String&gt; map = new HashMap&lt;&gt;();
+        map.put(100,&quot;aa&quot;);
+        map.put(200,&quot;bb&quot;);
+        map.put(300,&quot;cc&quot;);
+        
+        //使用Iterator遍历Map，第一种方式
+        Set&lt;Entry&lt;Integer,String&gt;&gt; ss = map.entrySet();
+        for(Iterator&lt;Entry&lt;Integer,String&gt;&gt; iter=ss.iterator();iter.hasNext();) &#123;
+            Entry&lt;Integer,String&gt; temp = iter.next();
+            System.out.println(temp.getKey()+&quot;---&quot;+temp.getValue());
+        &#125;
+        
+        //使用Iterator遍历Map，第二种方式
+        Set&lt;Integer&gt; keySet = map.keySet();
+        for(Iterator&lt;Integer&gt; iter=keySet.iterator();iter.hasNext();) &#123;
+            Integer key = iter.next();
+            System.out.println(key+&quot;---&quot;+map.get(key));
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">aa
+bb
+cc
+aa
+bb
+cc
+100---aa
+200---bb
+300---cc
+100---aa
+200---bb
+300---cc
+</code></pre>
+<h2 id="遍历集合-容器-的方法"><a href="#遍历集合-容器-的方法" class="headerlink" title="遍历集合(容器)的方法"></a>遍历集合(容器)的方法</h2><h3 id="遍历List方法一：普通for循环"><a href="#遍历List方法一：普通for循环" class="headerlink" title="遍历List方法一：普通for循环"></a>遍历List方法一：普通for循环</h3><pre><code class="java">for(int i=0;i&lt;list.size();i++)&#123;//list为集合的对象名
+    String temp = (String)list.get(i);
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法二：增强for循环"><a href="#遍历List方法二：增强for循环" class="headerlink" title="遍历List方法二：增强for循环"></a>遍历List方法二：增强for循环</h3><pre><code class="java">for (String temp : list) &#123;
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法三：使用Iterator迭代器-1"><a href="#遍历List方法三：使用Iterator迭代器-1" class="headerlink" title="遍历List方法三：使用Iterator迭代器(1)"></a>遍历List方法三：使用Iterator迭代器(1)</h3><pre><code class="java">for(Iterator iter = list.iterator();iter.hasNext();)&#123;
+    String temp = (String)iter.next();
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历List方法四：使用Iterator迭代器-2"><a href="#遍历List方法四：使用Iterator迭代器-2" class="headerlink" title="遍历List方法四：使用Iterator迭代器(2)"></a>遍历List方法四：使用Iterator迭代器(2)</h3><pre><code class="java">Iterator iter = list.iterator();
+while(iter.hasNext())&#123;
+    Object  obj = iter.next();
+    iter.remove();//如果要遍历时，删除集合中的元素，建议使用这种方式
+    System.out.println(obj);
+&#125;
+</code></pre>
+<h3 id="遍历Set方法一：增强for循环"><a href="#遍历Set方法一：增强for循环" class="headerlink" title="遍历Set方法一：增强for循环"></a>遍历Set方法一：增强for循环</h3><pre><code class="java">for(String temp:set)&#123;
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历Set方法二：使用Iterator迭代器"><a href="#遍历Set方法二：使用Iterator迭代器" class="headerlink" title="遍历Set方法二：使用Iterator迭代器"></a>遍历Set方法二：使用Iterator迭代器</h3><pre><code class="java">for(Iterator iter = set.iterator();iter.hasNext();)&#123;
+    String temp = (String)iter.next();
+    System.out.println(temp);
+&#125;
+</code></pre>
+<h3 id="遍历Map方法一：根据key获取value"><a href="#遍历Map方法一：根据key获取value" class="headerlink" title="遍历Map方法一：根据key获取value"></a>遍历Map方法一：根据key获取value</h3><pre><code class="java">Map&lt;Integer, Man&gt; maps = new HashMap&lt;Integer, Man&gt;();
+Set&lt;Integer&gt; keySet = maps.keySet();
+for(Integer id : keySet)&#123;
+    System.out.println(maps.get(id).name);
+&#125;
+</code></pre>
+<h3 id="遍历Map方法二：使用entrySet"><a href="#遍历Map方法二：使用entrySet" class="headerlink" title="遍历Map方法二：使用entrySet"></a>遍历Map方法二：使用entrySet</h3><pre><code class="java">Set&lt;Entry&lt;Integer, Man&gt;&gt; ss = maps.entrySet();
+for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
+    Entry e = (Entry) iterator.next(); 
+    System.out.println(e.getKey()+&quot;--&quot;+e.getValue());
+&#125;
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Collection</tag>
+      </tags>
   </entry>
 </search>
