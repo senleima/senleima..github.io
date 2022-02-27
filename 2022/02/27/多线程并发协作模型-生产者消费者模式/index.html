@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>多线程synchronized实现简单的影院购票功能 |  senleima</title>
+      <title>多线程并发协作模型-生产者消费者模式 |  senleima</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -60,7 +60,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-多线程synchronized实现简单的影院购票功能"
+  id="post-多线程并发协作模型-生产者消费者模式"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -71,7 +71,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  多线程synchronized实现简单的影院购票功能
+  多线程并发协作模型-生产者消费者模式
 </h1>
  
 
@@ -79,8 +79,8 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2022/02/25/%E5%A4%9A%E7%BA%BF%E7%A8%8Bsynchronized%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E5%BD%B1%E9%99%A2%E8%B4%AD%E7%A5%A8%E5%8A%9F%E8%83%BD/" class="article-date">
-  <time datetime="2022-02-24T16:37:02.000Z" itemprop="datePublished">2022-02-25</time>
+      <a href="/2022/02/27/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91%E5%8D%8F%E4%BD%9C%E6%A8%A1%E5%9E%8B-%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%BC%8F/" class="article-date">
+  <time datetime="2022-02-27T04:34:09.000Z" itemprop="datePublished">2022-02-27</time>
 </a> 
   <div class="article-category">
     <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
@@ -91,7 +91,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">858</span>
+            <span class="post-count">2.9k</span>
         </span>
     </span>
 
@@ -100,7 +100,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">3 min</span>
+            <span class="post-count">11 min</span>
         </span>
     </span>
 </div>
@@ -115,112 +115,457 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="多线程synchronized实现简单的影院购票功能"><a href="#多线程synchronized实现简单的影院购票功能" class="headerlink" title="多线程synchronized实现简单的影院购票功能"></a>多线程synchronized实现简单的影院购票功能</h1><p>由于同一进程的多个线程共享同一块存储空间，在带来方便的同时，也带来了访问冲突的问题。解决该问题的机制是synchronized关键字，它包括两种用法：synchronized 方法和 synchronized 块。</p>
-<h2 id="synchronized-方法"><a href="#synchronized-方法" class="headerlink" title="synchronized 方法"></a><strong>synchronized 方法</strong></h2><p> 通过在方法声明中加入 synchronized关键字来声明，语法如下：</p>
-<pre><code class="java">public synchronized void accessVal(int newVal);
-</code></pre>
-<p>synchronized 方法控制对“对象的类成员变量”的访问：每个对象对应一把锁，每个 synchronized 方法都必须获得调用该方法的对象的锁方能执行，否则所属线程阻塞，方法一旦执行，就独占该锁，直到从该方法返回时才将锁释放，此后被阻塞的线程方能获得该锁，重新进入可执行状态。</p>
-<h2 id="synchronized-块"><a href="#synchronized-块" class="headerlink" title="synchronized 块"></a><strong>synchronized 块</strong></h2><p>synchronized 方法的缺陷：若将一个大的方法声明为synchronized 将会大大影响效率。</p>
-<p>Java 为我们提供了更好的解决办法，那就是 synchronized 块。 块可以让我们精确地控制到具体的“成员变量”，缩小同步的范围，提高效率。</p>
-<p>synchronized 块：通过 synchronized关键字来声明synchronized 块，语法如下：</p>
-<pre><code class="java">synchronized(syncObject)
-　  &#123; 
-　　 //允许访问控制的代码 
-　  &#125;
-</code></pre>
-<h2 id="实现简单的影院购票功能"><a href="#实现简单的影院购票功能" class="headerlink" title="实现简单的影院购票功能"></a>实现简单的影院购票功能</h2><p>代码如下：</p>
-<pre><code class="java">package com.msl.syn;
-
-import java.util.ArrayList;
-import java.util.List;
-
+  <h1 id="多线程并发协作模型-生产者消费者模式"><a href="#多线程并发协作模型-生产者消费者模式" class="headerlink" title="多线程并发协作模型-生产者消费者模式"></a>多线程并发协作模型-生产者消费者模式</h1><h2 id="生产者消费者模式"><a href="#生产者消费者模式" class="headerlink" title="生产者消费者模式"></a>生产者消费者模式</h2><h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a><strong>应用场景</strong></h3><ul>
+<li><p>假设仓库中只能存放一件产品，生产者将生产出来的产品放入仓库，消费者将仓库中产品取走消费。</p>
+</li>
+<li><p>如果仓库中没有产品，则生产者将产品放入仓库，否则停止生产并等待，直到仓库中的产品被消费者取走为止。</p>
+</li>
+<li><p>如果仓库中放有产品，则消费者可以将产品取走消费，否则停止消费并等待，直到仓库中再次放入产品为止。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/Producer-consumer-problem.png" alt="Producer-consumer-problem"></p>
+</li>
+</ul>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>这是一个线程同步问题，生产者和消费者共享同一个资源，并且生产者和消费者之间相互依赖，互为条件。</p>
+<ul>
+<li><p>对于生产者，没有生产产品之前，要通知消费者等待。而生产了产品之后，又需要马上通知消费者消费。</p>
+</li>
+<li><p>对于消费者，在消费之后，要通知生产者已经消费结束，需要继续生产新产品以供消费。</p>
+</li>
+<li><p>在生产者消费者问题中，仅有synchronized是不够的。</p>
+<ul>
+<li>synchronized可阻止并发更新同一个共享资源，实现了同步。</li>
+<li>synchronized不能用来实现不同线程之间的消息传递（通信）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h3><ul>
+<li>并发协作模型-生产者消费者模式—&gt;管程法</li>
+<li>并发协作模型-生产者消费者模式—&gt;信号灯法</li>
+</ul>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><h4 id="管程法"><a href="#管程法" class="headerlink" title="管程法"></a><strong>管程法</strong></h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.cooperation;
 /**
- * 实现简单的影院购票功能 - 快乐影院
+ * 协作模型:生产者消费者实现方式一:管程法
+ * 借助缓冲区
+ * 
  * @author Senley
  *
  */
-public class HappyCinema2 &#123;
+public class CoTest01 &#123;
     public static void main(String[] args) &#123;
-        //可用位置
-        List&lt;Integer&gt; available = new ArrayList&lt;Integer&gt;();
-        available.add(1);
-        available.add(2);
-        available.add(5);
-        available.add(6);
-        available.add(7);
-        //顾客需要的位置
-        List&lt;Integer&gt; seats1 = new ArrayList&lt;Integer&gt;();
-        seats1.add(1);
-        seats1.add(2);
-        List&lt;Integer&gt; seats2 = new ArrayList&lt;Integer&gt;();
-        seats2.add(3);
-        seats2.add(6);
-        
-        MslCinema m = new MslCinema(available, &quot;Happy Cinema&quot;);
-        new Thread(new HappyCustomer(m, seats1),&quot;张三&quot;).start();
-        new Thread(new HappyCustomer(m, seats2),&quot;李四&quot;).start();
-    &#125;
-    
-&#125;
-
-//影院
-class MslCinema&#123;
-    List&lt;Integer&gt; available; //可用的位置
-    String name; //名称
-    
-    public MslCinema(List&lt;Integer&gt; available, String name) &#123;
-        this.available = available;
-        this.name = name;
-    &#125;
-    
-    //购票
-    public boolean bookTickets(List&lt;Integer&gt; seats) &#123;
-        System.out.println(&quot;欢迎光临&quot;+this.name+&quot;，可用位置为：&quot;+available);
-        List&lt;Integer&gt; copy = new ArrayList&lt;Integer&gt;();
-        copy.addAll(available);
-        //相减
-        copy.removeAll(seats);
-        //判断大小
-        if(available.size()-seats.size()!=copy.size()) &#123;
-            return false;
-        &#125;
-        //成功
-        available = copy;
-        return true;
+        SynContainer container = new SynContainer();
+        new Productor(container).start();
+        new Consumer(container).start();
     &#125;
 &#125;
-
-//顾客
-class HappyCustomer implements Runnable&#123;
-    MslCinema cinema;
-    List&lt;Integer&gt; seats;
-
-    public HappyCustomer(MslCinema cinema, List&lt;Integer&gt; seats) &#123;
-        super();
-        this.cinema = cinema;
-        this.seats = seats;
+//生产者
+class Productor extends Thread&#123;
+    SynContainer container  ;    
+    public Productor(SynContainer container) &#123;
+        this.container = container;
     &#125;
 
-    @Override
     public void run() &#123;
-        synchronized(cinema) &#123;
-            boolean flag = cinema.bookTickets(seats);
-            if(flag) &#123;
-                System.out.println(&quot;出票成功--&quot;+Thread.currentThread().getName()+&quot;--位置为&quot;+seats);
+        //生产
+        for(int i=0;i&lt;100;i++) &#123;
+            System.out.println(&quot;生产--&gt;&quot;+i+&quot;个馒头&quot;);
+            container.push(new Steamedbun(i) );
+        &#125;
+    &#125;
+&#125;
+//消费者
+class Consumer extends Thread&#123;
+    SynContainer container  ;    
+    public Consumer(SynContainer container) &#123;
+        this.container = container;
+    &#125;
+    public void run() &#123;
+        //消费
+        for(int i=0;i&lt;100;i++) &#123;
+            System.out.println(&quot;消费--&gt;&quot;+container.pop().id+&quot;个馒头&quot;);
+        &#125;
+    &#125;
+&#125;
+//缓冲区
+class SynContainer&#123;
+    Steamedbun[] buns = new Steamedbun[10]; //存储容器
+    int count = 0; //计数器
+    //存储 生产
+    public synchronized void push(Steamedbun bun) &#123;
+        //何时能生产  容器存在空间
+        //不能生产 只有等待
+        if(count == buns.length) &#123;
+            try &#123;
+                this.wait(); //线程阻塞  消费者通知生产解除
+            &#125; catch (InterruptedException e) &#123;
+            &#125;
+        &#125;
+        //存在空间 可以生产
+        buns[count] = bun;
+        count++;
+        //存在数据了，可以通知消费了
+        this.notifyAll();
+    &#125;
+    //获取 消费
+    public synchronized Steamedbun pop() &#123;
+        //何时消费 容器中是否存在数据
+        //没有数据 只有等待
+        if(count == 0) &#123;
+            try &#123;
+                this.wait(); //线程阻塞  生产者通知消费解除
+            &#125; catch (InterruptedException e) &#123;
+            &#125;
+        &#125;
+        //存在数据可以消费
+        count --;
+        Steamedbun bun = buns[count] ;        
+        this.notifyAll(); //存在空间了，可以唤醒对方生产了
+        return bun;
+    &#125;
+&#125;
+//馒头
+class Steamedbun&#123;
+    int id;
+    public Steamedbun(int id) &#123;
+        this.id = id;
+    &#125;
+    
+&#125;
+</code></pre>
+<p>结果如下:</p>
+<pre><code class="java">生产--&gt;0个馒头
+生产--&gt;1个馒头
+生产--&gt;2个馒头
+生产--&gt;3个馒头
+生产--&gt;4个馒头
+生产--&gt;5个馒头
+生产--&gt;6个馒头
+生产--&gt;7个馒头
+生产--&gt;8个馒头
+生产--&gt;9个馒头
+生产--&gt;10个馒头
+生产--&gt;11个馒头
+消费--&gt;9个馒头
+消费--&gt;10个馒头
+消费--&gt;11个馒头
+消费--&gt;8个馒头
+生产--&gt;12个馒头
+生产--&gt;13个馒头
+消费--&gt;7个馒头
+生产--&gt;14个馒头
+消费--&gt;13个馒头
+生产--&gt;15个馒头
+消费--&gt;14个馒头
+生产--&gt;16个馒头
+消费--&gt;15个馒头
+生产--&gt;17个馒头
+消费--&gt;16个馒头
+生产--&gt;18个馒头
+消费--&gt;17个馒头
+生产--&gt;19个馒头
+生产--&gt;20个馒头
+生产--&gt;21个馒头
+消费--&gt;18个馒头
+消费--&gt;20个馒头
+生产--&gt;22个馒头
+消费--&gt;21个馒头
+消费--&gt;22个馒头
+生产--&gt;23个馒头
+消费--&gt;19个馒头
+生产--&gt;24个馒头
+消费--&gt;23个馒头
+生产--&gt;25个馒头
+消费--&gt;24个馒头
+生产--&gt;26个馒头
+生产--&gt;27个馒头
+生产--&gt;28个馒头
+消费--&gt;25个馒头
+消费--&gt;27个馒头
+生产--&gt;29个馒头
+生产--&gt;30个馒头
+消费--&gt;28个馒头
+消费--&gt;29个馒头
+生产--&gt;31个馒头
+生产--&gt;32个馒头
+消费--&gt;30个馒头
+消费--&gt;31个馒头
+生产--&gt;33个馒头
+生产--&gt;34个馒头
+消费--&gt;32个馒头
+消费--&gt;33个馒头
+生产--&gt;35个馒头
+生产--&gt;36个馒头
+消费--&gt;34个馒头
+消费--&gt;35个馒头
+生产--&gt;37个馒头
+消费--&gt;36个馒头
+生产--&gt;38个馒头
+消费--&gt;37个馒头
+生产--&gt;39个馒头
+消费--&gt;38个馒头
+生产--&gt;40个馒头
+消费--&gt;39个馒头
+生产--&gt;41个馒头
+消费--&gt;40个馒头
+生产--&gt;42个馒头
+消费--&gt;41个馒头
+消费--&gt;42个馒头
+消费--&gt;26个馒头
+消费--&gt;12个馒头
+生产--&gt;43个馒头
+消费--&gt;6个馒头
+消费--&gt;43个馒头
+消费--&gt;5个馒头
+消费--&gt;4个馒头
+消费--&gt;3个馒头
+消费--&gt;2个馒头
+消费--&gt;1个馒头
+消费--&gt;0个馒头
+生产--&gt;44个馒头
+生产--&gt;45个馒头
+消费--&gt;44个馒头
+生产--&gt;46个馒头
+消费--&gt;45个馒头
+生产--&gt;47个馒头
+消费--&gt;46个馒头
+生产--&gt;48个馒头
+消费--&gt;47个馒头
+生产--&gt;49个馒头
+消费--&gt;48个馒头
+生产--&gt;50个馒头
+消费--&gt;49个馒头
+生产--&gt;51个馒头
+消费--&gt;50个馒头
+生产--&gt;52个馒头
+消费--&gt;51个馒头
+生产--&gt;53个馒头
+消费--&gt;52个馒头
+生产--&gt;54个馒头
+消费--&gt;53个馒头
+消费--&gt;54个馒头
+生产--&gt;55个馒头
+生产--&gt;56个馒头
+消费--&gt;55个馒头
+生产--&gt;57个馒头
+消费--&gt;56个馒头
+生产--&gt;58个馒头
+消费--&gt;57个馒头
+生产--&gt;59个馒头
+消费--&gt;58个馒头
+生产--&gt;60个馒头
+消费--&gt;59个馒头
+生产--&gt;61个馒头
+消费--&gt;60个馒头
+生产--&gt;62个馒头
+消费--&gt;61个馒头
+生产--&gt;63个馒头
+消费--&gt;62个馒头
+生产--&gt;64个馒头
+消费--&gt;63个馒头
+消费--&gt;64个馒头
+生产--&gt;65个馒头
+生产--&gt;66个馒头
+消费--&gt;65个馒头
+生产--&gt;67个馒头
+消费--&gt;66个馒头
+生产--&gt;68个馒头
+消费--&gt;67个馒头
+生产--&gt;69个馒头
+消费--&gt;68个馒头
+消费--&gt;69个馒头
+生产--&gt;70个馒头
+生产--&gt;71个馒头
+消费--&gt;70个馒头
+生产--&gt;72个馒头
+消费--&gt;71个馒头
+消费--&gt;72个馒头
+生产--&gt;73个馒头
+生产--&gt;74个馒头
+生产--&gt;75个馒头
+生产--&gt;76个馒头
+消费--&gt;73个馒头
+消费--&gt;76个馒头
+消费--&gt;75个馒头
+消费--&gt;74个馒头
+生产--&gt;77个馒头
+生产--&gt;78个馒头
+消费--&gt;77个馒头
+消费--&gt;78个馒头
+生产--&gt;79个馒头
+消费--&gt;79个馒头
+生产--&gt;80个馒头
+生产--&gt;81个馒头
+消费--&gt;80个馒头
+消费--&gt;81个馒头
+生产--&gt;82个馒头
+生产--&gt;83个馒头
+消费--&gt;82个馒头
+消费--&gt;83个馒头
+生产--&gt;84个馒头
+生产--&gt;85个馒头
+消费--&gt;84个馒头
+消费--&gt;85个馒头
+生产--&gt;86个馒头
+生产--&gt;87个馒头
+消费--&gt;86个馒头
+生产--&gt;88个馒头
+消费--&gt;87个馒头
+生产--&gt;89个馒头
+消费--&gt;88个馒头
+消费--&gt;89个馒头
+生产--&gt;90个馒头
+生产--&gt;91个馒头
+消费--&gt;90个馒头
+消费--&gt;91个馒头
+生产--&gt;92个馒头
+生产--&gt;93个馒头
+消费--&gt;92个馒头
+生产--&gt;94个馒头
+消费--&gt;93个馒头
+生产--&gt;95个馒头
+消费--&gt;94个馒头
+消费--&gt;95个馒头
+生产--&gt;96个馒头
+生产--&gt;97个馒头
+消费--&gt;96个馒头
+消费--&gt;97个馒头
+生产--&gt;98个馒头
+生产--&gt;99个馒头
+消费--&gt;98个馒头
+消费--&gt;99个馒头
+</code></pre>
+<h4 id="信号灯法"><a href="#信号灯法" class="headerlink" title="信号灯法"></a>信号灯法</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.cooperation;
+/**
+ * 协作模型:生产者消费者实现方式二:信号灯法
+ * 借助标志位
+ * 
+ * @author Senley
+ *
+ */
+public class CoTest02 &#123;
+    public static void main(String[] args) &#123;
+        Tv tv  =new Tv();
+        new Player(tv).start();
+        new Watcher(tv).start();
+    &#125;
+&#125;
+//生产者 演员
+class Player extends Thread&#123;
+    Tv tv;    
+    public Player(Tv tv) &#123;
+        this.tv = tv;
+    &#125;
+
+    public void run() &#123;
+        for(int i=0;i&lt;20;i++) &#123;
+            if(i%2==0) &#123;
+                this.tv.play(&quot;欢乐集结号&quot;);
             &#125;else &#123;
-                System.out.println(&quot;出票失败--&quot;+Thread.currentThread().getName()+&quot;--位置不够&quot;);        
+                this.tv.play(&quot;怕上火 喝加多宝&quot;);
             &#125;
         &#125;
     &#125;
 &#125;
+//消费者 观众
+class Watcher extends Thread&#123;
+    Tv tv;    
+    public Watcher(Tv tv) &#123;
+        this.tv = tv;
+    &#125;
+
+    public void run() &#123;
+        for(int i=0;i&lt;20;i++) &#123;
+            tv.watch();
+        &#125;
+    &#125;
+&#125;
+//同一个资源 电视
+class Tv&#123;
+    String voice;
+    //信号灯
+    //T 表示演员表演 观众等待
+    //F 表示观众观看 演员等待
+    boolean flag = true;
+    
+    //表演
+    public  synchronized void play(String voice) &#123;
+        //演员等待
+        if(!flag) &#123;
+            try &#123;
+                this.wait();
+            &#125; catch (InterruptedException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;        
+        //表演
+        System.out.println(&quot;表演了:&quot;+voice);
+        this.voice = voice;
+        //唤醒
+        this.notifyAll();
+        //切换标志
+        this.flag =!this.flag;
+    &#125;
+    //观看
+    public synchronized  void watch() &#123;
+        //观众等待
+        if(flag) &#123;
+            try &#123;
+                this.wait();
+            &#125; catch (InterruptedException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        //观看
+        System.out.println(&quot;听到了:&quot;+voice);
+        //唤醒
+        this.notifyAll();
+        //切换标志
+        this.flag =!this.flag;
+    &#125;
+&#125;
 </code></pre>
 <p>结果如下：</p>
-<pre><code class="java">欢迎光临Happy Cinema，可用位置为：[1, 2, 5, 6, 7]
-出票成功--张三--位置为[1, 2]
-欢迎光临Happy Cinema，可用位置为：[5, 6, 7]
-出票失败--李四--位置不够
+<pre><code class="java">表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
+表演了:欢乐集结号
+听到了:欢乐集结号
+表演了:怕上火 喝加多宝
+听到了:怕上火 喝加多宝
 </code></pre>
-<p>“synchronized (cinema)” 意味着线程需要获得cinema对象的“锁”才有资格运行同步块中的代码。cinema对象的“锁”也称为“互斥锁”，在同一时刻只能被一个线程使用。A线程拥有锁，则可以调用“同步块”中的代码；B线程没有锁，则进入cinema对象的“锁池队列”等待，直到A线程使用完毕释放了cinema对象的锁，B线程得到锁才可以开始调用“同步块”中的代码。</p>
  
       <!-- reward -->
       
@@ -291,7 +636,7 @@ class HappyCustomer implements Runnable&#123;
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2022/02/25/%E5%A4%9A%E7%BA%BF%E7%A8%8Bsynchronized%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E5%BD%B1%E9%99%A2%E8%B4%AD%E7%A5%A8%E5%8A%9F%E8%83%BD/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2022/02/27/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91%E5%8D%8F%E4%BD%9C%E6%A8%A1%E5%9E%8B-%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%BC%8F/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -304,19 +649,10 @@ class HappyCustomer implements Runnable&#123;
    
   <nav class="article-nav">
     
-      <a href="/2022/02/27/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91%E5%8D%8F%E4%BD%9C%E6%A8%A1%E5%9E%8B-%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%BC%8F/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            多线程并发协作模型-生产者消费者模式
-          
-        </div>
-      </a>
     
-    
-      <a href="/2022/02/22/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%8F%8A%E7%AE%80%E5%8D%95%E6%A8%A1%E6%8B%9F/" class="article-nav-link">
+      <a href="/2022/02/25/%E5%A4%9A%E7%BA%BF%E7%A8%8Bsynchronized%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E5%BD%B1%E9%99%A2%E8%B4%AD%E7%A5%A8%E5%8A%9F%E8%83%BD/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">多线程的实现方式及简单模拟</div>
+        <div class="article-nav-title">多线程synchronized实现简单的影院购票功能</div>
       </a>
     
   </nav>
