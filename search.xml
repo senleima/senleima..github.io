@@ -2705,4 +2705,56 @@ class Tv&#123;
         <tag>Thread</tag>
       </tags>
   </entry>
+  <entry>
+    <title></title>
+    <url>/2022/02/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81%E7%9A%84%E5%8E%9F%E7%90%86%E5%AE%9E%E7%8E%B0/</url>
+    <content><![CDATA[<p>title: 多线程可重入锁的原理实现<br>date: 2022-02-28 00:14:01<br>categories: Java基础<br>tags: Thread</p>
+<h1 id="多线程可重入锁的原理实现"><a href="#多线程可重入锁的原理实现" class="headerlink" title="多线程可重入锁的原理实现"></a>多线程可重入锁的原理实现</h1><h2 id="可重入锁"><a href="#可重入锁" class="headerlink" title="可重入锁"></a>可重入锁</h2><p>锁作为并发共享数据保证一致性的工具，大多数内置锁都是可重入的，也就是说，如果某个线程试图获取一个已经由它自己持有的锁时，那么这个请求会立刻成功，并且会将这个锁的计数值加1，而当线程退出同步代码块时，计数器将会递减，当计数值等于0时，锁释放。如果没有可重入锁的支持，在第二次企图获得锁时将会进入死锁状态。</p>
+<p>可重入锁随处可见，如synchronized 和ReentrantLock。</p>
+<h2 id="原理实现"><a href="#原理实现" class="headerlink" title="原理实现"></a><strong>原理实现</strong></h2><p>手动实现一个可重入锁，代码如下：</p>
+<pre><code class="java">package com.msl.others;
+
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * 可重入锁: 锁可以延续使用 + 计数器
+ * 
+ * @author Senley
+ *
+ */
+public class LockTest &#123;
+    ReentrantLock lock = new ReentrantLock();
+    public void a() throws InterruptedException &#123;
+        lock.lock();
+        System.out.println(lock.getHoldCount());
+        doSomething();
+        lock.unlock();
+        System.out.println(lock.getHoldCount());
+    &#125;
+    //不可重入
+    public void doSomething() throws InterruptedException &#123;
+        lock.lock();
+        System.out.println(lock.getHoldCount());
+        //...................
+        lock.unlock();
+        System.out.println(lock.getHoldCount());
+    &#125;
+    public static void main(String[] args) throws InterruptedException &#123;
+        LockTest04 test = new LockTest04();
+        test.a();            
+        Thread.sleep(1000);        
+        System.out.println(test.lock.getHoldCount());
+    &#125;
+
+&#125;
+</code></pre>
+<p>结果如下:</p>
+<pre><code class="java">1
+2
+1
+0
+0
+</code></pre>
+]]></content>
+  </entry>
 </search>
