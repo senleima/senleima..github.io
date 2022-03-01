@@ -161,6 +161,292 @@
     
     
     <article
+  id="post-基于TCP实现多用户登录"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/03/02/%E5%9F%BA%E4%BA%8ETCP%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95/"
+    >基于TCP实现多用户登录</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/03/02/%E5%9F%BA%E4%BA%8ETCP%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95/" class="article-date">
+  <time datetime="2022-03-01T17:34:12.000Z" itemprop="datePublished">2022-03-02</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="基于TCP实现多用户登录"><a href="#基于TCP实现多用户登录" class="headerlink" title="基于TCP实现多用户登录"></a>基于TCP实现多用户登录</h1><ul>
+<li><strong>创建服务器</strong></li>
+</ul>
+<ol>
+<li>指定端口 使用ServerSocket创建服务器</li>
+<li>阻塞式等待连接 accept</li>
+<li>操作: 输入输出流操作</li>
+<li>释放资源 </li>
+</ol>
+<ul>
+<li><strong>创建客户端</strong></li>
+</ul>
+<ol>
+<li>建立连接: 使用Socket创建客户端 +服务的地址和端口</li>
+<li>操作: 输入输出流操作</li>
+<li>释放资源 </li>
+</ol>
+<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a><strong>Server</strong></h2><pre><code class="java">package com.msl.tcp;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+ * 模拟登录 多个客户端请求
+ * 创建服务器
+ * 1、指定端口 使用ServerSocket创建服务器
+ * 2、阻塞式等待连接 accept
+ * 3、操作: 输入输出流操作
+ * 4、释放资源 
+ * @author Senley
+ *
+ */
+public class LoginMultiServer &#123;
+    public static void main(String[] args) throws IOException &#123;
+        System.out.println(&quot;-----Server-----&quot;);
+        // 1、指定端口 使用ServerSocket创建服务器
+        ServerSocket server =new ServerSocket(8888);
+        boolean isRunning =true;;
+        // 2、阻塞式等待连接 accept
+        while(isRunning) &#123;
+            Socket  client =server.accept(); 
+            System.out.println(&quot;一个客户端建立了连接&quot;);
+            new Thread(new Channel(client)).start();
+        &#125;
+        server.close();
+    &#125;
+    //一个channel就代表一个客户端
+    static class Channel implements Runnable&#123;
+        private Socket client;
+        //输入流
+        private DataInputStream dis;
+        //输出流
+        private DataOutputStream dos;
+        public Channel(Socket  client) &#123;
+            this.client = client;
+            try &#123;
+                //输入
+                dis = new DataInputStream(client.getInputStream());
+                //输出
+                dos =new DataOutputStream(client.getOutputStream());    
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+                release();
+            &#125;
+        &#125;
+        
+        //接收数据
+        private String receive() &#123;
+            String datas =&quot;&quot;;
+            try &#123;
+                datas = dis.readUTF();
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            return datas;
+        &#125;
+        //释放资源
+        private void release() &#123;
+            // 4、释放资源 
+            try &#123;
+                if(null != dos) &#123;
+                    dos.close();                    
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            try &#123;
+                if(null != dis) &#123;
+                    dis.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            try &#123;
+                if(null != client) &#123;
+                    client.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        //发送数据
+        private void send(String msg) &#123;
+            try &#123;
+                dos.writeUTF(msg);
+                dos.flush();
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        @Override
+        public void run() &#123;                        
+            // 3、操作: 输入输出流操作                    
+            String uname =&quot;&quot;;
+            String upwd =&quot;&quot;;
+            //分析
+            String[] dataArray = receive().split(&quot;&amp;&quot;);
+            for(String info:dataArray) &#123;
+                    String[] userInfo =info.split(&quot;=&quot;);
+                    if(userInfo[0].equals(&quot;uname&quot;)) &#123;
+                        System.out.println(&quot;你的用户名为:&quot;+userInfo[1]);
+                        uname = userInfo[1];
+                    &#125;else if(userInfo[0].equals(&quot;upwd&quot;)) &#123;
+                        System.out.println(&quot;你的密码为:&quot;+userInfo[1]);
+                        upwd = userInfo[1];
+                    &#125;                
+            &#125;                    
+            if(uname.equals(&quot;senley&quot;) &amp;&amp; upwd.equals(&quot;123&quot;)) &#123; //成功
+                send(&quot;登录成功，欢迎回来&quot;);
+            &#125;else &#123; //失败
+                send(&quot;用户名或密码错误&quot;);
+            &#125;        
+            release();        
+        &#125;    
+    &#125;
+&#125;
+</code></pre>
+<h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><pre><code class="java">package com.msl.tcp;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+/**
+ * 模拟登录  多个客户端请求
+ * 创建客户端
+ * 1、建立连接: 使用Socket创建客户端 +服务的地址和端口
+ * 2、操作: 输入输出流操作
+ * 3、释放资源 
+ * @author Senley
+ *
+ */
+public class LoginMultiClient &#123;
+    public static void main(String[] args) throws UnknownHostException, IOException &#123;        
+        System.out.println(&quot;-----Client-----&quot;);
+        //1、建立连接: 使用Socket创建客户端 +服务的地址和端口
+        Socket client =new Socket(&quot;localhost&quot;,8888);
+        //2、操作: 输入输出流操作  先请求后响应
+        new Send(client).send();
+        new Receive(client).receive();        
+        client.close();
+    &#125;
+    //发送
+    static class Send&#123;
+        private Socket client;
+        private DataOutputStream dos;
+        private BufferedReader console ;
+        private String msg;
+        public Send(Socket client) &#123;            
+            console=new BufferedReader(new InputStreamReader(System.in));
+            this.msg =init();
+            this.client = client;
+            try &#123;
+                dos=new DataOutputStream(client.getOutputStream());
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        private String init() &#123;                    
+            try &#123;
+                System.out.print(&quot;请输入用户名:&quot;);
+                String uname =console.readLine();
+                System.out.print(&quot;请输入密码:&quot;);
+                String upwd =console.readLine();
+                return &quot;uname=&quot;+uname+&quot;&amp;&quot;+&quot;upwd=&quot;+upwd;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            return &quot;&quot;;            
+        &#125;
+        
+        public void send() &#123;
+            try &#123;
+                dos.writeUTF(msg);
+                dos.flush();
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+    &#125;
+    //接收
+    static class Receive&#123;
+        private Socket client;
+        private DataInputStream dis;
+        public Receive(Socket client) &#123;
+            this.client = client;
+            try &#123;
+                dis=new DataInputStream(client.getInputStream());
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;        
+        public void receive() &#123;
+            String result;
+            try &#123;
+                result = dis.readUTF();
+                System.out.println(result);
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;        
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>示例结果如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/LoginMultiServer.png" alt="LoginMultiServer"></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Net/" rel="tag">Net</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-多线程可重入锁的原理实现"
   class="article article-type-post"
   itemscope
@@ -2629,153 +2915,6 @@ for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Collection/" rel="tag">Collection</a></li></ul>
-
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
-    <article
-  id="post-自定义一个HashSet"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/"
-    >自定义一个HashSet</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/" class="article-date">
-  <time datetime="2021-11-18T14:05:03.000Z" itemprop="datePublished">2021-11-18</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="自定义一个HashSet"><a href="#自定义一个HashSet" class="headerlink" title="自定义一个HashSet"></a>自定义一个HashSet</h1><h2 id="HashSet特点和底层实现"><a href="#HashSet特点和底层实现" class="headerlink" title="HashSet特点和底层实现"></a>HashSet特点和底层实现</h2><ul>
-<li><p>HashSet底层是HashMap；</p>
-</li>
-<li><p>向Hashset中添加元素, 实际上是把这个元素作为键添加到底层的HashMap中；</p>
-</li>
-<li><p>HashSet实际上就是底层HashMap的键的集合。</p>
-</li>
-</ul>
-<p> HashSet是采用哈希算法实现，底层实际是用HashMap实现的(HashSet本质就是一个简化版的HashMap)，因此，查询效率和增删效率都比较高。查看HashSet的源码：</p>
-<pre><code class="java">public class HashSet&lt;E&gt; extends AbstractSet&lt;E&gt; implements Set&lt;E&gt;, Cloneable, java.io.Serializable&#123;
-    static final long serialVersionUID = -5024744406713321676L;
-
-    private transient HashMap&lt;E,Object&gt; map;
-
-    // Dummy value to associate with an Object in the backing Map
-    private static final Object PRESENT = new Object();
-
-    /**
-     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
-     * default initial capacity (16) and load factor (0.75).
-     */
-    public HashSet() &#123;
-        map = new HashMap&lt;&gt;();
-    &#125;
-    
-     /**
-     * Adds the specified element to this set if it is not already present.
-     * More formally, adds the specified element &lt;tt&gt;e&lt;/tt&gt; to this set if
-     * this set contains no element &lt;tt&gt;e2&lt;/tt&gt; such that
-     * &lt;tt&gt;(e==null&amp;nbsp;?&amp;nbsp;e2==null&amp;nbsp;:&amp;nbsp;e.equals(e2))&lt;/tt&gt;.
-     * If this set already contains the element, the call leaves the set
-     * unchanged and returns &lt;tt&gt;false&lt;/tt&gt;.
-     *
-     * @param e element to be added to this set
-     * @return &lt;tt&gt;true&lt;/tt&gt; if this set did not already contain the specified
-     * element
-     */
-    public boolean add(E e) &#123;
-        return map.put(e, PRESENT)==null;
-    &#125;
-    //以下代码省略
-&#125;
-</code></pre>
-<p>可以发现里面有个map属性，这就是HashSet的核心秘密。再看add()方法，可以发现增加一个元素，说白了就是在map中增加一个键值对，键对象就是这个元素，值对象是名为PRESENT的Object对象。说白了就是“往set中加入元素，本质就是把这个元素作为key加入到了内部的map中”。</p>
-<p>由于map中key都是不可重复的，因此，Set天然具有“不可重复”的特性。</p>
-<h2 id="自定义一个HashSet，体会底层原理"><a href="#自定义一个HashSet，体会底层原理" class="headerlink" title="自定义一个HashSet，体会底层原理"></a>自定义一个HashSet，体会底层原理</h2><p>代码如下：</p>
-<pre><code class="java">package com.msl.mycollection;
-
-import java.util.HashMap;
-
-/**
- * 手动实现一个HashSet，深刻理解HashSet底层原理
- * @author Senley
- *
- */
-public class MslHashSet &#123;
-    HashMap map;
-    private static final Object PRESENT = new Object();
-    
-    public static void main(String[] args) &#123;
-        MslHashSet set = new MslHashSet();
-        set.add(&quot;aaa&quot;);
-        set.add(&quot;bbb&quot;);
-        set.add(&quot;ccc&quot;);
-        System.out.println(set);
-    &#125;
-    
-    public MslHashSet()&#123;
-        map = new HashMap();
-    &#125;
-    
-    public int size() &#123;
-        return map.size();
-    &#125;
-    
-    public void add(Object o) &#123;
-        map.put(o, PRESENT);
-    &#125;
-    
-    @Override
-    public String toString() &#123;
-        StringBuilder sb = new StringBuilder();
-        sb.append(&quot;[&quot;);
-        for(Object key:map.keySet()) &#123;
-            sb.append(key+&quot;,&quot;);
-        &#125;
-        sb.setCharAt(sb.length()-1, &#39;]&#39;);
-        return sb.toString();
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">[aaa,ccc,bbb]
-</code></pre>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HashSet/" rel="tag">HashSet</a></li></ul>
 
     </footer>
   </div>

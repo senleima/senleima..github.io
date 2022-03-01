@@ -161,6 +161,153 @@
     
     
     <article
+  id="post-自定义一个HashSet"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/"
+    >自定义一个HashSet</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2021/11/18/%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAHashSet/" class="article-date">
+  <time datetime="2021-11-18T14:05:03.000Z" itemprop="datePublished">2021-11-18</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="自定义一个HashSet"><a href="#自定义一个HashSet" class="headerlink" title="自定义一个HashSet"></a>自定义一个HashSet</h1><h2 id="HashSet特点和底层实现"><a href="#HashSet特点和底层实现" class="headerlink" title="HashSet特点和底层实现"></a>HashSet特点和底层实现</h2><ul>
+<li><p>HashSet底层是HashMap；</p>
+</li>
+<li><p>向Hashset中添加元素, 实际上是把这个元素作为键添加到底层的HashMap中；</p>
+</li>
+<li><p>HashSet实际上就是底层HashMap的键的集合。</p>
+</li>
+</ul>
+<p> HashSet是采用哈希算法实现，底层实际是用HashMap实现的(HashSet本质就是一个简化版的HashMap)，因此，查询效率和增删效率都比较高。查看HashSet的源码：</p>
+<pre><code class="java">public class HashSet&lt;E&gt; extends AbstractSet&lt;E&gt; implements Set&lt;E&gt;, Cloneable, java.io.Serializable&#123;
+    static final long serialVersionUID = -5024744406713321676L;
+
+    private transient HashMap&lt;E,Object&gt; map;
+
+    // Dummy value to associate with an Object in the backing Map
+    private static final Object PRESENT = new Object();
+
+    /**
+     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
+     * default initial capacity (16) and load factor (0.75).
+     */
+    public HashSet() &#123;
+        map = new HashMap&lt;&gt;();
+    &#125;
+    
+     /**
+     * Adds the specified element to this set if it is not already present.
+     * More formally, adds the specified element &lt;tt&gt;e&lt;/tt&gt; to this set if
+     * this set contains no element &lt;tt&gt;e2&lt;/tt&gt; such that
+     * &lt;tt&gt;(e==null&amp;nbsp;?&amp;nbsp;e2==null&amp;nbsp;:&amp;nbsp;e.equals(e2))&lt;/tt&gt;.
+     * If this set already contains the element, the call leaves the set
+     * unchanged and returns &lt;tt&gt;false&lt;/tt&gt;.
+     *
+     * @param e element to be added to this set
+     * @return &lt;tt&gt;true&lt;/tt&gt; if this set did not already contain the specified
+     * element
+     */
+    public boolean add(E e) &#123;
+        return map.put(e, PRESENT)==null;
+    &#125;
+    //以下代码省略
+&#125;
+</code></pre>
+<p>可以发现里面有个map属性，这就是HashSet的核心秘密。再看add()方法，可以发现增加一个元素，说白了就是在map中增加一个键值对，键对象就是这个元素，值对象是名为PRESENT的Object对象。说白了就是“往set中加入元素，本质就是把这个元素作为key加入到了内部的map中”。</p>
+<p>由于map中key都是不可重复的，因此，Set天然具有“不可重复”的特性。</p>
+<h2 id="自定义一个HashSet，体会底层原理"><a href="#自定义一个HashSet，体会底层原理" class="headerlink" title="自定义一个HashSet，体会底层原理"></a>自定义一个HashSet，体会底层原理</h2><p>代码如下：</p>
+<pre><code class="java">package com.msl.mycollection;
+
+import java.util.HashMap;
+
+/**
+ * 手动实现一个HashSet，深刻理解HashSet底层原理
+ * @author Senley
+ *
+ */
+public class MslHashSet &#123;
+    HashMap map;
+    private static final Object PRESENT = new Object();
+    
+    public static void main(String[] args) &#123;
+        MslHashSet set = new MslHashSet();
+        set.add(&quot;aaa&quot;);
+        set.add(&quot;bbb&quot;);
+        set.add(&quot;ccc&quot;);
+        System.out.println(set);
+    &#125;
+    
+    public MslHashSet()&#123;
+        map = new HashMap();
+    &#125;
+    
+    public int size() &#123;
+        return map.size();
+    &#125;
+    
+    public void add(Object o) &#123;
+        map.put(o, PRESENT);
+    &#125;
+    
+    @Override
+    public String toString() &#123;
+        StringBuilder sb = new StringBuilder();
+        sb.append(&quot;[&quot;);
+        for(Object key:map.keySet()) &#123;
+            sb.append(key+&quot;,&quot;);
+        &#125;
+        sb.setCharAt(sb.length()-1, &#39;]&#39;);
+        return sb.toString();
+    &#125;
+&#125;
+</code></pre>
+<p>结果如下：</p>
+<pre><code class="java">[aaa,ccc,bbb]
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HashSet/" rel="tag">HashSet</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-自定义一个HashMap"
   class="article article-type-post"
   itemscope

@@ -2762,4 +2762,248 @@ for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
         <tag>Collection</tag>
       </tags>
   </entry>
+  <entry>
+    <title>基于TCP实现多用户登录</title>
+    <url>/2022/03/02/%E5%9F%BA%E4%BA%8ETCP%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="基于TCP实现多用户登录"><a href="#基于TCP实现多用户登录" class="headerlink" title="基于TCP实现多用户登录"></a>基于TCP实现多用户登录</h1><ul>
+<li><strong>创建服务器</strong></li>
+</ul>
+<ol>
+<li>指定端口 使用ServerSocket创建服务器</li>
+<li>阻塞式等待连接 accept</li>
+<li>操作: 输入输出流操作</li>
+<li>释放资源 </li>
+</ol>
+<ul>
+<li><strong>创建客户端</strong></li>
+</ul>
+<ol>
+<li>建立连接: 使用Socket创建客户端 +服务的地址和端口</li>
+<li>操作: 输入输出流操作</li>
+<li>释放资源 </li>
+</ol>
+<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a><strong>Server</strong></h2><pre><code class="java">package com.msl.tcp;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+ * 模拟登录 多个客户端请求
+ * 创建服务器
+ * 1、指定端口 使用ServerSocket创建服务器
+ * 2、阻塞式等待连接 accept
+ * 3、操作: 输入输出流操作
+ * 4、释放资源 
+ * @author Senley
+ *
+ */
+public class LoginMultiServer &#123;
+    public static void main(String[] args) throws IOException &#123;
+        System.out.println(&quot;-----Server-----&quot;);
+        // 1、指定端口 使用ServerSocket创建服务器
+        ServerSocket server =new ServerSocket(8888);
+        boolean isRunning =true;;
+        // 2、阻塞式等待连接 accept
+        while(isRunning) &#123;
+            Socket  client =server.accept(); 
+            System.out.println(&quot;一个客户端建立了连接&quot;);
+            new Thread(new Channel(client)).start();
+        &#125;
+        server.close();
+    &#125;
+    //一个channel就代表一个客户端
+    static class Channel implements Runnable&#123;
+        private Socket client;
+        //输入流
+        private DataInputStream dis;
+        //输出流
+        private DataOutputStream dos;
+        public Channel(Socket  client) &#123;
+            this.client = client;
+            try &#123;
+                //输入
+                dis = new DataInputStream(client.getInputStream());
+                //输出
+                dos =new DataOutputStream(client.getOutputStream());    
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+                release();
+            &#125;
+        &#125;
+        
+        //接收数据
+        private String receive() &#123;
+            String datas =&quot;&quot;;
+            try &#123;
+                datas = dis.readUTF();
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            return datas;
+        &#125;
+        //释放资源
+        private void release() &#123;
+            // 4、释放资源 
+            try &#123;
+                if(null != dos) &#123;
+                    dos.close();                    
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            try &#123;
+                if(null != dis) &#123;
+                    dis.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            try &#123;
+                if(null != client) &#123;
+                    client.close();
+                &#125;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        //发送数据
+        private void send(String msg) &#123;
+            try &#123;
+                dos.writeUTF(msg);
+                dos.flush();
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        @Override
+        public void run() &#123;                        
+            // 3、操作: 输入输出流操作                    
+            String uname =&quot;&quot;;
+            String upwd =&quot;&quot;;
+            //分析
+            String[] dataArray = receive().split(&quot;&amp;&quot;);
+            for(String info:dataArray) &#123;
+                    String[] userInfo =info.split(&quot;=&quot;);
+                    if(userInfo[0].equals(&quot;uname&quot;)) &#123;
+                        System.out.println(&quot;你的用户名为:&quot;+userInfo[1]);
+                        uname = userInfo[1];
+                    &#125;else if(userInfo[0].equals(&quot;upwd&quot;)) &#123;
+                        System.out.println(&quot;你的密码为:&quot;+userInfo[1]);
+                        upwd = userInfo[1];
+                    &#125;                
+            &#125;                    
+            if(uname.equals(&quot;senley&quot;) &amp;&amp; upwd.equals(&quot;123&quot;)) &#123; //成功
+                send(&quot;登录成功，欢迎回来&quot;);
+            &#125;else &#123; //失败
+                send(&quot;用户名或密码错误&quot;);
+            &#125;        
+            release();        
+        &#125;    
+    &#125;
+&#125;
+</code></pre>
+<h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><pre><code class="java">package com.msl.tcp;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+/**
+ * 模拟登录  多个客户端请求
+ * 创建客户端
+ * 1、建立连接: 使用Socket创建客户端 +服务的地址和端口
+ * 2、操作: 输入输出流操作
+ * 3、释放资源 
+ * @author Senley
+ *
+ */
+public class LoginMultiClient &#123;
+    public static void main(String[] args) throws UnknownHostException, IOException &#123;        
+        System.out.println(&quot;-----Client-----&quot;);
+        //1、建立连接: 使用Socket创建客户端 +服务的地址和端口
+        Socket client =new Socket(&quot;localhost&quot;,8888);
+        //2、操作: 输入输出流操作  先请求后响应
+        new Send(client).send();
+        new Receive(client).receive();        
+        client.close();
+    &#125;
+    //发送
+    static class Send&#123;
+        private Socket client;
+        private DataOutputStream dos;
+        private BufferedReader console ;
+        private String msg;
+        public Send(Socket client) &#123;            
+            console=new BufferedReader(new InputStreamReader(System.in));
+            this.msg =init();
+            this.client = client;
+            try &#123;
+                dos=new DataOutputStream(client.getOutputStream());
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+        private String init() &#123;                    
+            try &#123;
+                System.out.print(&quot;请输入用户名:&quot;);
+                String uname =console.readLine();
+                System.out.print(&quot;请输入密码:&quot;);
+                String upwd =console.readLine();
+                return &quot;uname=&quot;+uname+&quot;&amp;&quot;+&quot;upwd=&quot;+upwd;
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+            return &quot;&quot;;            
+        &#125;
+        
+        public void send() &#123;
+            try &#123;
+                dos.writeUTF(msg);
+                dos.flush();
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;
+    &#125;
+    //接收
+    static class Receive&#123;
+        private Socket client;
+        private DataInputStream dis;
+        public Receive(Socket client) &#123;
+            this.client = client;
+            try &#123;
+                dis=new DataInputStream(client.getInputStream());
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;
+        &#125;        
+        public void receive() &#123;
+            String result;
+            try &#123;
+                result = dis.readUTF();
+                System.out.println(result);
+            &#125; catch (IOException e) &#123;
+                e.printStackTrace();
+            &#125;        
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>示例结果如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/senleima/imagebed/img/LoginMultiServer.png" alt="LoginMultiServer"></p>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Net</tag>
+      </tags>
+  </entry>
 </search>
