@@ -3006,4 +3006,174 @@ public class LoginMultiClient &#123;
         <tag>Net</tag>
       </tags>
   </entry>
+  <entry>
+    <title>设计模式之单例模式</title>
+    <url>/2022/04/15/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h1 id="设计模式之单例模式"><a href="#设计模式之单例模式" class="headerlink" title="设计模式之单例模式"></a>设计模式之单例模式</h1><h2 id="核心作用"><a href="#核心作用" class="headerlink" title="核心作用"></a>核心作用</h2><p>单例模式属于创建类型的一种常用的软件设计模式，可以保证一个类只有一个实例并提供一个访问该实例的全局访问点。</p>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a><strong>应用场景</strong></h3><h2 id="常见应用场景"><a href="#常见应用场景" class="headerlink" title="常见应用场景"></a>常见应用场景</h2><ul>
+<li>Windows的Task Manager（任务管理器）就是很典型的单例模式。</li>
+<li>Windows的Recycle Bin（回收站）也是典型的单例应用。在整个系统运行过程中，回收站一直维护着仅有的一个实例。</li>
+<li>项目中，读取配置文件的类，一般也只有一个对象。没有必要每次使用配置文件数据，每次new一个对象去读取。</li>
+<li>网站的计数器，一般也是采用单例模式实现，否则难以同步。</li>
+<li>应用程序的日志应用，一般都使用单例模式实现，这一般是由于共享的日志文件一直处于打开状态，因为只能有一个实例去操作，否则内容不好追加。</li>
+<li>数据库连接池的设计一般也是采用单例模式，因为数据库连接是一种数据库资源。</li>
+<li>操作系统的文件系统，也是大的单例模式实现的具体例子，一个操作系统只能有一个文件系统。</li>
+<li>Application 也是单例的典型应用（Servlet编程中会涉及到）。</li>
+<li>Spring中，每个Bean默认就是单例的，这样做的优点是Spring容器可以管理。</li>
+<li>Servlet编程中，每个Servlet也是单例。</li>
+<li>SpringMVC框架/Struts1框架中，控制器对象也是单例。</li>
+</ul>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ul>
+<li>由于单例模式只生成一个实例，减少了系统性能开销，当一个对象的产生需要比较多的资源时，如读取配置、产生其他依赖对象时，则可以通过在应用启动时直接产生一个单例对象，然后永久驻留内存的方式来解决。</li>
+<li>单例模式可以在系统设置全局的访问点，优化环共享资源访问，例如可以设计一个单例类，负责所有数据表的映射处理。</li>
+</ul>
+<h2 id="常见的五种单例模式实现方式"><a href="#常见的五种单例模式实现方式" class="headerlink" title="常见的五种单例模式实现方式"></a><strong>常见的五种单例模式实现方式</strong></h2><ul>
+<li>主要：<ul>
+<li><strong>饿汉式</strong>（线程安全，调用效率高。 但是，不能延时加载。）</li>
+<li><strong>懒汉式</strong>（线程安全，调用效率不高。 但是，可以延时加载。）</li>
+</ul>
+</li>
+<li>其他：<ul>
+<li><strong>双重检测锁式</strong>（由于JVM底层内部模型原因，偶尔会出问题。不建议使用）</li>
+<li><strong>静态内部类式</strong>（线程安全，调用效率高。 但是，可以延时加载）</li>
+<li><strong>枚举式</strong>（线程安全，调用效率高，不能延时加载）</li>
+</ul>
+</li>
+</ul>
+<h4 id="饿汉式"><a href="#饿汉式" class="headerlink" title="饿汉式"></a>饿汉式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+/**
+ * 测试饿汉式单例模式
+ * @author Senley
+ *
+ */
+public class SingletonDemo1 &#123;
+    
+    //类初始化时，立即加载这个对象（没有延时加载的优势）。加载类时，天然的是线程安全的！
+    private static SingletonDemo1 instance = new SingletonDemo1();
+    
+    private SingletonDemo1() &#123;
+    &#125;
+    
+    //方法没有同步，调用效率高！
+    public static SingletonDemo1 getInstance() &#123;
+        return instance;
+    &#125;
+    
+&#125;
+</code></pre>
+<h4 id="懒汉式"><a href="#懒汉式" class="headerlink" title="懒汉式"></a>懒汉式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 测试懒汉式单例模式
+ * @author Senley
+ *
+ */
+public class SingletonDemo2 &#123;
+    
+    //类初始化时，不初始化这个对象（延时加载，真正用的时候再创建）。
+    private static SingletonDemo2 instance;  
+    
+    private SingletonDemo2()&#123; //私有化构造器
+    &#125;
+    
+    //方法同步，调用效率低！
+    public static  synchronized SingletonDemo2  getInstance()&#123;
+        if(instance==null)&#123;
+            instance = new SingletonDemo2();
+        &#125;
+        return instance;
+    &#125;
+    
+&#125;
+</code></pre>
+<h4 id="双重检测锁式"><a href="#双重检测锁式" class="headerlink" title="双重检测锁式"></a>双重检测锁式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 双重检查锁实现单例模式
+ * @author Senley
+ *
+ */
+public class SingletonDemo3 &#123; 
+
+  private static SingletonDemo3 instance = null; 
+
+  public static SingletonDemo3 getInstance() &#123; 
+    if (instance == null) &#123; 
+      SingletonDemo3 sc; 
+      synchronized (SingletonDemo3.class) &#123; 
+        sc = instance; 
+        if (sc == null) &#123; 
+          synchronized (SingletonDemo3.class) &#123; 
+            if(sc == null) &#123; 
+              sc = new SingletonDemo3(); 
+            &#125; 
+          &#125; 
+          instance = sc; 
+        &#125; 
+      &#125; 
+    &#125; 
+    return instance; 
+  &#125; 
+
+  private SingletonDemo3() &#123; 
+
+  &#125; 
+    
+&#125;
+</code></pre>
+<h4 id="静态内部类式"><a href="#静态内部类式" class="headerlink" title="静态内部类式"></a>静态内部类式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 测试静态内部类实现单例模式
+ * 这种方式：线程安全，调用效率高，并且实现了延时加载！
+ * @author Senley
+ *
+ */
+public class SingletonDemo4 &#123;
+    
+    private static class SingletonClassInstance &#123;
+        private static final SingletonDemo4 instance = new SingletonDemo4();
+    &#125;
+    
+    private SingletonDemo4()&#123;
+    &#125;
+    
+    //方法没有同步，调用效率高！
+    public static SingletonDemo4  getInstance()&#123;
+        return SingletonClassInstance.instance;
+    &#125;
+    
+&#125;
+</code></pre>
+<h4 id="枚举式"><a href="#枚举式" class="headerlink" title="枚举式"></a>枚举式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 测试枚举式实现单例模式(没有延时加载)
+ * @author Senley
+ *
+ */
+public enum SingletonDemo5 &#123;
+    
+    //这个枚举元素，本身就是单例对象！
+    INSTANCE;
+    
+    //添加自己需要的操作！
+    public void singletonOperation()&#123;
+    &#125;
+    
+&#125;
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Pattern</tag>
+      </tags>
+  </entry>
 </search>

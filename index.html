@@ -161,6 +161,218 @@
     
     
     <article
+  id="post-设计模式之单例模式"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2022/04/15/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/"
+    >设计模式之单例模式</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/04/15/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" class="article-date">
+  <time datetime="2022-04-14T16:10:12.000Z" itemprop="datePublished">2022-04-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="设计模式之单例模式"><a href="#设计模式之单例模式" class="headerlink" title="设计模式之单例模式"></a>设计模式之单例模式</h1><h2 id="核心作用"><a href="#核心作用" class="headerlink" title="核心作用"></a>核心作用</h2><p>单例模式属于创建类型的一种常用的软件设计模式，可以保证一个类只有一个实例并提供一个访问该实例的全局访问点。</p>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a><strong>应用场景</strong></h3><h2 id="常见应用场景"><a href="#常见应用场景" class="headerlink" title="常见应用场景"></a>常见应用场景</h2><ul>
+<li>Windows的Task Manager（任务管理器）就是很典型的单例模式。</li>
+<li>Windows的Recycle Bin（回收站）也是典型的单例应用。在整个系统运行过程中，回收站一直维护着仅有的一个实例。</li>
+<li>项目中，读取配置文件的类，一般也只有一个对象。没有必要每次使用配置文件数据，每次new一个对象去读取。</li>
+<li>网站的计数器，一般也是采用单例模式实现，否则难以同步。</li>
+<li>应用程序的日志应用，一般都使用单例模式实现，这一般是由于共享的日志文件一直处于打开状态，因为只能有一个实例去操作，否则内容不好追加。</li>
+<li>数据库连接池的设计一般也是采用单例模式，因为数据库连接是一种数据库资源。</li>
+<li>操作系统的文件系统，也是大的单例模式实现的具体例子，一个操作系统只能有一个文件系统。</li>
+<li>Application 也是单例的典型应用（Servlet编程中会涉及到）。</li>
+<li>Spring中，每个Bean默认就是单例的，这样做的优点是Spring容器可以管理。</li>
+<li>Servlet编程中，每个Servlet也是单例。</li>
+<li>SpringMVC框架/Struts1框架中，控制器对象也是单例。</li>
+</ul>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ul>
+<li>由于单例模式只生成一个实例，减少了系统性能开销，当一个对象的产生需要比较多的资源时，如读取配置、产生其他依赖对象时，则可以通过在应用启动时直接产生一个单例对象，然后永久驻留内存的方式来解决。</li>
+<li>单例模式可以在系统设置全局的访问点，优化环共享资源访问，例如可以设计一个单例类，负责所有数据表的映射处理。</li>
+</ul>
+<h2 id="常见的五种单例模式实现方式"><a href="#常见的五种单例模式实现方式" class="headerlink" title="常见的五种单例模式实现方式"></a><strong>常见的五种单例模式实现方式</strong></h2><ul>
+<li>主要：<ul>
+<li><strong>饿汉式</strong>（线程安全，调用效率高。 但是，不能延时加载。）</li>
+<li><strong>懒汉式</strong>（线程安全，调用效率不高。 但是，可以延时加载。）</li>
+</ul>
+</li>
+<li>其他：<ul>
+<li><strong>双重检测锁式</strong>（由于JVM底层内部模型原因，偶尔会出问题。不建议使用）</li>
+<li><strong>静态内部类式</strong>（线程安全，调用效率高。 但是，可以延时加载）</li>
+<li><strong>枚举式</strong>（线程安全，调用效率高，不能延时加载）</li>
+</ul>
+</li>
+</ul>
+<h4 id="饿汉式"><a href="#饿汉式" class="headerlink" title="饿汉式"></a>饿汉式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+/**
+ * 测试饿汉式单例模式
+ * @author Senley
+ *
+ */
+public class SingletonDemo1 &#123;
+    
+    //类初始化时，立即加载这个对象（没有延时加载的优势）。加载类时，天然的是线程安全的！
+    private static SingletonDemo1 instance = new SingletonDemo1();
+    
+    private SingletonDemo1() &#123;
+    &#125;
+    
+    //方法没有同步，调用效率高！
+    public static SingletonDemo1 getInstance() &#123;
+        return instance;
+    &#125;
+    
+&#125;
+</code></pre>
+<h4 id="懒汉式"><a href="#懒汉式" class="headerlink" title="懒汉式"></a>懒汉式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 测试懒汉式单例模式
+ * @author Senley
+ *
+ */
+public class SingletonDemo2 &#123;
+    
+    //类初始化时，不初始化这个对象（延时加载，真正用的时候再创建）。
+    private static SingletonDemo2 instance;  
+    
+    private SingletonDemo2()&#123; //私有化构造器
+    &#125;
+    
+    //方法同步，调用效率低！
+    public static  synchronized SingletonDemo2  getInstance()&#123;
+        if(instance==null)&#123;
+            instance = new SingletonDemo2();
+        &#125;
+        return instance;
+    &#125;
+    
+&#125;
+</code></pre>
+<h4 id="双重检测锁式"><a href="#双重检测锁式" class="headerlink" title="双重检测锁式"></a>双重检测锁式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 双重检查锁实现单例模式
+ * @author Senley
+ *
+ */
+public class SingletonDemo3 &#123; 
+
+  private static SingletonDemo3 instance = null; 
+
+  public static SingletonDemo3 getInstance() &#123; 
+    if (instance == null) &#123; 
+      SingletonDemo3 sc; 
+      synchronized (SingletonDemo3.class) &#123; 
+        sc = instance; 
+        if (sc == null) &#123; 
+          synchronized (SingletonDemo3.class) &#123; 
+            if(sc == null) &#123; 
+              sc = new SingletonDemo3(); 
+            &#125; 
+          &#125; 
+          instance = sc; 
+        &#125; 
+      &#125; 
+    &#125; 
+    return instance; 
+  &#125; 
+
+  private SingletonDemo3() &#123; 
+
+  &#125; 
+    
+&#125;
+</code></pre>
+<h4 id="静态内部类式"><a href="#静态内部类式" class="headerlink" title="静态内部类式"></a>静态内部类式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 测试静态内部类实现单例模式
+ * 这种方式：线程安全，调用效率高，并且实现了延时加载！
+ * @author Senley
+ *
+ */
+public class SingletonDemo4 &#123;
+    
+    private static class SingletonClassInstance &#123;
+        private static final SingletonDemo4 instance = new SingletonDemo4();
+    &#125;
+    
+    private SingletonDemo4()&#123;
+    &#125;
+    
+    //方法没有同步，调用效率高！
+    public static SingletonDemo4  getInstance()&#123;
+        return SingletonClassInstance.instance;
+    &#125;
+    
+&#125;
+</code></pre>
+<h4 id="枚举式"><a href="#枚举式" class="headerlink" title="枚举式"></a>枚举式</h4><p>示例代码如下：</p>
+<pre><code class="java">package com.msl.singleton;
+
+/**
+ * 测试枚举式实现单例模式(没有延时加载)
+ * @author Senley
+ *
+ */
+public enum SingletonDemo5 &#123;
+    
+    //这个枚举元素，本身就是单例对象！
+    INSTANCE;
+    
+    //添加自己需要的操作！
+    public void singletonOperation()&#123;
+    &#125;
+    
+&#125;
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pattern/" rel="tag">Pattern</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-基于TCP实现多用户登录"
   class="article article-type-post"
   itemscope
@@ -2731,190 +2943,6 @@ id:1003,name:王五,salary:3000.0,hiredate:2020.5.4
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/StoreData/" rel="tag">StoreData</a></li></ul>
-
-    </footer>
-  </div>
-
-    
- 
-    
-</article>
-
-    
-    <article
-  id="post-遍历集合的方法总结"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/"
-    >遍历集合的方法总结</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2021/11/21/%E9%81%8D%E5%8E%86%E9%9B%86%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" class="article-date">
-  <time datetime="2021-11-21T13:09:08.000Z" itemprop="datePublished">2021-11-21</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Java%E5%9F%BA%E7%A1%80/">Java基础</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="遍历集合-容器-的方法总结"><a href="#遍历集合-容器-的方法总结" class="headerlink" title="遍历集合(容器)的方法总结"></a><strong>遍历集合(容器)的方法总结</strong></h1><h2 id="使用Iterator迭代器遍历容器元素"><a href="#使用Iterator迭代器遍历容器元素" class="headerlink" title="使用Iterator迭代器遍历容器元素"></a>使用Iterator迭代器遍历容器元素</h2><h2 id="Iterator迭代器"><a href="#Iterator迭代器" class="headerlink" title="Iterator迭代器"></a>Iterator迭代器</h2><p>Java集合框架的集合类，我们有时候称之为容器。容器的种类有很多种，如ArrayList、LinkedList、HashSet…，每种容器都有自己的特点，ArrayList底层维护的是一个数组；LinkedList是链表结构；HashSet依赖的是哈希表，每种容器都有自己特有的数据结构。</p>
-<p>因为容器的内部结构不同，很多时候可能不知道该怎样去遍历一个容器中的元素。所以为了使对容器内元素的操作更为简单，Java引入了迭代器模式。</p>
-<p><strong>把访问逻辑从不同类型的集合类中抽取出来，从而避免向外部暴露集合的内部结构。</strong></p>
-<p>使用Iterator遍历List、Set、Map，代码如下：</p>
-<pre><code class="java">package com.msl.collection;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-/**
- * 测试迭代器遍历集合
- * @author Senley
- *
- */
-public class TestIterator &#123;
-    public static void main(String[] args) &#123;
-        testIteratorList();
-        testIteratorSet();
-        testIteratorMap();
-    &#125;
-    
-    public static void testIteratorList() &#123;
-        List&lt;String&gt; list = new ArrayList&lt;&gt;();
-        list.add(&quot;aa&quot;);
-        list.add(&quot;bb&quot;);
-        list.add(&quot;cc&quot;);
-        
-        //使用Iterator遍历List
-        for(Iterator&lt;String&gt; iter=list.iterator();iter.hasNext();) &#123;
-            String temp = iter.next();
-            System.out.println(temp);
-        &#125;
-    &#125;
-    
-    public static void testIteratorSet() &#123;
-        Set&lt;String&gt; set = new HashSet&lt;&gt;();
-        set.add(&quot;aa&quot;);
-        set.add(&quot;bb&quot;);
-        set.add(&quot;cc&quot;);
-        
-        //使用Iterator遍历Set
-        for(Iterator&lt;String&gt; iter=set.iterator();iter.hasNext();) &#123;
-            String temp = iter.next();
-            System.out.println(temp);
-        &#125;
-    &#125;
-    
-    public static void testIteratorMap() &#123;
-        Map&lt;Integer,String&gt; map = new HashMap&lt;&gt;();
-        map.put(100,&quot;aa&quot;);
-        map.put(200,&quot;bb&quot;);
-        map.put(300,&quot;cc&quot;);
-        
-        //使用Iterator遍历Map，第一种方式
-        Set&lt;Entry&lt;Integer,String&gt;&gt; ss = map.entrySet();
-        for(Iterator&lt;Entry&lt;Integer,String&gt;&gt; iter=ss.iterator();iter.hasNext();) &#123;
-            Entry&lt;Integer,String&gt; temp = iter.next();
-            System.out.println(temp.getKey()+&quot;---&quot;+temp.getValue());
-        &#125;
-        
-        //使用Iterator遍历Map，第二种方式
-        Set&lt;Integer&gt; keySet = map.keySet();
-        for(Iterator&lt;Integer&gt; iter=keySet.iterator();iter.hasNext();) &#123;
-            Integer key = iter.next();
-            System.out.println(key+&quot;---&quot;+map.get(key));
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>结果如下：</p>
-<pre><code class="java">aa
-bb
-cc
-aa
-bb
-cc
-100---aa
-200---bb
-300---cc
-100---aa
-200---bb
-300---cc
-</code></pre>
-<h2 id="遍历集合-容器-的方法"><a href="#遍历集合-容器-的方法" class="headerlink" title="遍历集合(容器)的方法"></a>遍历集合(容器)的方法</h2><h3 id="遍历List方法一：普通for循环"><a href="#遍历List方法一：普通for循环" class="headerlink" title="遍历List方法一：普通for循环"></a>遍历List方法一：普通for循环</h3><pre><code class="java">for(int i=0;i&lt;list.size();i++)&#123;//list为集合的对象名
-    String temp = (String)list.get(i);
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历List方法二：增强for循环"><a href="#遍历List方法二：增强for循环" class="headerlink" title="遍历List方法二：增强for循环"></a>遍历List方法二：增强for循环</h3><pre><code class="java">for (String temp : list) &#123;
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历List方法三：使用Iterator迭代器-1"><a href="#遍历List方法三：使用Iterator迭代器-1" class="headerlink" title="遍历List方法三：使用Iterator迭代器(1)"></a>遍历List方法三：使用Iterator迭代器(1)</h3><pre><code class="java">for(Iterator iter = list.iterator();iter.hasNext();)&#123;
-    String temp = (String)iter.next();
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历List方法四：使用Iterator迭代器-2"><a href="#遍历List方法四：使用Iterator迭代器-2" class="headerlink" title="遍历List方法四：使用Iterator迭代器(2)"></a>遍历List方法四：使用Iterator迭代器(2)</h3><pre><code class="java">Iterator iter = list.iterator();
-while(iter.hasNext())&#123;
-    Object  obj = iter.next();
-    iter.remove();//如果要遍历时，删除集合中的元素，建议使用这种方式
-    System.out.println(obj);
-&#125;
-</code></pre>
-<h3 id="遍历Set方法一：增强for循环"><a href="#遍历Set方法一：增强for循环" class="headerlink" title="遍历Set方法一：增强for循环"></a>遍历Set方法一：增强for循环</h3><pre><code class="java">for(String temp:set)&#123;
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历Set方法二：使用Iterator迭代器"><a href="#遍历Set方法二：使用Iterator迭代器" class="headerlink" title="遍历Set方法二：使用Iterator迭代器"></a>遍历Set方法二：使用Iterator迭代器</h3><pre><code class="java">for(Iterator iter = set.iterator();iter.hasNext();)&#123;
-    String temp = (String)iter.next();
-    System.out.println(temp);
-&#125;
-</code></pre>
-<h3 id="遍历Map方法一：根据key获取value"><a href="#遍历Map方法一：根据key获取value" class="headerlink" title="遍历Map方法一：根据key获取value"></a>遍历Map方法一：根据key获取value</h3><pre><code class="java">Map&lt;Integer, Man&gt; maps = new HashMap&lt;Integer, Man&gt;();
-Set&lt;Integer&gt; keySet = maps.keySet();
-for(Integer id : keySet)&#123;
-    System.out.println(maps.get(id).name);
-&#125;
-</code></pre>
-<h3 id="遍历Map方法二：使用entrySet"><a href="#遍历Map方法二：使用entrySet" class="headerlink" title="遍历Map方法二：使用entrySet"></a>遍历Map方法二：使用entrySet</h3><pre><code class="java">Set&lt;Entry&lt;Integer, Man&gt;&gt; ss = maps.entrySet();
-for (Iterator iterator = ss.iterator(); iterator.hasNext();) &#123;
-    Entry e = (Entry) iterator.next(); 
-    System.out.println(e.getKey()+&quot;--&quot;+e.getValue());
-&#125;
-</code></pre>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Collection/" rel="tag">Collection</a></li></ul>
 
     </footer>
   </div>
